@@ -605,6 +605,7 @@ namespace
             for (int i = 0; i < Monster::MONSTER_COUNT; ++i) {
                 std::string id = std::to_string(i);
                 jsonData["monsters"][id] = {
+                    {"name", monsterData[i].generalStats.untranslatedName},
                     {"attack", monsterData[i].battleStats.attack},
                     {"defense", monsterData[i].battleStats.defense},
                     {"hp", monsterData[i].battleStats.hp},
