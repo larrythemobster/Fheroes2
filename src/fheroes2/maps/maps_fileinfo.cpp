@@ -207,8 +207,10 @@ bool Maps::FileInfo::readMP2Map( std::string filePath, const bool isForEditor )
     }
 
     // magic byte
-    if ( fs.getBE32() != 0x5C000000 ) {
-        DEBUG_LOG( DBG_GAME, DBG_WARN, "File " << filePath << " is not a valid map file" )
+    const uint32_t magic = fs.getBE32();
+    // 0x5C: standard, 0x5D: PoL?, 0x5E: ?
+    if ( magic != 0x5C000000 && magic != 0x5D000000 && magic != 0x5E000000 ) {
+        DEBUG_LOG( DBG_GAME, DBG_WARN, "File " << filePath << " is not a valid map file (magic: " << std::hex << magic << ")" )
         return false;
     }
 
@@ -732,7 +734,10 @@ MapsFileInfoList Maps::getAllMapFileInfos( const bool isForEditor, const uint8_t
 
     if ( isPOLSupported ) {
         maps.Append( Settings::FindFiles( "maps", ".mx2", false ) );
+        maps.Append( Settings::FindFiles( "maps", ".hxc", false ) );
     }
+
+    maps.Append( Settings::FindFiles( "maps", ".h2c", false ) );
 
     MapsFileInfoList validMaps = getValidMaps( maps, humanPlayerCount, isForEditor, true );
 
