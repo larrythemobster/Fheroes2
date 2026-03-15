@@ -825,6 +825,7 @@ namespace {
                 for (int i = 0; i < Spell::SPELL_COUNT; ++i) {
                     std::string id = std::to_string(i);
                     jsonData["spells"][id] = {
+                        {"name", spells[i].name},
                         {"manaCost", spells[i].spellPoints},
                         {"damage", Spell(i).Damage()},
                         {"movePoints", spells[i].movePoints},

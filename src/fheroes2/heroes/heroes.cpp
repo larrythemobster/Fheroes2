@@ -231,6 +231,69 @@ namespace
 
         return "Unknown";
     }
+
+    struct HeroModLoader {
+        struct HeroOverride {
+            int attack = -1;
+            int defense = -1;
+            int power = -1;
+            int knowledge = -1;
+            int32_t experience = -1;
+        };
+        std::map<int, HeroOverride> overrides;
+
+        HeroModLoader() {
+            std::ifstream file("stats.json");
+            nlohmann::json jsonData;
+            bool saveRequired = false;
+
+            if (file.is_open()) {
+                try { file >> jsonData; } catch (...) { }
+                file.close();
+            }
+
+            if (jsonData.contains("heroes")) {
+                auto& hrs = jsonData["heroes"];
+                for (auto it = hrs.begin(); it != hrs.end(); ++it) {
+                    int id = std::stoi(it.key());
+                    auto& stats = it.value();
+                    HeroOverride ovr;
+                    if (stats.contains("attack"))     ovr.attack     = stats["attack"];
+                    if (stats.contains("defense"))    ovr.defense    = stats["defense"];
+                    if (stats.contains("power"))      ovr.power      = stats["power"];
+                    if (stats.contains("knowledge"))  ovr.knowledge  = stats["knowledge"];
+                    if (stats.contains("experience")) ovr.experience = stats["experience"];
+                    overrides[id] = ovr;
+                }
+            } else {
+                for (int i = Heroes::UNKNOWN + 1; i < Heroes::HEROES_COUNT; ++i) {
+                    std::string idStr = std::to_string(i);
+                    int race = Race::KNGT;
+                    if (i >= Heroes::THUNDAX && i <= Heroes::ATLAS) race = Race::BARB;
+                    else if (i >= Heroes::ASTRA && i <= Heroes::LUNA) race = Race::SORC;
+                    else if (i >= Heroes::ARIE && i <= Heroes::WRATHMONT) race = Race::WRLK;
+                    else if (i >= Heroes::MYRA && i <= Heroes::MANDIGAL) race = Race::WZRD;
+                    else if (i >= Heroes::ZOM && i <= Heroes::CELIA) race = Race::NECR;
+                    
+                    jsonData["heroes"][idStr] = {
+                        {"name", Heroes::getDefaultName(i)},
+                        {"attack", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::ATTACK, race)},
+                        {"defense", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::DEFENSE, race)},
+                        {"power", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::POWER, race)},
+                        {"knowledge", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::KNOWLEDGE, race)},
+                        {"experience", 40}
+                    };
+                }
+                saveRequired = true;
+            }
+
+            if (saveRequired) {
+                std::ofstream outFile("stats.json");
+                outFile << jsonData.dump(4);
+            }
+        }
+    };
+    static HeroModLoader heroModLoader;
 }
 
 const char * Heroes::getDefaultName( const int heroId )
@@ -284,6 +347,21 @@ Heroes::Heroes( const int heroId, const int race )
     }
     _movePoints = GetMaxMovePoints();
 
+    {
+        auto it = heroModLoader.overrides.find(_id);
+        if (it != heroModLoader.overrides.end()) {
+            if (it->second.attack != -1)     attack      = it->second.attack;
+            if (it->second.defense != -1)    defense     = it->second.defense;
+            if (it->second.power != -1)      power       = it->second.power;
+            if (it->second.knowledge != -1)  knowledge   = it->second.knowledge;
+            if (it->second.experience != -1) _experience = it->second.experience;
+
+            if (!_spellPoints || it->second.knowledge != -1) {
+                SetSpellPoints(GetMaxSpellPoints());
+            }
+            _movePoints = GetMaxMovePoints();
+        }
+    }
 }
 
 void Heroes::LoadFromMP2( const int32_t mapIndex, const PlayerColor colorType, const int raceType, const bool isInJail, const std::vector<uint8_t> & data )

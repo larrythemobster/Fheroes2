@@ -38,6 +38,79 @@ namespace
     // This container was chosen intentionally to support future modding.
     std::vector<fheroes2::ArtifactData> artifactData;
 
+    std::string getBonusLabel(fheroes2::ArtifactBonusType type)
+    {
+        switch (type) {
+        case fheroes2::ArtifactBonusType::KNOWLEDGE_SKILL: return "Knowledge Skill";
+        case fheroes2::ArtifactBonusType::ATTACK_SKILL: return "Attack Skill";
+        case fheroes2::ArtifactBonusType::DEFENCE_SKILL: return "Defense Skill";
+        case fheroes2::ArtifactBonusType::SPELL_POWER_SKILL: return "Spell Power Skill";
+        case fheroes2::ArtifactBonusType::GOLD_INCOME: return "Gold Income (daily)";
+        case fheroes2::ArtifactBonusType::WOOD_INCOME: return "Wood Income (daily)";
+        case fheroes2::ArtifactBonusType::MERCURY_INCOME: return "Mercury Income (daily)";
+        case fheroes2::ArtifactBonusType::ORE_INCOME: return "Ore Income (daily)";
+        case fheroes2::ArtifactBonusType::SULFUR_INCOME: return "Sulfur Income (daily)";
+        case fheroes2::ArtifactBonusType::CRYSTAL_INCOME: return "Crystal Income (daily)";
+        case fheroes2::ArtifactBonusType::GEMS_INCOME: return "Gems Income (daily)";
+        case fheroes2::ArtifactBonusType::MORALE: return "Morale";
+        case fheroes2::ArtifactBonusType::LUCK: return "Luck";
+        case fheroes2::ArtifactBonusType::SEA_BATTLE_MORALE_BOOST: return "Sea Morale Boost";
+        case fheroes2::ArtifactBonusType::SEA_BATTLE_LUCK_BOOST: return "Sea Luck Boost";
+        case fheroes2::ArtifactBonusType::LAND_MOBILITY: return "Land Mobility";
+        case fheroes2::ArtifactBonusType::SEA_MOBILITY: return "Sea Mobility";
+        case fheroes2::ArtifactBonusType::SPELL_POINTS_DAILY_GENERATION: return "Spell Points (daily)";
+        case fheroes2::ArtifactBonusType::EVERY_COMBAT_SPELL_DURATION: return "Combat Spell Duration";
+        case fheroes2::ArtifactBonusType::EXTRA_CATAPULT_SHOTS: return "Extra Catapult Shots";
+        case fheroes2::ArtifactBonusType::AREA_REVEAL_DISTANCE: return "Fog Reveal Distance";
+        case fheroes2::ArtifactBonusType::ADD_SPELL: return "Add Spell (ID)";
+        case fheroes2::ArtifactBonusType::NECROMANCY_SKILL: return "Necromancy Skill (%)";
+        case fheroes2::ArtifactBonusType::SURRENDER_COST_REDUCTION_PERCENT: return "Surrender Cost Reduction (%)";
+        case fheroes2::ArtifactBonusType::CURSE_SPELL_COST_REDUCTION_PERCENT: return "Curse Spell Cost Reduction (%)";
+        case fheroes2::ArtifactBonusType::BLESS_SPELL_COST_REDUCTION_PERCENT: return "Bless Spell Cost Reduction (%)";
+        case fheroes2::ArtifactBonusType::SUMMONING_SPELL_COST_REDUCTION_PERCENT: return "Summoning Spell Cost Reduction (%)";
+        case fheroes2::ArtifactBonusType::MIND_INFLUENCE_SPELL_COST_REDUCTION_PERCENT: return "Mind Spell Cost Reduction (%)";
+        case fheroes2::ArtifactBonusType::COLD_SPELL_DAMAGE_REDUCTION_PERCENT: return "Cold Damage Reduction (%)";
+        case fheroes2::ArtifactBonusType::FIRE_SPELL_DAMAGE_REDUCTION_PERCENT: return "Fire Damage Reduction (%)";
+        case fheroes2::ArtifactBonusType::LIGHTNING_SPELL_DAMAGE_REDUCTION_PERCENT: return "Lightning Damage Reduction (%)";
+        case fheroes2::ArtifactBonusType::ELEMENTAL_SPELL_DAMAGE_REDUCTION_PERCENT: return "Elemental Damage Reduction (%)";
+        case fheroes2::ArtifactBonusType::HYPNOTIZE_SPELL_EXTRA_EFFECTIVENESS_PERCENT: return "Hypnotize Effectiveness (%)";
+        case fheroes2::ArtifactBonusType::COLD_SPELL_EXTRA_EFFECTIVENESS_PERCENT: return "Cold Spell Effectiveness (%)";
+        case fheroes2::ArtifactBonusType::FIRE_SPELL_EXTRA_EFFECTIVENESS_PERCENT: return "Fire Spell Effectiveness (%)";
+        case fheroes2::ArtifactBonusType::LIGHTNING_SPELL_EXTRA_EFFECTIVENESS_PERCENT: return "Lightning Spell Effectiveness (%)";
+        case fheroes2::ArtifactBonusType::RESURRECT_SPELL_EXTRA_EFFECTIVENESS_PERCENT: return "Resurrect Effectiveness (%)";
+        case fheroes2::ArtifactBonusType::SUMMONING_SPELL_EXTRA_EFFECTIVENESS_PERCENT: return "Summoning Effectiveness (%)";
+        case fheroes2::ArtifactBonusType::CURSE_SPELL_IMMUNITY: return "Curse Spell Immunity";
+        case fheroes2::ArtifactBonusType::HYPNOTIZE_SPELL_IMMUNITY: return "Hypnotize Immunity";
+        case fheroes2::ArtifactBonusType::DEATH_SPELL_IMMUNITY: return "Death Spell Immunity";
+        case fheroes2::ArtifactBonusType::BERSERK_SPELL_IMMUNITY: return "Berserk Immunity";
+        case fheroes2::ArtifactBonusType::BLIND_SPELL_IMMUNITY: return "Blind Immunity";
+        case fheroes2::ArtifactBonusType::PARALYZE_SPELL_IMMUNITY: return "Paralyze Immunity";
+        case fheroes2::ArtifactBonusType::HOLY_SPELL_IMMUNITY: return "Holy Immunity";
+        case fheroes2::ArtifactBonusType::DISPEL_SPELL_IMMUNITY: return "Dispel Immunity";
+        case fheroes2::ArtifactBonusType::ENDLESS_AMMUNITION: return "Endless Ammunition";
+        case fheroes2::ArtifactBonusType::NO_SHOOTING_PENALTY: return "No Shooting Penalty";
+        case fheroes2::ArtifactBonusType::VIEW_MONSTER_INFORMATION: return "View Monster Information";
+        case fheroes2::ArtifactBonusType::DISABLE_ALL_SPELL_COMBAT_CASTING: return "Disable Battle Casting";
+        case fheroes2::ArtifactBonusType::MAXIMUM_MORALE: return "Maximum Morale";
+        case fheroes2::ArtifactBonusType::MAXIMUM_LUCK: return "Maximum Luck";
+        default: return "Unknown Bonus";
+        }
+    }
+
+    std::string getCurseLabel(fheroes2::ArtifactCurseType type)
+    {
+        switch (type) {
+        case fheroes2::ArtifactCurseType::GOLD_PENALTY: return "Gold Penalty (daily)";
+        case fheroes2::ArtifactCurseType::SPELL_POWER_SKILL: return "Spell Power Penalty";
+        case fheroes2::ArtifactCurseType::MORALE: return "Morale Penalty";
+        case fheroes2::ArtifactCurseType::FIRE_SPELL_EXTRA_DAMAGE_PERCENT: return "Extra Fire Damage (%)";
+        case fheroes2::ArtifactCurseType::COLD_SPELL_EXTRA_DAMAGE_PERCENT: return "Extra Cold Damage (%)";
+        case fheroes2::ArtifactCurseType::NO_JOINING_ARMIES: return "No Joining Armies";
+        case fheroes2::ArtifactCurseType::UNDEAD_MORALE_PENALTY: return "Undead Morale Penalty";
+        default: return "Unknown Curse";
+        }
+    }
+
     void populateArtifactData()
     {
         assert( artifactData.empty() );
@@ -847,13 +920,32 @@ namespace
         } else {
             for (int i = 0; i < Artifact::ARTIFACT_COUNT; ++i) {
                 std::string id = std::to_string(i);
-                if (artifactData[i].bonuses.size() > 0) jsonData["artifacts"][id]["bonus0"] = artifactData[i].bonuses[0].value;
-                if (artifactData[i].bonuses.size() > 1) jsonData["artifacts"][id]["bonus1"] = artifactData[i].bonuses[1].value;
-                if (artifactData[i].bonuses.size() > 2) jsonData["artifacts"][id]["bonus2"] = artifactData[i].bonuses[2].value;
-                if (artifactData[i].bonuses.size() > 3) jsonData["artifacts"][id]["bonus3"] = artifactData[i].bonuses[3].value;
+                jsonData["artifacts"][id]["name"] = artifactData[i].untranslatedName;
+                if (artifactData[i].bonuses.size() > 0) {
+                    jsonData["artifacts"][id]["bonus0"] = artifactData[i].bonuses[0].value;
+                    jsonData["artifacts"][id]["bonus0_label"] = getBonusLabel(artifactData[i].bonuses[0].type);
+                }
+                if (artifactData[i].bonuses.size() > 1) {
+                    jsonData["artifacts"][id]["bonus1"] = artifactData[i].bonuses[1].value;
+                    jsonData["artifacts"][id]["bonus1_label"] = getBonusLabel(artifactData[i].bonuses[1].type);
+                }
+                if (artifactData[i].bonuses.size() > 2) {
+                    jsonData["artifacts"][id]["bonus2"] = artifactData[i].bonuses[2].value;
+                    jsonData["artifacts"][id]["bonus2_label"] = getBonusLabel(artifactData[i].bonuses[2].type);
+                }
+                if (artifactData[i].bonuses.size() > 3) {
+                    jsonData["artifacts"][id]["bonus3"] = artifactData[i].bonuses[3].value;
+                    jsonData["artifacts"][id]["bonus3_label"] = getBonusLabel(artifactData[i].bonuses[3].type);
+                }
                 
-                if (artifactData[i].curses.size() > 0) jsonData["artifacts"][id]["curse0"] = artifactData[i].curses[0].value;
-                if (artifactData[i].curses.size() > 1) jsonData["artifacts"][id]["curse1"] = artifactData[i].curses[1].value;
+                if (artifactData[i].curses.size() > 0) {
+                    jsonData["artifacts"][id]["curse0"] = artifactData[i].curses[0].value;
+                    jsonData["artifacts"][id]["curse0_label"] = getCurseLabel(artifactData[i].curses[0].type);
+                }
+                if (artifactData[i].curses.size() > 1) {
+                    jsonData["artifacts"][id]["curse1"] = artifactData[i].curses[1].value;
+                    jsonData["artifacts"][id]["curse1_label"] = getCurseLabel(artifactData[i].curses[1].type);
+                }
             }
             saveRequired = true;
         }
