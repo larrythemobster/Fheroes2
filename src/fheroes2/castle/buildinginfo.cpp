@@ -743,6 +743,29 @@ namespace {
                         if (bldgs[id].contains("cost_sulfur")) buildingStats[i].cost.sulfur = bldgs[id]["cost_sulfur"];
                         if (bldgs[id].contains("cost_crystal")) buildingStats[i].cost.crystal = bldgs[id]["cost_crystal"];
                         if (bldgs[id].contains("cost_gems")) buildingStats[i].cost.gems = bldgs[id]["cost_gems"];
+                    } else {
+                        int race = Race::KNGT;
+                        if (buildingStats[i].allowedRaces != Race::ALL) {
+                            for (int r : { Race::KNGT, Race::BARB, Race::SORC, Race::WRLK, Race::WZRD, Race::NECR }) {
+                                if (buildingStats[i].allowedRaces & r) {
+                                    race = r;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        jsonData["buildings"][id] = {
+                            {"name", std::string(Castle::GetStringBuilding(buildingStats[i].type, race))},
+                            {"type_id", buildingStats[i].type}, 
+                            {"cost_gold", buildingStats[i].cost.gold},
+                            {"cost_wood", buildingStats[i].cost.wood},
+                            {"cost_mercury", buildingStats[i].cost.mercury},
+                            {"cost_ore", buildingStats[i].cost.ore},
+                            {"cost_sulfur", buildingStats[i].cost.sulfur},
+                            {"cost_crystal", buildingStats[i].cost.crystal},
+                            {"cost_gems", buildingStats[i].cost.gems}
+                        };
+                        saveRequired = true;
                     }
                 }
             } else {
@@ -759,7 +782,7 @@ namespace {
                     }
                     
                     jsonData["buildings"][id] = {
-                        {"name", Castle::GetStringBuilding(buildingStats[i].type, race)},
+                        {"name", std::string(Castle::GetStringBuilding(buildingStats[i].type, race))},
                         {"type_id", buildingStats[i].type}, 
                         {"cost_gold", buildingStats[i].cost.gold},
                         {"cost_wood", buildingStats[i].cost.wood},

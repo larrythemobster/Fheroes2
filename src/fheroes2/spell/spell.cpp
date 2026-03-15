@@ -819,13 +819,23 @@ namespace {
                         if (spls[id].contains("movePoints")) spells[i].movePoints = spls[id]["movePoints"];
                         if (spls[id].contains("minMovePoints")) spells[i].minMovePoints = spls[id]["minMovePoints"];
                         if (spls[id].contains("extraValue")) spells[i].extraValue = spls[id]["extraValue"];
+                    } else {
+                        jsonData["spells"][id] = {
+                            {"name", std::string(spells[i].name)},
+                            {"manaCost", spells[i].spellPoints},
+                            {"damage", Spell(i).Damage()},
+                            {"movePoints", spells[i].movePoints},
+                            {"minMovePoints", spells[i].minMovePoints},
+                            {"extraValue", spells[i].extraValue}
+                        };
+                        saveRequired = true;
                     }
                 }
             } else {
                 for (int i = 0; i < Spell::SPELL_COUNT; ++i) {
                     std::string id = std::to_string(i);
                     jsonData["spells"][id] = {
-                        {"name", spells[i].name},
+                        {"name", std::string(spells[i].name)},
                         {"manaCost", spells[i].spellPoints},
                         {"damage", Spell(i).Damage()},
                         {"movePoints", spells[i].movePoints},
