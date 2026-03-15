@@ -750,7 +750,19 @@ namespace {
                 // Auto-generate default building stats
                 for (size_t i = 0; i < buildingStats.size(); ++i) {
                     std::string id = std::to_string(i);
+                    // Determine a representative race for the building name
+                    int race = Race::KNGT;
+                    if (buildingStats[i].allowedRaces != Race::ALL) {
+                        for (int r : { Race::KNGT, Race::BARB, Race::SORC, Race::WRLK, Race::WZRD, Race::NECR }) {
+                            if (buildingStats[i].allowedRaces & r) {
+                                race = r;
+                                break;
+                            }
+                        }
+                    }
+                    
                     jsonData["buildings"][id] = {
+                        {"name", Castle::GetStringBuilding(buildingStats[i].type, race)},
                         {"type_id", buildingStats[i].type}, 
                         {"cost_gold", buildingStats[i].cost.gold},
                         {"cost_wood", buildingStats[i].cost.wood},
