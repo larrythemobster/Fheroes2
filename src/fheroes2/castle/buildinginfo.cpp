@@ -27,7 +27,9 @@
 #include <array>
 #include <cassert>
 #include <utility>
+#include <fstream>
 
+#include "../json.hpp"
 #include "agg_image.h"
 #include "army_troop.h"
 #include "audio_manager.h"
@@ -103,7 +105,7 @@ namespace
         Cost cost{};
     };
 
-    const std::array<BuildingStats, 86> buildingStats = { { { BUILD_THIEVESGUILD, Race::ALL, { 750, 5, 0, 0, 0, 0, 0 } },
+    std::array<BuildingStats, 86> buildingStats = { { { BUILD_THIEVESGUILD, Race::ALL, { 750, 5, 0, 0, 0, 0, 0 } },
                                                             { BUILD_TAVERN, Race::ALL, { 500, 5, 0, 0, 0, 0, 0 } },
                                                             { BUILD_SHIPYARD, Race::ALL, { 2000, 20, 0, 0, 0, 0, 0 } },
                                                             { BUILD_WELL, Race::ALL, { 500, 0, 0, 0, 0, 0, 0 } },
@@ -715,3 +717,59 @@ bool DwellingsBar::ActionBarRightMouseHold( DwellingItem & dwl )
 
     return true;
 }
+
+
+// --- CUSTOM MOD: BUILDING STAT HOOK ---
+namespace {
+    struct BuildingModLoader {
+        BuildingModLoader() {
+            std::ifstream file("stats.json");
+            nlohmann::json jsonData;
+            bool saveRequired = false;
+
+            if (file.is_open()) {
+                try { file >> jsonData; } catch (...) { }
+                file.close();
+            }
+
+            if (jsonData.contains("buildings")) {
+                auto& bldgs = jsonData["buildings"];
+                for (size_t i = 0; i < buildingStats.size(); ++i) {
+                    std::string id = std::to_string(i);
+                    if (bldgs.contains(id)) {
+                        if (bldgs[id].contains("cost_gold")) buildingStats[i].cost.gold = bldgs[id]["cost_gold"];
+                        if (bldgs[id].contains("cost_wood")) buildingStats[i].cost.wood = bldgs[id]["cost_wood"];
+                        if (bldgs[id].contains("cost_mercury")) buildingStats[i].cost.mercury = bldgs[id]["cost_mercury"];
+                        if (bldgs[id].contains("cost_ore")) buildingStats[i].cost.ore = bldgs[id]["cost_ore"];
+                        if (bldgs[id].contains("cost_sulfur")) buildingStats[i].cost.sulfur = bldgs[id]["cost_sulfur"];
+                        if (bldgs[id].contains("cost_crystal")) buildingStats[i].cost.crystal = bldgs[id]["cost_crystal"];
+                        if (bldgs[id].contains("cost_gems")) buildingStats[i].cost.gems = bldgs[id]["cost_gems"];
+                    }
+                }
+            } else {
+                // Auto-generate default building stats
+                for (size_t i = 0; i < buildingStats.size(); ++i) {
+                    std::string id = std::to_string(i);
+                    jsonData["buildings"][id] = {
+                        {"type_id", buildingStats[i].type}, 
+                        {"cost_gold", buildingStats[i].cost.gold},
+                        {"cost_wood", buildingStats[i].cost.wood},
+                        {"cost_mercury", buildingStats[i].cost.mercury},
+                        {"cost_ore", buildingStats[i].cost.ore},
+                        {"cost_sulfur", buildingStats[i].cost.sulfur},
+                        {"cost_crystal", buildingStats[i].cost.crystal},
+                        {"cost_gems", buildingStats[i].cost.gems}
+                    };
+                }
+                saveRequired = true;
+            }
+
+            if (saveRequired) {
+                std::ofstream outFile("stats.json");
+                outFile << jsonData.dump(4);
+            }
+        }
+    };
+    static BuildingModLoader buildingModLoader;
+}
+// --------------------------------------
