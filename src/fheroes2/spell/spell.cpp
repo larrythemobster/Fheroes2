@@ -27,7 +27,9 @@
 #include <array>
 #include <cassert>
 #include <vector>
+#include <fstream>
 
+#include "../json.hpp"
 #include "artifact.h"
 #include "artifact_info.h"
 #include "heroes_base.h"
@@ -52,7 +54,7 @@ namespace
 
     // The original resources don't have most of sprites for Mass Spells
     // so we made some tricks in AGG source file. All modified sprite IDs start from 60
-    const std::array<SpellStats, Spell::SPELL_COUNT> spells = { {
+    std::array<SpellStats, Spell::SPELL_COUNT> spells = { {
         //  name | spell points | movement points | min movement points | image id | extra value | description
         { "Unknown", 0, 0, 0, 0, 0, "Unknown spell." },
         { gettext_noop( "Fireball" ), 9, 0, 0, 8, 10, gettext_noop( "Causes a giant fireball to strike the selected area, damaging all nearby creatures." ) },
@@ -147,6 +149,7 @@ namespace
         { gettext_noop( "Petrification" ), 0, 0, 0, 66, 0,
           gettext_noop( "Turns the affected creature into stone. A petrified creature receives half damage from a direct attack." ) },
     } };
+    std::array<uint32_t, Spell::SPELL_COUNT> customSpellDamage = {0};
 }
 
 const char * Spell::GetName() const
@@ -401,6 +404,8 @@ bool Spell::isGuardianType() const
 
 uint32_t Spell::Damage() const
 {
+    if (customSpellDamage[id] != 0) return customSpellDamage[id];
+
     switch ( id ) {
     case ARROW:
     case FIREBALL:
@@ -788,4 +793,53 @@ OStreamBase & operator<<( OStreamBase & stream, const Spell & spell )
 IStreamBase & operator>>( IStreamBase & stream, Spell & spell )
 {
     return stream >> spell.id;
+}
+
+
+namespace {
+    struct SpellModLoader {
+        SpellModLoader() {
+            std::ifstream file("stats.json");
+            nlohmann::json jsonData;
+            bool saveRequired = false;
+
+            if (file.is_open()) {
+                try { file >> jsonData; } catch (...) { }
+                file.close();
+            }
+
+            if (jsonData.contains("spells")) {
+                auto& spls = jsonData["spells"];
+                for (int i = 0; i < Spell::SPELL_COUNT; ++i) {
+                    std::string id = std::to_string(i);
+                    if (spls.contains(id)) {
+                        if (spls[id].contains("manaCost")) spells[i].spellPoints = spls[id]["manaCost"];
+                        if (spls[id].contains("damage")) customSpellDamage[i] = spls[id]["damage"];
+                        
+                        if (spls[id].contains("movePoints")) spells[i].movePoints = spls[id]["movePoints"];
+                        if (spls[id].contains("minMovePoints")) spells[i].minMovePoints = spls[id]["minMovePoints"];
+                        if (spls[id].contains("extraValue")) spells[i].extraValue = spls[id]["extraValue"];
+                    }
+                }
+            } else {
+                for (int i = 0; i < Spell::SPELL_COUNT; ++i) {
+                    std::string id = std::to_string(i);
+                    jsonData["spells"][id] = {
+                        {"manaCost", spells[i].spellPoints},
+                        {"damage", Spell(i).Damage()},
+                        {"movePoints", spells[i].movePoints},
+                        {"minMovePoints", spells[i].minMovePoints},
+                        {"extraValue", spells[i].extraValue}
+                    };
+                }
+                saveRequired = true;
+            }
+
+            if (saveRequired) {
+                std::ofstream outFile("stats.json");
+                outFile << jsonData.dump(4);
+            }
+        }
+    };
+    static SpellModLoader spellModLoader;
 }

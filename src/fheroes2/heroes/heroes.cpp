@@ -31,7 +31,9 @@
 #include <set>
 #include <sstream>
 #include <utility>
+#include <fstream>
 
+#include "../json.hpp"
 #include "agg_image.h"
 #include "ai_planner.h"
 #include "army_troop.h"
@@ -281,6 +283,7 @@ Heroes::Heroes( const int heroId, const int race )
         SetSpellPoints( GetMaxSpellPoints() );
     }
     _movePoints = GetMaxMovePoints();
+
 }
 
 void Heroes::LoadFromMP2( const int32_t mapIndex, const PlayerColor colorType, const int raceType, const bool isInJail, const std::vector<uint8_t> & data )

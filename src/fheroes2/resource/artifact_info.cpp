@@ -24,7 +24,9 @@
 #include <cassert>
 #include <cstddef>
 #include <sstream>
+#include <fstream>
 
+#include "../json.hpp"
 #include "artifact.h"
 #include "game_static.h"
 #include "spell.h"
@@ -813,9 +815,56 @@ namespace
 
         artifactData[Artifact::SPADE_NECROMANCY].bonuses.emplace_back( fheroes2::ArtifactBonusType::NECROMANCY_SKILL, 10 );
 
+        std::ifstream file("stats.json");
+        nlohmann::json jsonData;
+        bool saveRequired = false;
+
+        if (file.is_open()) {
+            try { file >> jsonData; } catch (...) { }
+            file.close();
+        }
+
+        if (jsonData.contains("artifacts")) {
+            auto& arts = jsonData["artifacts"];
+            for (int i = 0; i < Artifact::ARTIFACT_COUNT; ++i) {
+                std::string id = std::to_string(i);
+                if (arts.contains(id)) {
+                    if (arts[id].contains("bonus0") && artifactData[i].bonuses.size() > 0) 
+                        artifactData[i].bonuses[0].value = arts[id]["bonus0"];
+                    if (arts[id].contains("bonus1") && artifactData[i].bonuses.size() > 1) 
+                        artifactData[i].bonuses[1].value = arts[id]["bonus1"];
+                    if (arts[id].contains("bonus2") && artifactData[i].bonuses.size() > 2) 
+                        artifactData[i].bonuses[2].value = arts[id]["bonus2"];
+                    if (arts[id].contains("bonus3") && artifactData[i].bonuses.size() > 3) 
+                        artifactData[i].bonuses[3].value = arts[id]["bonus3"];
+
+                    if (arts[id].contains("curse0") && artifactData[i].curses.size() > 0) 
+                        artifactData[i].curses[0].value = arts[id]["curse0"];
+                    if (arts[id].contains("curse1") && artifactData[i].curses.size() > 1) 
+                        artifactData[i].curses[1].value = arts[id]["curse1"];
+                }
+            }
+        } else {
+            for (int i = 0; i < Artifact::ARTIFACT_COUNT; ++i) {
+                std::string id = std::to_string(i);
+                if (artifactData[i].bonuses.size() > 0) jsonData["artifacts"][id]["bonus0"] = artifactData[i].bonuses[0].value;
+                if (artifactData[i].bonuses.size() > 1) jsonData["artifacts"][id]["bonus1"] = artifactData[i].bonuses[1].value;
+                if (artifactData[i].bonuses.size() > 2) jsonData["artifacts"][id]["bonus2"] = artifactData[i].bonuses[2].value;
+                if (artifactData[i].bonuses.size() > 3) jsonData["artifacts"][id]["bonus3"] = artifactData[i].bonuses[3].value;
+                
+                if (artifactData[i].curses.size() > 0) jsonData["artifacts"][id]["curse0"] = artifactData[i].curses[0].value;
+                if (artifactData[i].curses.size() > 1) jsonData["artifacts"][id]["curse1"] = artifactData[i].curses[1].value;
+            }
+            saveRequired = true;
+        }
+
+        if (saveRequired) {
+            std::ofstream outFile("stats.json");
+            outFile << jsonData.dump(4);
+        }
+
         for ( const fheroes2::ArtifactData & artifact : artifactData ) {
             if ( artifact.bonuses.empty() && artifact.curses.empty() ) {
-                // Artifact info is not populated properly. An artifact with no effects cannot exist.
                 assert( 0 );
             }
 
@@ -832,6 +881,7 @@ namespace
             }
         }
     }
+
 }
 
 namespace fheroes2

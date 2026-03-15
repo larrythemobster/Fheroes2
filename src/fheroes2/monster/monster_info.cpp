@@ -28,7 +28,9 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include "../json.hpp"
 
+#include <fstream>
 #include "icn.h"
 #include "m82.h"
 #include "monster.h"
@@ -560,12 +562,75 @@ namespace
         monsterData[Monster::WATER_ELEMENT].battleStats.weaknesses.emplace_back( fheroes2::MonsterWeaknessType::DOUBLE_DAMAGE_FROM_FIRE_SPELLS );
         monsterData[Monster::WATER_ELEMENT].battleStats.weaknesses.emplace_back( fheroes2::MonsterWeaknessType::DOUBLE_DAMAGE_FROM_FIRE_CREATURES );
 
-        // Calculate base value of monster strength.
+        // TODO: verify that no duplicates of abilities and weaknesses exist.
+
+        std::ifstream file("stats.json");
+        nlohmann::json jsonData;
+        bool saveRequired = false;
+
+        if (file.is_open()) {
+            try { file >> jsonData; } catch (...) { }
+            file.close();
+        }
+
+        if (jsonData.contains("monsters")) {
+            for (int i = 0; i < Monster::MONSTER_COUNT; ++i) {
+                std::string id = std::to_string(i);
+                if (jsonData["monsters"].contains(id)) {
+                    auto& stats = jsonData["monsters"][id];
+                
+                    // Battle Stats
+                    if (stats.contains("attack")) monsterData[i].battleStats.attack = stats["attack"];
+                    if (stats.contains("defense")) monsterData[i].battleStats.defense = stats["defense"];
+                    if (stats.contains("hp")) monsterData[i].battleStats.hp = stats["hp"];
+                    if (stats.contains("damageMin")) monsterData[i].battleStats.damageMin = stats["damageMin"];
+                    if (stats.contains("damageMax")) monsterData[i].battleStats.damageMax = stats["damageMax"];
+                    if (stats.contains("speed")) monsterData[i].battleStats.speed = stats["speed"];
+                    if (stats.contains("shots")) monsterData[i].battleStats.shots = stats["shots"];
+                
+                    // General Stats
+                    if (stats.contains("growth")) monsterData[i].generalStats.baseGrowth = stats["growth"];
+                    if (stats.contains("cost_gold")) monsterData[i].generalStats.cost.gold = stats["cost_gold"];
+                    if (stats.contains("cost_wood")) monsterData[i].generalStats.cost.wood = stats["cost_wood"];
+                    if (stats.contains("cost_mercury")) monsterData[i].generalStats.cost.mercury = stats["cost_mercury"];
+                    if (stats.contains("cost_ore")) monsterData[i].generalStats.cost.ore = stats["cost_ore"];
+                    if (stats.contains("cost_sulfur")) monsterData[i].generalStats.cost.sulfur = stats["cost_sulfur"];
+                    if (stats.contains("cost_crystal")) monsterData[i].generalStats.cost.crystal = stats["cost_crystal"];
+                    if (stats.contains("cost_gems")) monsterData[i].generalStats.cost.gems = stats["cost_gems"];
+                }
+            }
+        } else {
+            for (int i = 0; i < Monster::MONSTER_COUNT; ++i) {
+                std::string id = std::to_string(i);
+                jsonData["monsters"][id] = {
+                    {"attack", monsterData[i].battleStats.attack},
+                    {"defense", monsterData[i].battleStats.defense},
+                    {"hp", monsterData[i].battleStats.hp},
+                    {"damageMin", monsterData[i].battleStats.damageMin},
+                    {"damageMax", monsterData[i].battleStats.damageMax},
+                    {"speed", monsterData[i].battleStats.speed},
+                    {"shots", monsterData[i].battleStats.shots},
+                    {"growth", monsterData[i].generalStats.baseGrowth},
+                    {"cost_gold", monsterData[i].generalStats.cost.gold},
+                    {"cost_wood", monsterData[i].generalStats.cost.wood},
+                    {"cost_mercury", monsterData[i].generalStats.cost.mercury},
+                    {"cost_ore", monsterData[i].generalStats.cost.ore},
+                    {"cost_sulfur", monsterData[i].generalStats.cost.sulfur},
+                    {"cost_crystal", monsterData[i].generalStats.cost.crystal},
+                    {"cost_gems", monsterData[i].generalStats.cost.gems}
+                };
+            }
+            saveRequired = true;
+        }
+
+        if (saveRequired) {
+            std::ofstream outFile("stats.json");
+            outFile << jsonData.dump(4);
+        }
+
         for ( fheroes2::MonsterData & data : monsterData ) {
             data.battleStats.monsterBaseStrength = getMonsterBaseStrength( data );
         }
-
-        // TODO: verify that no duplicates of abilities and weaknesses exist.
     }
 
     void removeDuplicateSpell( std::set<int> & sortedSpellIds, const int massSpellId, const int spellId )
