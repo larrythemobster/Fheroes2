@@ -598,6 +598,27 @@ namespace
                     if (stats.contains("cost_sulfur")) monsterData[i].generalStats.cost.sulfur = stats["cost_sulfur"];
                     if (stats.contains("cost_crystal")) monsterData[i].generalStats.cost.crystal = stats["cost_crystal"];
                     if (stats.contains("cost_gems")) monsterData[i].generalStats.cost.gems = stats["cost_gems"];
+                } else {
+                    // Add missing monster ID to JSON
+                    jsonData["monsters"][id] = {
+                        {"name", std::string(monsterData[i].generalStats.untranslatedName)},
+                        {"attack", monsterData[i].battleStats.attack},
+                        {"defense", monsterData[i].battleStats.defense},
+                        {"hp", monsterData[i].battleStats.hp},
+                        {"damageMin", monsterData[i].battleStats.damageMin},
+                        {"damageMax", monsterData[i].battleStats.damageMax},
+                        {"speed", monsterData[i].battleStats.speed},
+                        {"shots", monsterData[i].battleStats.shots},
+                        {"growth", monsterData[i].generalStats.baseGrowth},
+                        {"cost_gold", monsterData[i].generalStats.cost.gold},
+                        {"cost_wood", monsterData[i].generalStats.cost.wood},
+                        {"cost_mercury", monsterData[i].generalStats.cost.mercury},
+                        {"cost_ore", monsterData[i].generalStats.cost.ore},
+                        {"cost_sulfur", monsterData[i].generalStats.cost.sulfur},
+                        {"cost_crystal", monsterData[i].generalStats.cost.crystal},
+                        {"cost_gems", monsterData[i].generalStats.cost.gems}
+                    };
+                    saveRequired = true;
                 }
             }
         } else {
@@ -605,7 +626,7 @@ namespace
             for (int i = 0; i < Monster::MONSTER_COUNT; ++i) {
                 std::string id = std::to_string(i);
                 jsonData["monsters"][id] = {
-                    {"name", monsterData[i].generalStats.untranslatedName},
+                    {"name", std::string(monsterData[i].generalStats.untranslatedName)},
                     {"attack", monsterData[i].battleStats.attack},
                     {"defense", monsterData[i].battleStats.defense},
                     {"hp", monsterData[i].battleStats.hp},

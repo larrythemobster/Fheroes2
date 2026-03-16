@@ -233,12 +233,17 @@ namespace
     }
 
     struct HeroModLoader {
+        // NEW: Struct to hold army data
+        struct Troop { int id; int count; };
+
         struct HeroOverride {
             int attack = -1;
             int defense = -1;
             int power = -1;
             int knowledge = -1;
             int32_t experience = -1;
+            std::vector<Troop> army;
+            std::vector<int> artifacts;
         };
         std::map<int, HeroOverride> overrides;
 
@@ -254,23 +259,58 @@ namespace
 
             if (jsonData.contains("heroes")) {
                 auto& hrs = jsonData["heroes"];
-                for (auto it = hrs.begin(); it != hrs.end(); ++it) {
-                    int id = std::stoi(it.key());
-                    auto& stats = it.value();
-                    HeroOverride ovr;
-                    if (stats.contains("attack"))     ovr.attack     = stats["attack"];
-                    if (stats.contains("defense"))    ovr.defense    = stats["defense"];
-                    if (stats.contains("power"))      ovr.power      = stats["power"];
-                    if (stats.contains("knowledge"))  ovr.knowledge  = stats["knowledge"];
-                    if (stats.contains("experience")) ovr.experience = stats["experience"];
-                    overrides[id] = ovr;
+                for (int i = Heroes::UNKNOWN + 1; i < Heroes::HEROES_COUNT; ++i) {
+                    std::string id = std::to_string(i);
+                    if (hrs.contains(id)) {
+                        auto& stats = hrs[id];
+                        HeroOverride ovr;
+                        if (stats.contains("attack"))     ovr.attack     = stats["attack"];
+                        if (stats.contains("defense"))    ovr.defense    = stats["defense"];
+                        if (stats.contains("power"))      ovr.power      = stats["power"];
+                        if (stats.contains("knowledge"))  ovr.knowledge  = stats["knowledge"];
+                        if (stats.contains("experience")) ovr.experience = stats["experience"];
+                        
+                        if (stats.contains("army") && stats["army"].is_array()) {
+                            for (auto& t : stats["army"]) {
+                                if (t.contains("id") && t.contains("count")) {
+                                    ovr.army.push_back({t["id"], t["count"]});
+                                }
+                            }
+                        }
+                        if (stats.contains("artifacts") && stats["artifacts"].is_array()) {
+                            for (auto& a : stats["artifacts"]) {
+                                ovr.artifacts.push_back(a);
+                            }
+                        }
+                        
+                        overrides[i] = ovr;
+                    } else {
+                        // Add missing hero ID to JSON
+                        int race = Race::KNGT;
+                        if (i >= Heroes::THUNDAX && i <= Heroes::ATLAS) race = Race::BARB;
+                        else if (i >= Heroes::ASTRA && i <= Heroes::LUNA) race = Race::SORC;
+                        else if (i >= Heroes::ARIE && i <= Heroes::WRATHMONT) race = Race::WRLK;
+                        else if (i >= Heroes::MYRA && i <= Heroes::MANDIGAL) race = Race::WZRD;
+                        else if (i >= Heroes::ZOM && i <= Heroes::CELIA) race = Race::NECR;
+                        
+                        jsonData["heroes"][id] = {
+                            {"name", std::string(Heroes::getDefaultName(i))},
+                            {"attack", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::ATTACK, race)},
+                            {"defense", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::DEFENSE, race)},
+                            {"power", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::POWER, race)},
+                            {"knowledge", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::KNOWLEDGE, race)},
+                            {"experience", 40},
+                            {"army", nlohmann::json::array()},
+                            {"artifacts", nlohmann::json::array()}
+                        };
+                        saveRequired = true;
+                    }
                 }
             } else {
                 // Auto-generate default hero stats for all heroes
                 for (int i = Heroes::UNKNOWN + 1; i < Heroes::HEROES_COUNT; ++i) {
                     std::string idStr = std::to_string(i);
-                    // Determine race - this is tricky without a constructed hero, 
-                    // but we can infer it from the ID range
+
                     int race = Race::KNGT;
                     if (i >= Heroes::THUNDAX && i <= Heroes::ATLAS) race = Race::BARB;
                     else if (i >= Heroes::ASTRA && i <= Heroes::LUNA) race = Race::SORC;
@@ -279,12 +319,14 @@ namespace
                     else if (i >= Heroes::ZOM && i <= Heroes::CELIA) race = Race::NECR;
                     
                     jsonData["heroes"][idStr] = {
-                        {"name", Heroes::getDefaultName(i)},
+                        {"name", std::string(Heroes::getDefaultName(i))},
                         {"attack", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::ATTACK, race)},
                         {"defense", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::DEFENSE, race)},
                         {"power", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::POWER, race)},
                         {"knowledge", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::KNOWLEDGE, race)},
-                        {"experience", 40} // Consistent default starting XP
+                        {"experience", 40},
+                        {"army", nlohmann::json::array()},
+                        {"artifacts", nlohmann::json::array()}
                     };
                 }
                 saveRequired = true;
@@ -295,8 +337,42 @@ namespace
                 outFile << jsonData.dump(4);
             }
         }
+
     };
     static HeroModLoader heroModLoader;
+}
+
+#define APPLY_JSON_HERO_OVERRIDES() \
+{ \
+    auto it = heroModLoader.overrides.find(_id); \
+    if (it != heroModLoader.overrides.end()) { \
+        if (it->second.attack != -1)     attack      = it->second.attack; \
+        if (it->second.defense != -1)    defense     = it->second.defense; \
+        if (it->second.power != -1)      power       = it->second.power; \
+        if (it->second.knowledge != -1)  knowledge   = it->second.knowledge; \
+        if (it->second.experience != -1) _experience = it->second.experience; \
+        if (!it->second.army.empty()) { \
+            _army.Clean(); \
+            for (const auto& troop : it->second.army) { \
+                _army.JoinTroop(troop.id, troop.count, false); \
+            } \
+        } \
+        if (!it->second.artifacts.empty()) { \
+            if (GetCountArtifacts() == 0) { \
+                for (int artId : it->second.artifacts) { \
+                    if (artId == Artifact::MAGIC_BOOK) { \
+                        if (!HaveSpellBook()) SpellBookActivate(); \
+                    } else { \
+                        PickupArtifact(Artifact(artId)); \
+                    } \
+                } \
+            } \
+        } \
+        if (!_spellPoints || it->second.knowledge != -1) { \
+            SetSpellPoints(GetMaxSpellPoints()); \
+        } \
+        _movePoints = GetMaxMovePoints(); \
+    } \
 }
 
 const char * Heroes::getDefaultName( const int heroId )
@@ -350,24 +426,7 @@ Heroes::Heroes( const int heroId, const int race )
     }
     _movePoints = GetMaxMovePoints();
 
-    // --- CUSTOM MOD: HERO STAT HOOK ---
-    {
-        auto it = heroModLoader.overrides.find(_id);
-        if (it != heroModLoader.overrides.end()) {
-            if (it->second.attack != -1)     attack      = it->second.attack;
-            if (it->second.defense != -1)    defense     = it->second.defense;
-            if (it->second.power != -1)      power       = it->second.power;
-            if (it->second.knowledge != -1)  knowledge   = it->second.knowledge;
-            if (it->second.experience != -1) _experience = it->second.experience;
-
-            // Recalculate derived values after overriding stats
-            if (!_spellPoints || it->second.knowledge != -1) {
-                SetSpellPoints(GetMaxSpellPoints());
-            }
-            _movePoints = GetMaxMovePoints();
-        }
-    }
-    // ----------------------------------
+    APPLY_JSON_HERO_OVERRIDES();
 }
 
 void Heroes::LoadFromMP2( const int32_t mapIndex, const PlayerColor colorType, const int raceType, const bool isInJail, const std::vector<uint8_t> & data )
@@ -678,6 +737,8 @@ void Heroes::LoadFromMP2( const int32_t mapIndex, const PlayerColor colorType, c
     SetSpellPoints( GetMaxSpellPoints() );
     _movePoints = GetMaxMovePoints();
 
+    APPLY_JSON_HERO_OVERRIDES();
+
     DEBUG_LOG( DBG_GAME, DBG_INFO, _name << ", color: " << Color::String( GetColor() ) << ", race: " << Race::String( _race ) )
 }
 
@@ -836,6 +897,8 @@ void Heroes::applyHeroMetadata( const Maps::Map_Format::HeroMetadata & heroMetad
     }
 
     _movePoints = GetMaxMovePoints();
+
+    APPLY_JSON_HERO_OVERRIDES();
 }
 
 Maps::Map_Format::HeroMetadata Heroes::getHeroMetadata() const

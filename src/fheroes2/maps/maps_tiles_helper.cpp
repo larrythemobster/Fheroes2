@@ -56,6 +56,105 @@
 #include "world.h"
 #include "world_object_uid.h"
 
+#include "../json.hpp"
+#include <fstream>
+
+namespace {
+    struct MapModLoader {
+        double chestMultiplier = 1.0;
+        int shrine1 = -1;
+        int shrine2 = -1;
+        int shrine3 = -1;
+        int pyramidSpell = -1;
+        int witchHutSkill = -1;
+        
+        // Explicit Resource Overrides
+        int waterWheelGold = -1;
+        int graveyardGold = -1;
+        int shipwreckGold = -1;
+        int daemonCaveGold = -1;
+        int campfireGold = -1;
+        int campfireResourceAmt = -1;
+        int flotsamGold = -1;
+        int flotsamWood = -1;
+        
+        // Explicit Artifact Overrides
+        int graveyardArtifact = -1;
+        int shipwreckArtifact = -1;
+        int daemonCaveArtifact = -1;
+        int wagonArtifact = -1;
+        int skeletonArtifact = -1;
+        int survivorArtifact = -1;
+
+        MapModLoader() {
+            std::ifstream file("stats.json");
+            nlohmann::json jsonData;
+            bool saveRequired = false;
+
+            if (file.is_open()) {
+                try { file >> jsonData; } catch (...) { }
+                file.close();
+            }
+
+            if (jsonData.contains("map_objects")) {
+                auto& mo = jsonData["map_objects"];
+                if (mo.contains("chest_multiplier")) chestMultiplier = mo["chest_multiplier"];
+                if (mo.contains("shrine_1_spell")) shrine1 = mo["shrine_1_spell"];
+                if (mo.contains("shrine_2_spell")) shrine2 = mo["shrine_2_spell"];
+                if (mo.contains("shrine_3_spell")) shrine3 = mo["shrine_3_spell"];
+                if (mo.contains("pyramid_spell")) pyramidSpell = mo["pyramid_spell"];
+                if (mo.contains("witch_hut_skill")) witchHutSkill = mo["witch_hut_skill"];
+                
+                if (mo.contains("water_wheel_gold")) waterWheelGold = mo["water_wheel_gold"];
+                if (mo.contains("graveyard_gold")) graveyardGold = mo["graveyard_gold"];
+                if (mo.contains("shipwreck_gold")) shipwreckGold = mo["shipwreck_gold"];
+                if (mo.contains("daemon_cave_gold")) daemonCaveGold = mo["daemon_cave_gold"];
+                if (mo.contains("campfire_gold")) campfireGold = mo["campfire_gold"];
+                if (mo.contains("campfire_resource_amt")) campfireResourceAmt = mo["campfire_resource_amt"];
+                if (mo.contains("flotsam_gold")) flotsamGold = mo["flotsam_gold"];
+                if (mo.contains("flotsam_wood")) flotsamWood = mo["flotsam_wood"];
+                
+                if (mo.contains("graveyard_artifact")) graveyardArtifact = mo["graveyard_artifact"];
+                if (mo.contains("shipwreck_artifact")) shipwreckArtifact = mo["shipwreck_artifact"];
+                if (mo.contains("daemon_cave_artifact")) daemonCaveArtifact = mo["daemon_cave_artifact"];
+                if (mo.contains("wagon_artifact")) wagonArtifact = mo["wagon_artifact"];
+                if (mo.contains("skeleton_artifact")) skeletonArtifact = mo["skeleton_artifact"];
+                if (mo.contains("survivor_artifact")) survivorArtifact = mo["survivor_artifact"];
+            } else {
+                jsonData["map_objects"] = {
+                    {"chest_multiplier", 1.0},
+                    {"shrine_1_spell", -1},
+                    {"shrine_2_spell", -1},
+                    {"shrine_3_spell", -1},
+                    {"pyramid_spell", -1},
+                    {"witch_hut_skill", -1},
+                    {"water_wheel_gold", -1},
+                    {"graveyard_gold", -1},
+                    {"shipwreck_gold", -1},
+                    {"daemon_cave_gold", -1},
+                    {"campfire_gold", -1},
+                    {"campfire_resource_amt", -1},
+                    {"flotsam_gold", -1},
+                    {"flotsam_wood", -1},
+                    {"graveyard_artifact", -1},
+                    {"shipwreck_artifact", -1},
+                    {"daemon_cave_artifact", -1},
+                    {"wagon_artifact", -1},
+                    {"skeleton_artifact", -1},
+                    {"survivor_artifact", -1}
+                };
+                saveRequired = true;
+            }
+
+            if (saveRequired) {
+                std::ofstream outFile("stats.json");
+                outFile << jsonData.dump(4);
+            }
+        }
+    };
+    static MapModLoader mapModLoader;
+}
+
 namespace
 {
     void updateMonsterPopulationOnTile( Maps::Tile & tile )
@@ -400,7 +499,12 @@ namespace Maps
             assert( 0 );
             break;
         }
-
+        // --- CUSTOM MOD: SHRINE OVERRIDE ---
+        MP2::MapObjectType objType = tile.getMainObjectType(false);
+        if (objType == MP2::OBJ_SHRINE_FIRST_CIRCLE && mapModLoader.shrine1 != -1) return Spell(mapModLoader.shrine1);
+        if (objType == MP2::OBJ_SHRINE_SECOND_CIRCLE && mapModLoader.shrine2 != -1) return Spell(mapModLoader.shrine2);
+        if (objType == MP2::OBJ_SHRINE_THIRD_CIRCLE && mapModLoader.shrine3 != -1) return Spell(mapModLoader.shrine3);
+        if (objType == MP2::OBJ_PYRAMID && mapModLoader.pyramidSpell != -1) return Spell(mapModLoader.pyramidSpell);
         return { Spell::NONE };
     }
 
@@ -573,13 +677,20 @@ namespace Maps
     {
         switch ( tile.getMainObjectType( false ) ) {
         case MP2::OBJ_DAEMON_CAVE:
+            return { mapModLoader.daemonCaveArtifact != -1 ? mapModLoader.daemonCaveArtifact : static_cast<int>( tile.metadata()[0] ) };
         case MP2::OBJ_GRAVEYARD:
-        case MP2::OBJ_SEA_CHEST:
+            return { mapModLoader.graveyardArtifact != -1 ? mapModLoader.graveyardArtifact : static_cast<int>( tile.metadata()[0] ) };
         case MP2::OBJ_SHIPWRECK:
-        case MP2::OBJ_SHIPWRECK_SURVIVOR:
-        case MP2::OBJ_SKELETON:
-        case MP2::OBJ_TREASURE_CHEST:
+            return { mapModLoader.shipwreckArtifact != -1 ? mapModLoader.shipwreckArtifact : static_cast<int>( tile.metadata()[0] ) };
         case MP2::OBJ_WAGON:
+            return { mapModLoader.wagonArtifact != -1 ? mapModLoader.wagonArtifact : static_cast<int>( tile.metadata()[0] ) };
+        case MP2::OBJ_SKELETON:
+            return { mapModLoader.skeletonArtifact != -1 ? mapModLoader.skeletonArtifact : static_cast<int>( tile.metadata()[0] ) };
+        case MP2::OBJ_SHIPWRECK_SURVIVOR:
+            return { mapModLoader.survivorArtifact != -1 ? mapModLoader.survivorArtifact : static_cast<int>( tile.metadata()[0] ) };
+
+        case MP2::OBJ_SEA_CHEST:
+        case MP2::OBJ_TREASURE_CHEST:
             return { static_cast<int>( tile.metadata()[0] ) };
 
         case MP2::OBJ_ARTIFACT:
@@ -595,7 +706,6 @@ namespace Maps
             break;
         }
 
-        // Why are you calling this function for an unsupported object type?
         assert( 0 );
         return { Artifact::UNKNOWN };
     }
@@ -709,6 +819,11 @@ namespace Maps
 
     Skill::Secondary getSecondarySkillFromWitchsHut( const Tile & tile )
     {
+        // --- CUSTOM MOD: WITCH HUT OVERRIDE ---
+        if (mapModLoader.witchHutSkill != -1) {
+            return Skill::Secondary(mapModLoader.witchHutSkill, Skill::Level::BASIC);
+        }
+        // --------------------------------------
         if ( tile.getMainObjectType( false ) != MP2::OBJ_WITCHS_HUT ) {
             // Why are you calling this for an unsupported object type?
             assert( 0 );
@@ -728,26 +843,39 @@ namespace Maps
     {
         switch ( tile.getMainObjectType( false ) ) {
         case MP2::OBJ_BARREL:
-        case MP2::OBJ_CAMPFIRE:
-            // Campfire or barrel contains N of non-Gold resources and (N * 100) Gold.
-            return Funds{ static_cast<int>( tile.metadata()[0] ), tile.metadata()[1] } + Funds{ Resource::GOLD, tile.metadata()[1] * 100 };
+        case MP2::OBJ_CAMPFIRE: {
+            uint32_t resAmt = mapModLoader.campfireResourceAmt != -1 ? mapModLoader.campfireResourceAmt : tile.metadata()[1];
+            uint32_t goldAmt = mapModLoader.campfireGold != -1 ? mapModLoader.campfireGold : tile.metadata()[1] * 100;
+            return Funds{ static_cast<int>( tile.metadata()[0] ), resAmt } + Funds{ Resource::GOLD, goldAmt };
+        }
 
-        case MP2::OBJ_FLOTSAM:
-            return Funds{ Resource::WOOD, tile.metadata()[0] } + Funds{ Resource::GOLD, tile.metadata()[1] };
+        case MP2::OBJ_FLOTSAM: {
+            uint32_t woodAmt = mapModLoader.flotsamWood != -1 ? mapModLoader.flotsamWood : tile.metadata()[0];
+            uint32_t goldAmt = mapModLoader.flotsamGold != -1 ? mapModLoader.flotsamGold : tile.metadata()[1];
+            return Funds{ Resource::WOOD, woodAmt } + Funds{ Resource::GOLD, goldAmt };
+        }
 
         case MP2::OBJ_DAEMON_CAVE:
+            return { Resource::GOLD, mapModLoader.daemonCaveGold != -1 ? mapModLoader.daemonCaveGold : tile.metadata()[1] };
         case MP2::OBJ_GRAVEYARD:
-        case MP2::OBJ_SEA_CHEST:
+            return { Resource::GOLD, mapModLoader.graveyardGold != -1 ? mapModLoader.graveyardGold : tile.metadata()[1] };
         case MP2::OBJ_SHIPWRECK:
-        case MP2::OBJ_TREASURE_CHEST:
+            return { Resource::GOLD, mapModLoader.shipwreckGold != -1 ? mapModLoader.shipwreckGold : tile.metadata()[1] };
+        case MP2::OBJ_SEA_CHEST:
             return { Resource::GOLD, tile.metadata()[1] };
+
+        case MP2::OBJ_TREASURE_CHEST:
+            return { Resource::GOLD, static_cast<uint32_t>(tile.metadata()[1] * mapModLoader.chestMultiplier) };
+
+        case MP2::OBJ_WATER_WHEEL:
+            if (mapModLoader.waterWheelGold != -1) return { Resource::GOLD, static_cast<uint32_t>(mapModLoader.waterWheelGold) };
+            return { static_cast<int>( tile.metadata()[0] ), tile.metadata()[1] };
 
         case MP2::OBJ_DERELICT_SHIP:
         case MP2::OBJ_LEAN_TO:
         case MP2::OBJ_MAGIC_GARDEN:
         case MP2::OBJ_RESOURCE:
         case MP2::OBJ_WINDMILL:
-        case MP2::OBJ_WATER_WHEEL:
             return { static_cast<int>( tile.metadata()[0] ), tile.metadata()[1] };
 
         case MP2::OBJ_WAGON:
@@ -757,7 +885,6 @@ namespace Maps
             break;
         }
 
-        // Why are you calling this for an unsupported object type?
         assert( 0 );
         return {};
     }

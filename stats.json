@@ -1,338 +1,568 @@
 {
     "artifacts": {
         "0": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Unknown Bonus",
+            "name": "Invalid Artifact"
         },
         "1": {
-            "bonus0": 12
+            "bonus0": 12,
+            "bonus0_label": "Knowledge Skill",
+            "name": "Ultimate Book of Knowledge"
         },
         "10": {
-            "bonus0": 2
+            "bonus0": 2,
+            "bonus0_label": "Spell Power Skill",
+            "name": "Caster's Bracelet of Magic"
         },
         "100": {
-            "bonus0": 5
+            "bonus0": 5,
+            "bonus0_label": "Spell Power Skill",
+            "name": "Staff of Wizardry"
         },
         "101": {
             "bonus0": 4,
-            "bonus1": 1
+            "bonus0_label": "Defense Skill",
+            "bonus1": 1,
+            "bonus1_label": "Attack Skill",
+            "name": "Sword Breaker"
         },
         "102": {
-            "bonus0": 5
+            "bonus0": 5,
+            "bonus0_label": "Attack Skill",
+            "name": "Sword of Anduran"
         },
         "103": {
-            "bonus0": 10
+            "bonus0": 10,
+            "bonus0_label": "Necromancy Skill (%)",
+            "name": "Spade of Necromancy"
         },
         "11": {
-            "bonus0": 2
+            "bonus0": 2,
+            "bonus0_label": "Spell Power Skill",
+            "name": "Mage's Ring of Power"
         },
         "12": {
-            "bonus0": 3
+            "bonus0": 3,
+            "bonus0_label": "Spell Power Skill",
+            "name": "Witch's Broach of Magic"
         },
         "13": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Morale",
+            "name": "Medal of Valor"
         },
         "14": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Morale",
+            "name": "Medal of Courage"
         },
         "15": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Morale",
+            "name": "Medal of Honor"
         },
         "16": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Morale",
+            "name": "Medal of Distinction"
         },
         "17": {
-            "curse0": 2
+            "curse0": 2,
+            "curse0_label": "Morale Penalty",
+            "name": "Fizbin of Misfortune"
         },
         "18": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Attack Skill",
+            "name": "Thunder Mace of Dominion"
         },
         "19": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Defense Skill",
+            "name": "Armored Gauntlets of Protection"
         },
         "2": {
-            "bonus0": 12
+            "bonus0": 12,
+            "bonus0_label": "Attack Skill",
+            "name": "Ultimate Sword of Dominion"
         },
         "20": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Defense Skill",
+            "name": "Defender Helm of Protection"
         },
         "21": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Attack Skill",
+            "name": "Giant Flail of Dominion"
         },
         "22": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Extra Catapult Shots",
+            "name": "Ballista of Quickness"
         },
         "23": {
-            "bonus0": 2
+            "bonus0": 2,
+            "bonus0_label": "Defense Skill",
+            "name": "Stealth Shield of Protection"
         },
         "24": {
-            "bonus0": 3
+            "bonus0": 3,
+            "bonus0_label": "Attack Skill",
+            "name": "Dragon Sword of Dominion"
         },
         "25": {
-            "bonus0": 2
+            "bonus0": 2,
+            "bonus0_label": "Attack Skill",
+            "name": "Power Axe of Dominion"
         },
         "26": {
-            "bonus0": 3
+            "bonus0": 3,
+            "bonus0_label": "Defense Skill",
+            "name": "Divine Breastplate of Protection"
         },
         "27": {
-            "bonus0": 2
+            "bonus0": 2,
+            "bonus0_label": "Knowledge Skill",
+            "name": "Minor Scroll of Knowledge"
         },
         "28": {
-            "bonus0": 3
+            "bonus0": 3,
+            "bonus0_label": "Knowledge Skill",
+            "name": "Major Scroll of Knowledge"
         },
         "29": {
-            "bonus0": 4
+            "bonus0": 4,
+            "bonus0_label": "Knowledge Skill",
+            "name": "Superior Scroll of Knowledge"
         },
         "3": {
-            "bonus0": 12
+            "bonus0": 12,
+            "bonus0_label": "Defense Skill",
+            "name": "Ultimate Cloak of Protection"
         },
         "30": {
-            "bonus0": 5
+            "bonus0": 5,
+            "bonus0_label": "Knowledge Skill",
+            "name": "Foremost Scroll of Knowledge"
         },
         "31": {
-            "bonus0": 1000
+            "bonus0": 1000,
+            "bonus0_label": "Gold Income (daily)",
+            "name": "Endless Sack of Gold"
         },
         "32": {
-            "bonus0": 750
+            "bonus0": 750,
+            "bonus0_label": "Gold Income (daily)",
+            "name": "Endless Bag of Gold"
         },
         "33": {
-            "bonus0": 500
+            "bonus0": 500,
+            "bonus0_label": "Gold Income (daily)",
+            "name": "Endless Purse of Gold"
         },
         "34": {
-            "bonus0": 600
+            "bonus0": 600,
+            "bonus0_label": "Land Mobility",
+            "name": "Nomad Boots of Mobility"
         },
         "35": {
-            "bonus0": 300
+            "bonus0": 300,
+            "bonus0_label": "Land Mobility",
+            "name": "Traveler's Boots of Mobility"
         },
         "36": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Luck",
+            "name": "Lucky Rabbit's Foot"
         },
         "37": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Luck",
+            "name": "Golden Horseshoe"
         },
         "38": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Luck",
+            "name": "Gambler's Lucky Coin"
         },
         "39": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Luck",
+            "name": "Four-Leaf Clover"
         },
         "4": {
-            "bonus0": 12
+            "bonus0": 12,
+            "bonus0_label": "Spell Power Skill",
+            "name": "Ultimate Wand of Magic"
         },
         "40": {
             "bonus0": 500,
-            "bonus1": 500
+            "bonus0_label": "Land Mobility",
+            "bonus1": 500,
+            "bonus1_label": "Sea Mobility",
+            "name": "True Compass of Mobility"
         },
         "41": {
-            "bonus0": 1000
+            "bonus0": 1000,
+            "bonus0_label": "Sea Mobility",
+            "name": "Sailor's Astrolabe of Mobility"
         },
         "42": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Curse Spell Cost Reduction (%)",
+            "name": "Evil Eye"
         },
         "43": {
-            "bonus0": 2
+            "bonus0": 2,
+            "bonus0_label": "Combat Spell Duration",
+            "name": "Enchanted Hourglass"
         },
         "44": {
-            "bonus0": 100
+            "bonus0": 100,
+            "bonus0_label": "Hypnotize Effectiveness (%)",
+            "name": "Gold Watch"
         },
         "45": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Mind Spell Cost Reduction (%)",
+            "name": "Skullcap"
         },
         "46": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Cold Damage Reduction (%)",
+            "name": "Ice Cloak"
         },
         "47": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Fire Damage Reduction (%)",
+            "name": "Fire Cloak"
         },
         "48": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Lightning Damage Reduction (%)",
+            "name": "Lightning Helm"
         },
         "49": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Cold Spell Effectiveness (%)",
+            "name": "Evercold Icicle"
         },
         "5": {
             "bonus0": 6,
-            "bonus1": 6
+            "bonus0_label": "Attack Skill",
+            "bonus1": 6,
+            "bonus1_label": "Defense Skill",
+            "name": "Ultimate Shield"
         },
         "50": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Fire Spell Effectiveness (%)",
+            "name": "Everhot Lava Rock"
         },
         "51": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Lightning Spell Effectiveness (%)",
+            "name": "Lightning Rod"
         },
         "52": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Bless Spell Cost Reduction (%)",
+            "name": "Snake-Ring"
         },
         "53": {
-            "bonus0": 100
+            "bonus0": 100,
+            "bonus0_label": "Resurrect Effectiveness (%)",
+            "name": "Ankh"
         },
         "54": {
-            "bonus0": 100
+            "bonus0": 100,
+            "bonus0_label": "Summoning Effectiveness (%)",
+            "name": "Book of Elements"
         },
         "55": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "Summoning Spell Cost Reduction (%)",
+            "name": "Elemental Ring"
         },
         "56": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Curse Spell Immunity",
+            "name": "Holy Pendant"
         },
         "57": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Hypnotize Immunity",
+            "name": "Pendant of Free Will"
         },
         "58": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Death Spell Immunity",
+            "name": "Pendant of Life"
         },
         "59": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Berserk Immunity",
+            "name": "Serenity Pendant"
         },
         "6": {
             "bonus0": 6,
-            "bonus1": 6
+            "bonus0_label": "Spell Power Skill",
+            "bonus1": 6,
+            "bonus1_label": "Knowledge Skill",
+            "name": "Ultimate Staff"
         },
         "60": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Blind Immunity",
+            "name": "Seeing-eye Pendant"
         },
         "61": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Paralyze Immunity",
+            "name": "Kinetic Pendant"
         },
         "62": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Holy Immunity",
+            "name": "Pendant of Death"
         },
         "63": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Dispel Immunity",
+            "name": "Wand of Negation"
         },
         "64": {
-            "bonus0": 50
+            "bonus0": 50,
+            "bonus0_label": "No Shooting Penalty",
+            "name": "Golden Bow"
         },
         "65": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Fog Reveal Distance",
+            "name": "Telescope"
         },
         "66": {
-            "bonus0": 10
+            "bonus0": 10,
+            "bonus0_label": "Surrender Cost Reduction (%)",
+            "name": "Statesman's Quill"
         },
         "67": {
-            "bonus0": 10
+            "bonus0": 10,
+            "bonus0_label": "Combat Spell Duration",
+            "name": "Wizard's Hat"
         },
         "68": {
-            "bonus0": 2
+            "bonus0": 2,
+            "bonus0_label": "Spell Points (daily)",
+            "name": "Power Ring"
         },
         "69": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Endless Ammunition",
+            "name": "Ammo Cart"
         },
         "7": {
             "bonus0": 4,
+            "bonus0_label": "Attack Skill",
             "bonus1": 4,
+            "bonus1_label": "Defense Skill",
             "bonus2": 4,
-            "bonus3": 4
+            "bonus2_label": "Spell Power Skill",
+            "bonus3": 4,
+            "bonus3_label": "Knowledge Skill",
+            "name": "Ultimate Crown"
         },
         "70": {
-            "curse0": 250
+            "curse0": 250,
+            "curse0_label": "Gold Penalty (daily)",
+            "name": "Tax Lien"
         },
         "71": {
-            "curse0": 0
+            "curse0": 0,
+            "curse0_label": "No Joining Armies",
+            "name": "Hideous Mask"
         },
         "72": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Sulfur Income (daily)",
+            "name": "Endless Pouch of Sulfur"
         },
         "73": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Mercury Income (daily)",
+            "name": "Endless Vial of Mercury"
         },
         "74": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Gems Income (daily)",
+            "name": "Endless Pouch of Gems"
         },
         "75": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Wood Income (daily)",
+            "name": "Endless Cord of Wood"
         },
         "76": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Ore Income (daily)",
+            "name": "Endless Cart of Ore"
         },
         "77": {
-            "bonus0": 1
+            "bonus0": 1,
+            "bonus0_label": "Crystal Income (daily)",
+            "name": "Endless Pouch of Crystal"
         },
         "78": {
             "bonus0": 1,
-            "bonus1": 1
+            "bonus0_label": "Attack Skill",
+            "bonus1": 1,
+            "bonus1_label": "Defense Skill",
+            "name": "Spiked Helm"
         },
         "79": {
             "bonus0": 2,
-            "bonus1": 2
+            "bonus0_label": "Attack Skill",
+            "bonus1": 2,
+            "bonus1_label": "Defense Skill",
+            "name": "Spiked Shield"
         },
         "8": {
-            "bonus0": 10000
+            "bonus0": 10000,
+            "bonus0_label": "Gold Income (daily)",
+            "name": "Golden Goose"
         },
         "80": {
             "bonus0": 1,
-            "bonus1": 1
+            "bonus0_label": "Knowledge Skill",
+            "bonus1": 1,
+            "bonus1_label": "Spell Power Skill",
+            "name": "White Pearl"
         },
         "81": {
             "bonus0": 2,
-            "bonus1": 2
+            "bonus0_label": "Knowledge Skill",
+            "bonus1": 2,
+            "bonus1_label": "Spell Power Skill",
+            "name": "Black Pearl"
         },
         "82": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Unknown Bonus",
+            "name": "Magic Book"
         },
         "83": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Unknown Bonus",
+            "name": "Ultimate Artifact"
         },
         "84": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Unknown Bonus",
+            "name": "Dummy 2"
         },
         "85": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Unknown Bonus",
+            "name": "Dummy 3"
         },
         "86": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Unknown Bonus",
+            "name": "Dummy 4"
         },
         "87": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Add Spell (ID)",
+            "name": "Spell Scroll"
         },
         "88": {
             "bonus0": 3,
-            "curse0": 0
+            "bonus0_label": "Spell Power Skill",
+            "curse0": 0,
+            "curse0_label": "Undead Morale Penalty",
+            "name": "Arm of the Martyr"
         },
         "89": {
-            "bonus0": 5
+            "bonus0": 5,
+            "bonus0_label": "Defense Skill",
+            "name": "Breastplate of Anduran"
         },
         "9": {
-            "bonus0": 4
+            "bonus0": 4,
+            "bonus0_label": "Spell Power Skill",
+            "name": "Arcane Necklace of Magic"
         },
         "90": {
             "bonus0": 50,
-            "curse0": 2
+            "bonus0_label": "Elemental Damage Reduction (%)",
+            "curse0": 2,
+            "curse0_label": "Spell Power Penalty",
+            "name": "Broach of Shielding"
         },
         "91": {
             "bonus0": 5,
+            "bonus0_label": "Attack Skill",
             "bonus1": 5,
+            "bonus1_label": "Defense Skill",
             "bonus2": 5,
-            "bonus3": 0
+            "bonus2_label": "Spell Power Skill",
+            "bonus3": 0,
+            "bonus3_label": "Maximum Morale",
+            "name": "Battle Garb of Anduran"
         },
         "92": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "View Monster Information",
+            "name": "Crystal Ball"
         },
         "93": {
             "bonus0": 50,
-            "curse0": 100
+            "bonus0_label": "Fire Damage Reduction (%)",
+            "curse0": 100,
+            "curse0_label": "Extra Cold Damage (%)",
+            "name": "Heart of Fire"
         },
         "94": {
             "bonus0": 50,
-            "curse0": 100
+            "bonus0_label": "Cold Damage Reduction (%)",
+            "curse0": 100,
+            "curse0_label": "Extra Fire Damage (%)",
+            "name": "Heart of Ice"
         },
         "95": {
-            "bonus0": 5
+            "bonus0": 5,
+            "bonus0_label": "Spell Power Skill",
+            "name": "Helmet of Anduran"
         },
         "96": {
-            "bonus0": 5
+            "bonus0": 5,
+            "bonus0_label": "Attack Skill",
+            "name": "Holy Hammer"
         },
         "97": {
             "bonus0": 2,
+            "bonus0_label": "Attack Skill",
             "bonus1": 2,
+            "bonus1_label": "Defense Skill",
             "bonus2": 2,
-            "bonus3": 2
+            "bonus2_label": "Knowledge Skill",
+            "bonus3": 2,
+            "bonus3_label": "Spell Power Skill",
+            "name": "Legendary Scepter"
         },
         "98": {
             "bonus0": 1,
-            "bonus1": 1
+            "bonus0_label": "Sea Morale Boost",
+            "bonus1": 1,
+            "bonus1_label": "Sea Luck Boost",
+            "name": "Masthead"
         },
         "99": {
-            "bonus0": 0
+            "bonus0": 0,
+            "bonus0_label": "Disable Battle Casting",
+            "name": "Sphere of Negation"
         }
     },
     "buildings": {
@@ -344,6 +574,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Thieves' Guild",
             "type_id": 1
         },
         "1": {
@@ -354,6 +585,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Tavern",
             "type_id": 2
         },
         "10": {
@@ -364,6 +596,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Captain's Quarters",
             "type_id": 4096
         },
         "11": {
@@ -374,6 +607,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Mage Guild, Level 1",
             "type_id": 16384
         },
         "12": {
@@ -384,6 +618,7 @@
             "cost_ore": 5,
             "cost_sulfur": 4,
             "cost_wood": 5,
+            "name": "Mage Guild, Level 2",
             "type_id": 32768
         },
         "13": {
@@ -394,6 +629,7 @@
             "cost_ore": 5,
             "cost_sulfur": 6,
             "cost_wood": 5,
+            "name": "Mage Guild, Level 3",
             "type_id": 65536
         },
         "14": {
@@ -404,6 +640,7 @@
             "cost_ore": 5,
             "cost_sulfur": 8,
             "cost_wood": 5,
+            "name": "Mage Guild, Level 4",
             "type_id": 131072
         },
         "15": {
@@ -414,6 +651,7 @@
             "cost_ore": 5,
             "cost_sulfur": 10,
             "cost_wood": 5,
+            "name": "Mage Guild, Level 5",
             "type_id": 262144
         },
         "16": {
@@ -424,6 +662,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Farm",
             "type_id": 256
         },
         "17": {
@@ -434,6 +673,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Garbage Heap",
             "type_id": 256
         },
         "18": {
@@ -444,6 +684,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Crystal Garden",
             "type_id": 256
         },
         "19": {
@@ -454,6 +695,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Waterfall",
             "type_id": 256
         },
         "2": {
@@ -464,6 +706,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 20,
+            "name": "Shipyard",
             "type_id": 4
         },
         "20": {
@@ -474,6 +717,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Orchard",
             "type_id": 256
         },
         "21": {
@@ -484,6 +728,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Skull Pile",
             "type_id": 256
         },
         "22": {
@@ -494,6 +739,7 @@
             "cost_ore": 15,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Fortifications",
             "type_id": 1024
         },
         "23": {
@@ -504,6 +750,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Coliseum",
             "type_id": 1024
         },
         "24": {
@@ -514,6 +761,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Rainbow",
             "type_id": 1024
         },
         "25": {
@@ -524,6 +772,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Dungeon",
             "type_id": 1024
         },
         "26": {
@@ -534,6 +783,7 @@
             "cost_ore": 5,
             "cost_sulfur": 5,
             "cost_wood": 5,
+            "name": "Library",
             "type_id": 1024
         },
         "27": {
@@ -544,6 +794,7 @@
             "cost_ore": 0,
             "cost_sulfur": 10,
             "cost_wood": 0,
+            "name": "Storm",
             "type_id": 1024
         },
         "28": {
@@ -554,6 +805,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Shrine",
             "type_id": 8192
         },
         "29": {
@@ -564,6 +816,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Thatched Hut",
             "type_id": 1048576
         },
         "3": {
@@ -574,6 +827,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Well",
             "type_id": 8
         },
         "30": {
@@ -584,6 +838,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Archery Range",
             "type_id": 2097152
         },
         "31": {
@@ -594,6 +849,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Archery Range",
             "type_id": 67108864
         },
         "32": {
@@ -604,6 +860,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Blacksmith",
             "type_id": 4194304
         },
         "33": {
@@ -614,6 +871,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Blacksmith",
             "type_id": 134217728
         },
         "34": {
@@ -624,6 +882,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Armory",
             "type_id": 8388608
         },
         "35": {
@@ -634,6 +893,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Armory",
             "type_id": 268435456
         },
         "36": {
@@ -644,6 +904,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 20,
+            "name": "Jousting Arena",
             "type_id": 16777216
         },
         "37": {
@@ -654,6 +915,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Upg. Jousting Arena",
             "type_id": 536870912
         },
         "38": {
@@ -664,6 +926,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 20,
+            "name": "Cathedral",
             "type_id": 33554432
         },
         "39": {
@@ -674,6 +937,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Upg. Cathedral",
             "type_id": 1073741824
         },
         "4": {
@@ -684,6 +948,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Statue",
             "type_id": 16
         },
         "40": {
@@ -694,6 +959,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Hut",
             "type_id": 1048576
         },
         "41": {
@@ -704,6 +970,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Stick Hut",
             "type_id": 2097152
         },
         "42": {
@@ -714,6 +981,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Stick Hut",
             "type_id": 67108864
         },
         "43": {
@@ -724,6 +992,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Den",
             "type_id": 4194304
         },
         "44": {
@@ -734,6 +1003,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Adobe",
             "type_id": 8388608
         },
         "45": {
@@ -744,6 +1014,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Adobe",
             "type_id": 268435456
         },
         "46": {
@@ -754,6 +1025,7 @@
             "cost_ore": 20,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Bridge",
             "type_id": 16777216
         },
         "47": {
@@ -764,6 +1036,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Bridge",
             "type_id": 536870912
         },
         "48": {
@@ -774,6 +1047,7 @@
             "cost_ore": 20,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Pyramid",
             "type_id": 33554432
         },
         "49": {
@@ -784,6 +1058,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Treehouse",
             "type_id": 1048576
         },
         "5": {
@@ -794,6 +1069,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Left Turret",
             "type_id": 32
         },
         "50": {
@@ -804,6 +1080,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Cottage",
             "type_id": 2097152
         },
         "51": {
@@ -814,6 +1091,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Cottage",
             "type_id": 67108864
         },
         "52": {
@@ -824,6 +1102,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Archery Range",
             "type_id": 4194304
         },
         "53": {
@@ -834,6 +1113,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Archery Range",
             "type_id": 134217728
         },
         "54": {
@@ -844,6 +1124,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Stonehenge",
             "type_id": 8388608
         },
         "55": {
@@ -854,6 +1135,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Stonehenge",
             "type_id": 268435456
         },
         "56": {
@@ -864,6 +1146,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Fenced Meadow",
             "type_id": 16777216
         },
         "57": {
@@ -874,6 +1157,7 @@
             "cost_ore": 30,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Red Tower",
             "type_id": 33554432
         },
         "58": {
@@ -884,6 +1168,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Cave",
             "type_id": 1048576
         },
         "59": {
@@ -894,6 +1179,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Crypt",
             "type_id": 2097152
         },
         "6": {
@@ -904,6 +1190,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Right Turret",
             "type_id": 64
         },
         "60": {
@@ -914,6 +1201,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Nest",
             "type_id": 4194304
         },
         "61": {
@@ -924,6 +1212,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Maze",
             "type_id": 8388608
         },
         "62": {
@@ -934,6 +1223,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Maze",
             "type_id": 268435456
         },
         "63": {
@@ -944,6 +1234,7 @@
             "cost_ore": 0,
             "cost_sulfur": 10,
             "cost_wood": 0,
+            "name": "Swamp",
             "type_id": 16777216
         },
         "64": {
@@ -954,6 +1245,7 @@
             "cost_ore": 30,
             "cost_sulfur": 20,
             "cost_wood": 0,
+            "name": "Green Tower",
             "type_id": 33554432
         },
         "65": {
@@ -964,6 +1256,7 @@
             "cost_ore": 5,
             "cost_sulfur": 10,
             "cost_wood": 0,
+            "name": "Red Tower",
             "type_id": 1073741824
         },
         "66": {
@@ -974,6 +1267,7 @@
             "cost_ore": 5,
             "cost_sulfur": 10,
             "cost_wood": 0,
+            "name": "Black Tower",
             "type_id": 2147483648
         },
         "67": {
@@ -984,6 +1278,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Habitat",
             "type_id": 1048576
         },
         "68": {
@@ -994,6 +1289,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Pen",
             "type_id": 2097152
         },
         "69": {
@@ -1004,6 +1300,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Foundry",
             "type_id": 4194304
         },
         "7": {
@@ -1014,6 +1311,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Marketplace",
             "type_id": 128
         },
         "70": {
@@ -1024,6 +1322,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Foundry",
             "type_id": 134217728
         },
         "71": {
@@ -1034,6 +1333,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Cliff Nest",
             "type_id": 8388608
         },
         "72": {
@@ -1044,6 +1344,7 @@
             "cost_ore": 5,
             "cost_sulfur": 5,
             "cost_wood": 5,
+            "name": "Ivory Tower",
             "type_id": 16777216
         },
         "73": {
@@ -1054,6 +1355,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Ivory Tower",
             "type_id": 536870912
         },
         "74": {
@@ -1064,6 +1366,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Cloud Castle",
             "type_id": 33554432
         },
         "75": {
@@ -1074,6 +1377,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Cloud Castle",
             "type_id": 1073741824
         },
         "76": {
@@ -1084,6 +1388,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Excavation",
             "type_id": 1048576
         },
         "77": {
@@ -1094,6 +1399,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Graveyard",
             "type_id": 2097152
         },
         "78": {
@@ -1104,6 +1410,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Graveyard",
             "type_id": 67108864
         },
         "79": {
@@ -1114,6 +1421,7 @@
             "cost_ore": 10,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Pyramid",
             "type_id": 4194304
         },
         "8": {
@@ -1124,6 +1432,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Moat",
             "type_id": 512
         },
         "80": {
@@ -1134,6 +1443,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Pyramid",
             "type_id": 134217728
         },
         "81": {
@@ -1144,6 +1454,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 10,
+            "name": "Mansion",
             "type_id": 8388608
         },
         "82": {
@@ -1154,6 +1465,7 @@
             "cost_ore": 0,
             "cost_sulfur": 0,
             "cost_wood": 5,
+            "name": "Upg. Mansion",
             "type_id": 268435456
         },
         "83": {
@@ -1164,6 +1476,7 @@
             "cost_ore": 0,
             "cost_sulfur": 10,
             "cost_wood": 10,
+            "name": "Mausoleum",
             "type_id": 16777216
         },
         "84": {
@@ -1174,6 +1487,7 @@
             "cost_ore": 5,
             "cost_sulfur": 0,
             "cost_wood": 0,
+            "name": "Upg. Mausoleum",
             "type_id": 536870912
         },
         "85": {
@@ -1184,6 +1498,7 @@
             "cost_ore": 10,
             "cost_sulfur": 5,
             "cost_wood": 10,
+            "name": "Laboratory",
             "type_id": 33554432
         },
         "9": {
@@ -1194,11 +1509,14 @@
             "cost_ore": 20,
             "cost_sulfur": 0,
             "cost_wood": 20,
+            "name": "Castle",
             "type_id": 2048
         }
     },
     "heroes": {
         "1": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1207,6 +1525,8 @@
             "power": 1
         },
         "10": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1215,6 +1535,8 @@
             "power": 1
         },
         "11": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1223,6 +1545,8 @@
             "power": 1
         },
         "12": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1231,6 +1555,8 @@
             "power": 1
         },
         "13": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1239,6 +1565,8 @@
             "power": 1
         },
         "14": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1247,6 +1575,8 @@
             "power": 1
         },
         "15": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1255,6 +1585,8 @@
             "power": 1
         },
         "16": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1263,6 +1595,8 @@
             "power": 1
         },
         "17": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1271,6 +1605,8 @@
             "power": 1
         },
         "18": {
+            "army": [],
+            "artifacts": [],
             "attack": 3,
             "defense": 1,
             "experience": 40,
@@ -1279,6 +1615,8 @@
             "power": 1
         },
         "19": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1287,6 +1625,8 @@
             "power": 2
         },
         "2": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1295,6 +1635,8 @@
             "power": 1
         },
         "20": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1303,6 +1645,8 @@
             "power": 2
         },
         "21": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1311,6 +1655,8 @@
             "power": 2
         },
         "22": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1319,6 +1665,8 @@
             "power": 2
         },
         "23": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1327,6 +1675,8 @@
             "power": 2
         },
         "24": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1335,6 +1685,8 @@
             "power": 2
         },
         "25": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1343,6 +1695,8 @@
             "power": 2
         },
         "26": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1351,6 +1705,8 @@
             "power": 2
         },
         "27": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1359,6 +1715,8 @@
             "power": 2
         },
         "28": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1367,6 +1725,8 @@
             "power": 3
         },
         "29": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1375,6 +1735,8 @@
             "power": 3
         },
         "3": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1383,6 +1745,8 @@
             "power": 1
         },
         "30": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1391,6 +1755,8 @@
             "power": 3
         },
         "31": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1399,6 +1765,8 @@
             "power": 3
         },
         "32": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1407,6 +1775,8 @@
             "power": 3
         },
         "33": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1415,6 +1785,8 @@
             "power": 3
         },
         "34": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1423,6 +1795,8 @@
             "power": 3
         },
         "35": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1431,6 +1805,8 @@
             "power": 3
         },
         "36": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 0,
             "experience": 40,
@@ -1439,6 +1815,8 @@
             "power": 3
         },
         "37": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1447,6 +1825,8 @@
             "power": 2
         },
         "38": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1455,6 +1835,8 @@
             "power": 2
         },
         "39": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1463,6 +1845,8 @@
             "power": 2
         },
         "4": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1471,6 +1855,8 @@
             "power": 1
         },
         "40": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1479,6 +1865,8 @@
             "power": 2
         },
         "41": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1487,6 +1875,8 @@
             "power": 2
         },
         "42": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1495,6 +1885,8 @@
             "power": 2
         },
         "43": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1503,6 +1895,8 @@
             "power": 2
         },
         "44": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1511,6 +1905,8 @@
             "power": 2
         },
         "45": {
+            "army": [],
+            "artifacts": [],
             "attack": 0,
             "defense": 1,
             "experience": 40,
@@ -1519,6 +1915,8 @@
             "power": 2
         },
         "46": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1527,6 +1925,8 @@
             "power": 2
         },
         "47": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1535,6 +1935,8 @@
             "power": 2
         },
         "48": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1543,6 +1945,8 @@
             "power": 2
         },
         "49": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1551,6 +1955,8 @@
             "power": 2
         },
         "5": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1559,6 +1965,8 @@
             "power": 1
         },
         "50": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1567,6 +1975,8 @@
             "power": 2
         },
         "51": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1575,6 +1985,8 @@
             "power": 2
         },
         "52": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1583,6 +1995,8 @@
             "power": 2
         },
         "53": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1591,6 +2005,8 @@
             "power": 2
         },
         "54": {
+            "army": [],
+            "artifacts": [],
             "attack": 1,
             "defense": 0,
             "experience": 40,
@@ -1599,6 +2015,8 @@
             "power": 2
         },
         "55": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1607,6 +2025,8 @@
             "power": 1
         },
         "56": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1615,6 +2035,8 @@
             "power": 1
         },
         "57": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1623,6 +2045,8 @@
             "power": 1
         },
         "58": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1631,6 +2055,8 @@
             "power": 1
         },
         "59": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1639,6 +2065,8 @@
             "power": 1
         },
         "6": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1647,6 +2075,8 @@
             "power": 1
         },
         "60": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1655,6 +2085,8 @@
             "power": 1
         },
         "61": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1663,6 +2095,8 @@
             "power": 1
         },
         "62": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1671,6 +2105,8 @@
             "power": 1
         },
         "63": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1679,6 +2115,8 @@
             "power": 1
         },
         "64": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1687,6 +2125,8 @@
             "power": 1
         },
         "65": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1695,6 +2135,8 @@
             "power": 1
         },
         "66": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1703,6 +2145,8 @@
             "power": 1
         },
         "67": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1711,6 +2155,8 @@
             "power": 1
         },
         "68": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1719,6 +2165,8 @@
             "power": 1
         },
         "69": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1727,6 +2175,8 @@
             "power": 1
         },
         "7": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1735,6 +2185,8 @@
             "power": 1
         },
         "70": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1743,6 +2195,8 @@
             "power": 1
         },
         "71": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1751,6 +2205,8 @@
             "power": 1
         },
         "72": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1759,6 +2215,8 @@
             "power": 1
         },
         "8": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1767,6 +2225,8 @@
             "power": 1
         },
         "9": {
+            "army": [],
+            "artifacts": [],
             "attack": 2,
             "defense": 2,
             "experience": 40,
@@ -1774,6 +2234,28 @@
             "name": "Dimitry",
             "power": 1
         }
+    },
+    "map_objects": {
+        "campfire_gold": -1,
+        "campfire_resource_amt": -1,
+        "chest_multiplier": 1.0,
+        "daemon_cave_artifact": -1,
+        "daemon_cave_gold": -1,
+        "flotsam_gold": -1,
+        "flotsam_wood": -1,
+        "graveyard_artifact": -1,
+        "graveyard_gold": -1,
+        "pyramid_spell": -1,
+        "shipwreck_artifact": -1,
+        "shipwreck_gold": -1,
+        "shrine_1_spell": -1,
+        "shrine_2_spell": -1,
+        "shrine_3_spell": -1,
+        "skeleton_artifact": -1,
+        "survivor_artifact": -1,
+        "wagon_artifact": -1,
+        "water_wheel_gold": -1,
+        "witch_hut_skill": -1
     },
     "monsters": {
         "0": {
@@ -1790,6 +2272,7 @@
             "defense": 0,
             "growth": 0,
             "hp": 0,
+            "name": "Unknown Monster",
             "shots": 0,
             "speed": 2
         },
@@ -1807,6 +2290,7 @@
             "defense": 1,
             "growth": 12,
             "hp": 1,
+            "name": "Peasant",
             "shots": 0,
             "speed": 2
         },
@@ -1824,6 +2308,7 @@
             "defense": 12,
             "growth": 2,
             "hp": 50,
+            "name": "Paladin",
             "shots": 0,
             "speed": 5
         },
@@ -1841,6 +2326,7 @@
             "defense": 12,
             "growth": 2,
             "hp": 65,
+            "name": "Crusader",
             "shots": 0,
             "speed": 6
         },
@@ -1858,6 +2344,7 @@
             "defense": 1,
             "growth": 10,
             "hp": 3,
+            "name": "Goblin",
             "shots": 0,
             "speed": 4
         },
@@ -1875,6 +2362,7 @@
             "defense": 4,
             "growth": 8,
             "hp": 10,
+            "name": "Orc",
             "shots": 8,
             "speed": 2
         },
@@ -1892,6 +2380,7 @@
             "defense": 4,
             "growth": 8,
             "hp": 15,
+            "name": "Orc Chief",
             "shots": 16,
             "speed": 3
         },
@@ -1909,6 +2398,7 @@
             "defense": 2,
             "growth": 5,
             "hp": 20,
+            "name": "Wolf",
             "shots": 0,
             "speed": 6
         },
@@ -1926,6 +2416,7 @@
             "defense": 5,
             "growth": 4,
             "hp": 40,
+            "name": "Ogre",
             "shots": 0,
             "speed": 2
         },
@@ -1943,6 +2434,7 @@
             "defense": 5,
             "growth": 4,
             "hp": 60,
+            "name": "Ogre Lord",
             "shots": 0,
             "speed": 4
         },
@@ -1960,6 +2452,7 @@
             "defense": 5,
             "growth": 3,
             "hp": 40,
+            "name": "Troll",
             "shots": 8,
             "speed": 4
         },
@@ -1977,6 +2470,7 @@
             "defense": 5,
             "growth": 3,
             "hp": 40,
+            "name": "War Troll",
             "shots": 16,
             "speed": 5
         },
@@ -1994,6 +2488,7 @@
             "defense": 3,
             "growth": 8,
             "hp": 10,
+            "name": "Archer",
             "shots": 12,
             "speed": 2
         },
@@ -2011,6 +2506,7 @@
             "defense": 9,
             "growth": 2,
             "hp": 80,
+            "name": "Cyclops",
             "shots": 0,
             "speed": 5
         },
@@ -2028,6 +2524,7 @@
             "defense": 2,
             "growth": 8,
             "hp": 2,
+            "name": "Sprite",
             "shots": 0,
             "speed": 4
         },
@@ -2045,6 +2542,7 @@
             "defense": 5,
             "growth": 6,
             "hp": 20,
+            "name": "Dwarf",
             "shots": 0,
             "speed": 2
         },
@@ -2062,6 +2560,7 @@
             "defense": 6,
             "growth": 6,
             "hp": 20,
+            "name": "Battle Dwarf",
             "shots": 0,
             "speed": 4
         },
@@ -2079,6 +2578,7 @@
             "defense": 3,
             "growth": 4,
             "hp": 15,
+            "name": "Elf",
             "shots": 24,
             "speed": 4
         },
@@ -2096,6 +2596,7 @@
             "defense": 5,
             "growth": 4,
             "hp": 15,
+            "name": "Grand Elf",
             "shots": 24,
             "speed": 6
         },
@@ -2113,6 +2614,7 @@
             "defense": 5,
             "growth": 3,
             "hp": 25,
+            "name": "Druid",
             "shots": 8,
             "speed": 5
         },
@@ -2130,6 +2632,7 @@
             "defense": 7,
             "growth": 3,
             "hp": 25,
+            "name": "Greater Druid",
             "shots": 16,
             "speed": 6
         },
@@ -2147,6 +2650,7 @@
             "defense": 9,
             "growth": 2,
             "hp": 40,
+            "name": "Unicorn",
             "shots": 0,
             "speed": 5
         },
@@ -2164,6 +2668,7 @@
             "defense": 10,
             "growth": 1,
             "hp": 100,
+            "name": "Phoenix",
             "shots": 0,
             "speed": 7
         },
@@ -2181,6 +2686,7 @@
             "defense": 3,
             "growth": 8,
             "hp": 10,
+            "name": "Ranger",
             "shots": 24,
             "speed": 4
         },
@@ -2198,6 +2704,7 @@
             "defense": 1,
             "growth": 8,
             "hp": 5,
+            "name": "Centaur",
             "shots": 8,
             "speed": 4
         },
@@ -2215,6 +2722,7 @@
             "defense": 7,
             "growth": 6,
             "hp": 15,
+            "name": "Gargoyle",
             "shots": 0,
             "speed": 6
         },
@@ -2232,6 +2740,7 @@
             "defense": 6,
             "growth": 4,
             "hp": 25,
+            "name": "Griffin",
             "shots": 0,
             "speed": 4
         },
@@ -2249,6 +2758,7 @@
             "defense": 8,
             "growth": 3,
             "hp": 35,
+            "name": "Minotaur",
             "shots": 0,
             "speed": 4
         },
@@ -2266,6 +2776,7 @@
             "defense": 8,
             "growth": 3,
             "hp": 45,
+            "name": "Minotaur King",
             "shots": 0,
             "speed": 6
         },
@@ -2283,6 +2794,7 @@
             "defense": 9,
             "growth": 2,
             "hp": 75,
+            "name": "Hydra",
             "shots": 0,
             "speed": 2
         },
@@ -2300,6 +2812,7 @@
             "defense": 12,
             "growth": 1,
             "hp": 200,
+            "name": "Green Dragon",
             "shots": 0,
             "speed": 4
         },
@@ -2317,6 +2830,7 @@
             "defense": 13,
             "growth": 1,
             "hp": 250,
+            "name": "Red Dragon",
             "shots": 0,
             "speed": 5
         },
@@ -2334,6 +2848,7 @@
             "defense": 14,
             "growth": 1,
             "hp": 300,
+            "name": "Black Dragon",
             "shots": 0,
             "speed": 6
         },
@@ -2351,6 +2866,7 @@
             "defense": 1,
             "growth": 8,
             "hp": 3,
+            "name": "Halfling",
             "shots": 12,
             "speed": 3
         },
@@ -2368,6 +2884,7 @@
             "defense": 9,
             "growth": 5,
             "hp": 15,
+            "name": "Pikeman",
             "shots": 0,
             "speed": 4
         },
@@ -2385,6 +2902,7 @@
             "defense": 4,
             "growth": 6,
             "hp": 15,
+            "name": "Boar",
             "shots": 0,
             "speed": 6
         },
@@ -2402,6 +2920,7 @@
             "defense": 10,
             "growth": 4,
             "hp": 30,
+            "name": "Iron Golem",
             "shots": 0,
             "speed": 2
         },
@@ -2419,6 +2938,7 @@
             "defense": 10,
             "growth": 4,
             "hp": 35,
+            "name": "Steel Golem",
             "shots": 0,
             "speed": 3
         },
@@ -2436,6 +2956,7 @@
             "defense": 7,
             "growth": 3,
             "hp": 40,
+            "name": "Roc",
             "shots": 0,
             "speed": 4
         },
@@ -2453,6 +2974,7 @@
             "defense": 7,
             "growth": 2,
             "hp": 30,
+            "name": "Mage",
             "shots": 12,
             "speed": 5
         },
@@ -2470,6 +2992,7 @@
             "defense": 8,
             "growth": 2,
             "hp": 35,
+            "name": "Archmage",
             "shots": 24,
             "speed": 6
         },
@@ -2487,6 +3010,7 @@
             "defense": 10,
             "growth": 1,
             "hp": 150,
+            "name": "Giant",
             "shots": 0,
             "speed": 4
         },
@@ -2504,6 +3028,7 @@
             "defense": 15,
             "growth": 1,
             "hp": 300,
+            "name": "Titan",
             "shots": 24,
             "speed": 6
         },
@@ -2521,6 +3046,7 @@
             "defense": 3,
             "growth": 8,
             "hp": 4,
+            "name": "Skeleton",
             "shots": 0,
             "speed": 4
         },
@@ -2538,6 +3064,7 @@
             "defense": 2,
             "growth": 6,
             "hp": 15,
+            "name": "Zombie",
             "shots": 0,
             "speed": 2
         },
@@ -2555,6 +3082,7 @@
             "defense": 9,
             "growth": 5,
             "hp": 20,
+            "name": "Veteran Pikeman",
             "shots": 0,
             "speed": 5
         },
@@ -2572,6 +3100,7 @@
             "defense": 2,
             "growth": 6,
             "hp": 20,
+            "name": "Mutant Zombie",
             "shots": 0,
             "speed": 4
         },
@@ -2589,6 +3118,7 @@
             "defense": 6,
             "growth": 4,
             "hp": 25,
+            "name": "Mummy",
             "shots": 0,
             "speed": 4
         },
@@ -2606,6 +3136,7 @@
             "defense": 6,
             "growth": 4,
             "hp": 30,
+            "name": "Royal Mummy",
             "shots": 0,
             "speed": 5
         },
@@ -2623,6 +3154,7 @@
             "defense": 6,
             "growth": 3,
             "hp": 30,
+            "name": "Vampire",
             "shots": 0,
             "speed": 4
         },
@@ -2640,6 +3172,7 @@
             "defense": 6,
             "growth": 3,
             "hp": 40,
+            "name": "Vampire Lord",
             "shots": 0,
             "speed": 5
         },
@@ -2657,6 +3190,7 @@
             "defense": 12,
             "growth": 2,
             "hp": 25,
+            "name": "Lich",
             "shots": 12,
             "speed": 5
         },
@@ -2674,6 +3208,7 @@
             "defense": 13,
             "growth": 2,
             "hp": 35,
+            "name": "Power Lich",
             "shots": 24,
             "speed": 6
         },
@@ -2691,6 +3226,7 @@
             "defense": 9,
             "growth": 1,
             "hp": 150,
+            "name": "Bone Dragon",
             "shots": 0,
             "speed": 4
         },
@@ -2708,6 +3244,7 @@
             "defense": 1,
             "growth": 8,
             "hp": 4,
+            "name": "Rogue",
             "shots": 0,
             "speed": 5
         },
@@ -2725,6 +3262,7 @@
             "defense": 6,
             "growth": 4,
             "hp": 20,
+            "name": "Nomad",
             "shots": 0,
             "speed": 6
         },
@@ -2742,6 +3280,7 @@
             "defense": 9,
             "growth": 4,
             "hp": 25,
+            "name": "Swordsman",
             "shots": 0,
             "speed": 4
         },
@@ -2759,6 +3298,7 @@
             "defense": 7,
             "growth": 3,
             "hp": 20,
+            "name": "Ghost",
             "shots": 0,
             "speed": 5
         },
@@ -2776,6 +3316,7 @@
             "defense": 9,
             "growth": 2,
             "hp": 50,
+            "name": "Genie",
             "shots": 0,
             "speed": 6
         },
@@ -2793,6 +3334,7 @@
             "defense": 9,
             "growth": 5,
             "hp": 35,
+            "name": "Medusa",
             "shots": 0,
             "speed": 4
         },
@@ -2810,6 +3352,7 @@
             "defense": 8,
             "growth": 4,
             "hp": 50,
+            "name": "Earth Elemental",
             "shots": 0,
             "speed": 3
         },
@@ -2827,6 +3370,7 @@
             "defense": 7,
             "growth": 4,
             "hp": 35,
+            "name": "Air Elemental",
             "shots": 0,
             "speed": 6
         },
@@ -2844,6 +3388,7 @@
             "defense": 6,
             "growth": 4,
             "hp": 40,
+            "name": "Fire Elemental",
             "shots": 0,
             "speed": 5
         },
@@ -2861,6 +3406,7 @@
             "defense": 8,
             "growth": 4,
             "hp": 45,
+            "name": "Water Elemental",
             "shots": 0,
             "speed": 4
         },
@@ -2878,6 +3424,7 @@
             "defense": 0,
             "growth": 0,
             "hp": 0,
+            "name": "Random Monster",
             "shots": 0,
             "speed": 2
         },
@@ -2895,6 +3442,7 @@
             "defense": 0,
             "growth": 0,
             "hp": 0,
+            "name": "Random Monster 1",
             "shots": 0,
             "speed": 2
         },
@@ -2912,6 +3460,7 @@
             "defense": 0,
             "growth": 0,
             "hp": 0,
+            "name": "Random Monster 2",
             "shots": 0,
             "speed": 2
         },
@@ -2929,6 +3478,7 @@
             "defense": 9,
             "growth": 4,
             "hp": 30,
+            "name": "Master Swordsman",
             "shots": 0,
             "speed": 5
         },
@@ -2946,6 +3496,7 @@
             "defense": 0,
             "growth": 0,
             "hp": 0,
+            "name": "Random Monster 3",
             "shots": 0,
             "speed": 2
         },
@@ -2963,6 +3514,7 @@
             "defense": 0,
             "growth": 0,
             "hp": 0,
+            "name": "Random Monster 4",
             "shots": 0,
             "speed": 2
         },
@@ -2980,6 +3532,7 @@
             "defense": 9,
             "growth": 3,
             "hp": 30,
+            "name": "Cavalry",
             "shots": 0,
             "speed": 6
         },
@@ -2997,6 +3550,7 @@
             "defense": 9,
             "growth": 3,
             "hp": 40,
+            "name": "Champion",
             "shots": 0,
             "speed": 7
         }
@@ -3004,295 +3558,587 @@
     "spells": {
         "0": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Unknown"
         },
         "1": {
             "damage": 10,
-            "manaCost": 9
+            "extraValue": 10,
+            "manaCost": 9,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Fireball"
         },
         "10": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 2,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Haste"
         },
         "11": {
             "damage": 0,
-            "manaCost": 10
+            "extraValue": 2,
+            "manaCost": 10,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mass Haste"
         },
         "12": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 0,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "spell|Slow"
         },
         "13": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 0,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mass Slow"
         },
         "14": {
             "damage": 0,
-            "manaCost": 6
+            "extraValue": 50,
+            "manaCost": 6,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "spell|Blind"
         },
         "15": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 0,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Bless"
         },
         "16": {
             "damage": 0,
-            "manaCost": 12
+            "extraValue": 0,
+            "manaCost": 12,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mass Bless"
         },
         "17": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 3,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Stoneskin"
         },
         "18": {
             "damage": 0,
-            "manaCost": 6
+            "extraValue": 5,
+            "manaCost": 6,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Steelskin"
         },
         "19": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 0,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Curse"
         },
         "2": {
             "damage": 10,
-            "manaCost": 15
+            "extraValue": 10,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Fireblast"
         },
         "20": {
             "damage": 0,
-            "manaCost": 12
+            "extraValue": 0,
+            "manaCost": 12,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mass Curse"
         },
         "21": {
             "damage": 10,
-            "manaCost": 9
+            "extraValue": 10,
+            "manaCost": 9,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Holy Word"
         },
         "22": {
             "damage": 20,
-            "manaCost": 12
+            "extraValue": 20,
+            "manaCost": 12,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Holy Shout"
         },
         "23": {
             "damage": 0,
-            "manaCost": 7
+            "extraValue": 0,
+            "manaCost": 7,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Anti-Magic"
         },
         "24": {
             "damage": 0,
-            "manaCost": 5
+            "extraValue": 0,
+            "manaCost": 5,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Dispel Magic"
         },
         "25": {
             "damage": 0,
-            "manaCost": 12
+            "extraValue": 0,
+            "manaCost": 12,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mass Dispel"
         },
         "26": {
             "damage": 10,
-            "manaCost": 3
+            "extraValue": 10,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Magic Arrow"
         },
         "27": {
             "damage": 0,
-            "manaCost": 12
+            "extraValue": 0,
+            "manaCost": 12,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Berserker"
         },
         "28": {
             "damage": 50,
-            "manaCost": 20
+            "extraValue": 50,
+            "manaCost": 20,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Armageddon"
         },
         "29": {
             "damage": 25,
-            "manaCost": 15
+            "extraValue": 25,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Elemental Storm"
         },
         "3": {
             "damage": 25,
-            "manaCost": 7
+            "extraValue": 25,
+            "manaCost": 7,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Lightning Bolt"
         },
         "30": {
             "damage": 25,
-            "manaCost": 15
+            "extraValue": 25,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Meteor Shower"
         },
         "31": {
             "damage": 0,
-            "manaCost": 9
+            "extraValue": 0,
+            "manaCost": 9,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Paralyze"
         },
         "32": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 25,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Hypnotize"
         },
         "33": {
             "damage": 20,
-            "manaCost": 6
+            "extraValue": 20,
+            "manaCost": 6,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Cold Ray"
         },
         "34": {
             "damage": 10,
-            "manaCost": 9
+            "extraValue": 10,
+            "manaCost": 9,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Cold Ring"
         },
         "35": {
             "damage": 0,
-            "manaCost": 7
+            "extraValue": 3,
+            "manaCost": 7,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Disrupting Ray"
         },
         "36": {
             "damage": 5,
-            "manaCost": 6
+            "extraValue": 5,
+            "manaCost": 6,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Death Ripple"
         },
         "37": {
             "damage": 10,
-            "manaCost": 10
+            "extraValue": 10,
+            "manaCost": 10,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Death Wave"
         },
         "38": {
             "damage": 0,
-            "manaCost": 6
+            "extraValue": 5,
+            "manaCost": 6,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Dragon Slayer"
         },
         "39": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 3,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Blood Lust"
         },
         "4": {
             "damage": 40,
-            "manaCost": 15
+            "extraValue": 40,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Chain Lightning"
         },
         "40": {
             "damage": 0,
-            "manaCost": 10
+            "extraValue": 50,
+            "manaCost": 10,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Animate Dead"
         },
         "41": {
             "damage": 0,
-            "manaCost": 25
+            "extraValue": 0,
+            "manaCost": 25,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mirror Image"
         },
         "42": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 2,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Shield"
         },
         "43": {
             "damage": 0,
-            "manaCost": 7
+            "extraValue": 0,
+            "manaCost": 7,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mass Shield"
         },
         "44": {
             "damage": 0,
-            "manaCost": 30
+            "extraValue": 3,
+            "manaCost": 30,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Summon Earth Elemental"
         },
         "45": {
             "damage": 0,
-            "manaCost": 30
+            "extraValue": 3,
+            "manaCost": 30,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Summon Air Elemental"
         },
         "46": {
             "damage": 0,
-            "manaCost": 30
+            "extraValue": 3,
+            "manaCost": 30,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Summon Fire Elemental"
         },
         "47": {
             "damage": 0,
-            "manaCost": 30
+            "extraValue": 3,
+            "manaCost": 30,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Summon Water Elemental"
         },
         "48": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 0,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Earthquake"
         },
         "49": {
             "damage": 0,
-            "manaCost": 1
+            "extraValue": 0,
+            "manaCost": 1,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "View Mines"
         },
         "5": {
             "damage": 0,
-            "manaCost": 9
+            "extraValue": 0,
+            "manaCost": 9,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Teleport"
         },
         "50": {
             "damage": 0,
-            "manaCost": 1
+            "extraValue": 0,
+            "manaCost": 1,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "View Resources"
         },
         "51": {
             "damage": 0,
-            "manaCost": 2
+            "extraValue": 0,
+            "manaCost": 2,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "View Artifacts"
         },
         "52": {
             "damage": 0,
-            "manaCost": 2
+            "extraValue": 0,
+            "manaCost": 2,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "View Towns"
         },
         "53": {
             "damage": 0,
-            "manaCost": 2
+            "extraValue": 0,
+            "manaCost": 2,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "View Heroes"
         },
         "54": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 0,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "View All"
         },
         "55": {
             "damage": 0,
-            "manaCost": 3
+            "extraValue": 0,
+            "manaCost": 3,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Identify Hero"
         },
         "56": {
             "damage": 0,
-            "manaCost": 5
+            "extraValue": 0,
+            "manaCost": 5,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Summon Boat"
         },
         "57": {
             "damage": 0,
-            "manaCost": 10
+            "extraValue": 0,
+            "manaCost": 10,
+            "minMovePoints": 69,
+            "movePoints": 225,
+            "name": "Dimension Door"
         },
         "58": {
             "damage": 0,
-            "manaCost": 10
+            "extraValue": 0,
+            "manaCost": 10,
+            "minMovePoints": 69,
+            "movePoints": 225,
+            "name": "Town Gate"
         },
         "59": {
             "damage": 0,
-            "manaCost": 20
+            "extraValue": 0,
+            "manaCost": 20,
+            "minMovePoints": 69,
+            "movePoints": 225,
+            "name": "Town Portal"
         },
         "6": {
             "damage": 0,
-            "manaCost": 6
+            "extraValue": 5,
+            "manaCost": 6,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Cure"
         },
         "60": {
             "damage": 0,
-            "manaCost": 6
+            "extraValue": 3,
+            "manaCost": 6,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Visions"
         },
         "61": {
             "damage": 0,
-            "manaCost": 8
+            "extraValue": 4,
+            "manaCost": 8,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Haunt"
         },
         "62": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 4,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Set Earth Guardian"
         },
         "63": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 4,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Set Air Guardian"
         },
         "64": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 4,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Set Fire Guardian"
         },
         "65": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 4,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Set Water Guardian"
         },
         "66": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Random Spell"
         },
         "67": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Random 1st Level Spell"
         },
         "68": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Random 2nd Level Spell"
         },
         "69": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Random 3rd Level Spell"
         },
         "7": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 5,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Mass Cure"
         },
         "70": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Random 4th Level Spell"
         },
         "71": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Random 5th Level Spell"
         },
         "72": {
             "damage": 0,
-            "manaCost": 0
+            "extraValue": 0,
+            "manaCost": 0,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Petrification"
         },
         "8": {
             "damage": 0,
-            "manaCost": 12
+            "extraValue": 50,
+            "manaCost": 12,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Resurrect"
         },
         "9": {
             "damage": 0,
-            "manaCost": 15
+            "extraValue": 50,
+            "manaCost": 15,
+            "minMovePoints": 0,
+            "movePoints": 0,
+            "name": "Resurrect True"
         }
     }
 }

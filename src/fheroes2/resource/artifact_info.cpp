@@ -918,13 +918,42 @@ namespace
                         artifactData[i].curses[0].value = arts[id]["curse0"];
                     if (arts[id].contains("curse1") && artifactData[i].curses.size() > 1) 
                         artifactData[i].curses[1].value = arts[id]["curse1"];
+                } else {
+                    // Add missing artifact ID to JSON
+                    jsonData["artifacts"][id]["name"] = std::string(artifactData[i].untranslatedName);
+                    if (artifactData[i].bonuses.size() > 0) {
+                        jsonData["artifacts"][id]["bonus0"] = artifactData[i].bonuses[0].value;
+                        jsonData["artifacts"][id]["bonus0_label"] = getBonusLabel(artifactData[i].bonuses[0].type);
+                    }
+                    if (artifactData[i].bonuses.size() > 1) {
+                        jsonData["artifacts"][id]["bonus1"] = artifactData[i].bonuses[1].value;
+                        jsonData["artifacts"][id]["bonus1_label"] = getBonusLabel(artifactData[i].bonuses[1].type);
+                    }
+                    if (artifactData[i].bonuses.size() > 2) {
+                        jsonData["artifacts"][id]["bonus2"] = artifactData[i].bonuses[2].value;
+                        jsonData["artifacts"][id]["bonus2_label"] = getBonusLabel(artifactData[i].bonuses[2].type);
+                    }
+                    if (artifactData[i].bonuses.size() > 3) {
+                        jsonData["artifacts"][id]["bonus3"] = artifactData[i].bonuses[3].value;
+                        jsonData["artifacts"][id]["bonus3_label"] = getBonusLabel(artifactData[i].bonuses[3].type);
+                    }
+                    
+                    if (artifactData[i].curses.size() > 0) {
+                        jsonData["artifacts"][id]["curse0"] = artifactData[i].curses[0].value;
+                        jsonData["artifacts"][id]["curse0_label"] = getCurseLabel(artifactData[i].curses[0].type);
+                    }
+                    if (artifactData[i].curses.size() > 1) {
+                        jsonData["artifacts"][id]["curse1"] = artifactData[i].curses[1].value;
+                        jsonData["artifacts"][id]["curse1_label"] = getCurseLabel(artifactData[i].curses[1].type);
+                    }
+                    saveRequired = true;
                 }
             }
         } else {
             // Auto-generate the artifacts section if missing
             for (int i = 0; i < Artifact::ARTIFACT_COUNT; ++i) {
                 std::string id = std::to_string(i);
-                jsonData["artifacts"][id]["name"] = artifactData[i].untranslatedName;
+                jsonData["artifacts"][id]["name"] = std::string(artifactData[i].untranslatedName);
                 if (artifactData[i].bonuses.size() > 0) {
                     jsonData["artifacts"][id]["bonus0"] = artifactData[i].bonuses[0].value;
                     jsonData["artifacts"][id]["bonus0_label"] = getBonusLabel(artifactData[i].bonuses[0].type);
