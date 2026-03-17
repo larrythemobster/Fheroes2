@@ -1269,10 +1269,12 @@ bool Heroes::Recruit( const PlayerColor col, const fheroes2::Point & pt )
         _army.Reset( false );
     }
 
+    APPLY_JSON_HERO_OVERRIDES();
+
     world.getTile( pt.x, pt.y ).setHero( this );
 
     kingdom.AddHero( this );
-    // Update the set of recruits in the kingdom
+
     kingdom.GetRecruits();
 
     // After recruiting a hero we reveal map in hero scout area.
