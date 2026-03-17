@@ -1292,6 +1292,8 @@ bool Heroes::Recruit( const PlayerColor col, const fheroes2::Point & pt )
         _army.Reset( false );
     }
 
+    APPLY_JSON_HERO_OVERRIDES();
+
     world.getTile( pt.x, pt.y ).setHero( this );
 
     kingdom.AddHero( this );
