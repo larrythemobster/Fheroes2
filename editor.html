@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fheroes2 Visual Mod Editor</title>
+    <style>
+        :root {
+            --bg: #1e1e2e;
+            --panel: #313244;
+            --border: #45475a;
+            --text: #cdd6f4;
+            --accent: #89b4fa;
+            --success: #a6e3a1;
+            --danger: #f38ba8;
+            --warning: #f9e2af;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--panel);
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        .header {
+            background: #181825;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+        }
+        .header h1 { margin: 0; color: var(--accent); }
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+        }
+        button {
+            background-color: var(--accent);
+            color: #111;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-success { background-color: var(--success); }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #181825;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .tab-btn {
+            background: transparent;
+            color: var(--text);
+            border-radius: 0;
+            padding: 12px 24px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: var(--panel);
+            color: var(--accent);
+            border-top: 3px solid var(--accent);
+            font-weight: bold;
+        }
+        
+        /* Form Layout */
+        .editor-content { padding: 30px; min-height: 400px; display: none; }
+        .editor-content.active { display: block; }
+        .section-title { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--accent); }
+        
+        .grid-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .form-group {
+            background: #181825;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-group label { font-weight: 500; font-size: 13px; color: #a6adc8; flex-grow: 1; padding-right: 10px;}
+        .form-group input {
+            width: 70px;
+            padding: 8px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--success);
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: right;
+        }
+        
+        /* Dropdowns */
+        select.map-dropdown {
+            max-width: 160px;
+            padding: 8px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--success);
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        /* Cards */
+        .data-card {
+            background: #181825;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .data-card h3 { margin-top: 0; color: var(--warning); border-bottom: 1px solid var(--border); padding-bottom: 10px;}
+        
+        /* Army Editor Specific */
+        .hero-stats { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;}
+        .hero-stats input { width: 60px; }
+        .list-container { background: var(--panel); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        .row-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .row-item select { flex-grow: 1; padding: 8px; background: #181825; color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
+        .btn-remove { background: var(--danger); padding: 6px 12px; font-size: 12px; }
+        
+        #status { text-align: center; padding: 10px; display: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Fheroes2 Visual Mod Editor</h1>
+        <p style="color: #a6adc8; margin-top: 5px;">Edit any stat in the game safely.</p>
+    </div>
+
+    <div class="toolbar">
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+        <button onclick="document.getElementById('fileInput').click()">📂 Load stats.json</button>
+        <button class="btn-success" id="downloadBtn" onclick="saveAndDownload()" style="display: none;">💾 Download Updated Game File</button>
+    </div>
+    
+    <div id="status"></div>
+
+    <div id="editorWorkspace" style="display: none;">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('mapObjects')">Map Objects</button>
+            <button class="tab-btn" onclick="switchTab('heroes')">Heroes & Armies</button>
+            <button class="tab-btn" onclick="switchTab('monsters')">Monsters</button>
+            <button class="tab-btn" onclick="switchTab('spells')">Spells</button>
+            <button class="tab-btn" onclick="switchTab('artifacts')">Artifacts</button>
+            <button class="tab-btn" onclick="switchTab('buildings')">Buildings</button>
+        </div>
+
+        <div class="editor-content active" id="mapObjectsTab">
+            <h2 class="section-title">Adventure Map Rewards (-1 means random map default)</h2>
+            <div class="grid-form" id="mapObjectsGrid"></div>
+        </div>
+
+        <div class="editor-content" id="heroesTab">
+            <h2 class="section-title">Starting Heroes, Armies & Artifacts</h2>
+            <div id="heroesList"></div>
+        </div>
+
+        <div class="editor-content" id="monstersTab">
+            <h2 class="section-title">Monster Stats & Costs</h2>
+            <div id="monstersList"></div>
+        </div>
+
+        <div class="editor-content" id="spellsTab">
+            <h2 class="section-title">Spell Costs & Effectiveness</h2>
+            <div id="spellsList"></div>
+        </div>
+
+        <div class="editor-content" id="artifactsTab">
+            <h2 class="section-title">Artifact Bonuses & Penalties</h2>
+            <div id="artifactsList"></div>
+        </div>
+
+        <div class="editor-content" id="buildingsTab">
+            <h2 class="section-title">Building Costs</h2>
+            <div id="buildingsList"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let gameData = null;
+
+    // Load File
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                gameData = JSON.parse(e.target.result);
+                document.getElementById('editorWorkspace').style.display = 'block';
+                document.getElementById('downloadBtn').style.display = 'inline-block';
+                
+                // Build all sections
+                buildMapObjectsUI();
+                buildHeroesUI();
+                buildGenericCardUI('monsters', 'monstersList');
+                buildGenericCardUI('spells', 'spellsList');
+                buildGenericCardUI('artifacts', 'artifactsList');
+                buildGenericCardUI('buildings', 'buildingsList');
+                
+                showStatus('File loaded successfully!', 'var(--success)');
+            } catch (err) {
+                showStatus('Error reading file. Is it a valid JSON?', 'var(--danger)');
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    function switchTab(tabName) {
+        const tabs = ['mapObjects', 'heroes', 'monsters', 'spells', 'artifacts', 'buildings'];
+        tabs.forEach((t, index) => {
+            document.getElementById(t + 'Tab').className = (t === tabName) ? 'editor-content active' : 'editor-content';
+            document.querySelectorAll('.tab-btn')[index].className = (t === tabName) ? 'tab-btn active' : 'tab-btn';
+        });
+    }
+
+    // Dynamic Dropdown Generator
+    // Reads directly from gameData (monsters, artifacts, spells)
+    function getOptionsForCategory(category, selectedId, allowDefault = false) {
+        let options = '';
+        if (allowDefault) {
+            options += `<option value="-1" ${selectedId == -1 ? 'selected' : ''}>Random / Default (-1)</option>`;
+        }
+        if (gameData && gameData[category]) {
+            const ids = Object.keys(gameData[category]).sort((a,b) => parseInt(a) - parseInt(b));
+            for (const id of ids) {
+                const name = gameData[category][id].name || 'Unknown';
+                options += `<option value="${id}" ${id == selectedId ? 'selected' : ''}>${name} (ID: ${id})</option>`;
+            }
+        }
+        return options;
+    }
+
+    // Build Map Objects UI with Dropdowns for Spells and Artifacts
+    function buildMapObjectsUI() {
+        const grid = document.getElementById('mapObjectsGrid');
+        grid.innerHTML = '';
+        if (!gameData.map_objects) return;
+
+        for (const [key, value] of Object.entries(gameData.map_objects)) {
+            const cleanName = key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            let inputHtml = '';
+
+            // Automatically use dropdowns if the key involves an artifact or spell
+            if (key.endsWith('_artifact')) {
+                inputHtml = `<select data-type="map_objects" data-key="${key}" class="map-dropdown">${getOptionsForCategory('artifacts', value, true)}</select>`;
+            } else if (key.endsWith('_spell')) {
+                inputHtml = `<select data-type="map_objects" data-key="${key}" class="map-dropdown">${getOptionsForCategory('spells', value, true)}</select>`;
+            } else {
+                inputHtml = `<input type="number" step="any" data-type="map_objects" data-key="${key}" value="${value}">`;
+            }
+
+            grid.insertAdjacentHTML('beforeend', `
+                <div class="form-group">
+                    <label>${cleanName}</label>
+                    ${inputHtml}
+                </div>
+            `);
+        }
+    }
+
+    // Build Heroes UI (Armies and Artifacts)
+    function buildHeroesUI() {
+        const list = document.getElementById('heroesList');
+        list.innerHTML = '';
+        if (!gameData.heroes) return;
+
+        for (const [heroId, heroData] of Object.entries(gameData.heroes)) {
+            
+            let armyHtml = '';
+            if (heroData.army) {
+                heroData.army.forEach((troop, index) => {
+                    armyHtml += createTroopRow(heroId, index, troop.id, troop.count);
+                });
+            }
+
+            let artifactHtml = '';
+            if (heroData.artifacts) {
+                heroData.artifacts.forEach((artId, index) => {
+                    artifactHtml += createArtifactRow(heroId, index, artId);
+                });
+            }
+
+            list.insertAdjacentHTML('beforeend', `
+                <div class="data-card">
+                    <h3>Hero ID: ${heroId} ${heroData.name ? `(${heroData.name})` : ''}</h3>
+                    <div class="hero-stats">
+                        <div class="form-group"><label>Attack</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="attack" value="${heroData.attack !== undefined ? heroData.attack : -1}"></div>
+                        <div class="form-group"><label>Defense</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="defense" value="${heroData.defense !== undefined ? heroData.defense : -1}"></div>
+                        <div class="form-group"><label>Power</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="power" value="${heroData.power !== undefined ? heroData.power : -1}"></div>
+                        <div class="form-group"><label>Knowledge</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="knowledge" value="${heroData.knowledge !== undefined ? heroData.knowledge : -1}"></div>
+                    </div>
+                    
+                    <div class="list-container" id="army-${heroId}">
+                        <h4 style="margin-top: 0; margin-bottom: 10px; color: var(--accent);">Starting Army</h4>
+                        <div id="troop-container-${heroId}">${armyHtml}</div>
+                        <button onclick="addTroopRow('${heroId}')" style="background: #45475a; padding: 6px 12px; font-size: 13px; margin-top: 10px;">+ Add Troop</button>
+                    </div>
+
+                    <div class="list-container" id="artifacts-list-${heroId}">
+                        <h4 style="margin-top: 0; margin-bottom: 10px; color: var(--accent);">Starting Artifacts</h4>
+                        <div id="artifact-container-${heroId}">${artifactHtml}</div>
+                        <button onclick="addArtifactRow('${heroId}')" style="background: #45475a; padding: 6px 12px; font-size: 13px; margin-top: 10px;">+ Add Artifact</button>
+                    </div>
+                </div>
+            `);
+        }
+    }
+
+    function createTroopRow(heroId, troopIndex, selectedId = 1, count = 10) {
+        return `
+            <div class="row-item" id="troop-${heroId}-${troopIndex}">
+                <select class="troop-select-id">${getOptionsForCategory('monsters', selectedId, false)}</select>
+                <label>Count:</label>
+                <input type="number" class="troop-input-count" value="${count}" min="1" style="width: 70px;">
+                <button class="btn-remove" onclick="document.getElementById('troop-${heroId}-${troopIndex}').remove()">X</button>
+            </div>
+        `;
+    }
+
+    function addTroopRow(heroId) {
+        const container = document.getElementById(`troop-container-${heroId}`);
+        container.insertAdjacentHTML('beforeend', createTroopRow(heroId, container.children.length));
+    }
+
+    function createArtifactRow(heroId, artifactIndex, selectedId = 1) {
+        return `
+            <div class="row-item" id="artifact-${heroId}-${artifactIndex}">
+                <select class="artifact-select-id">${getOptionsForCategory('artifacts', selectedId, false)}</select>
+                <button class="btn-remove" onclick="document.getElementById('artifact-${heroId}-${artifactIndex}').remove()">X</button>
+            </div>
+        `;
+    }
+
+    function addArtifactRow(heroId) {
+        const container = document.getElementById(`artifact-container-${heroId}`);
+        container.insertAdjacentHTML('beforeend', createArtifactRow(heroId, container.children.length, 1));
+    }
+
+    // Dynamic Card Generator for Monsters, Spells, Artifacts, and Buildings
+    function buildGenericCardUI(category, containerId) {
+        const list = document.getElementById(containerId);
+        list.innerHTML = '';
+        if (!gameData[category]) return;
+
+        const ids = Object.keys(gameData[category]).sort((a,b) => parseInt(a) - parseInt(b));
+
+        for (const id of ids) {
+            const item = gameData[category][id];
+            const div = document.createElement('div');
+            div.className = 'data-card';
+            
+            let title = item.name ? `${item.name} (ID: ${id})` : `ID: ${id}`;
+            let inputsHtml = '<div class="grid-form">';
+            
+            for (const [key, value] of Object.entries(item)) {
+                if (typeof value === 'number' && key !== 'type_id') {
+                    let labelText = item[key + '_label'] ? item[key + '_label'] : key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    inputsHtml += `
+                        <div class="form-group">
+                            <label>${labelText}</label>
+                            <input type="number" step="any" data-category="${category}" data-id="${id}" data-key="${key}" value="${value}">
+                        </div>
+                    `;
+                }
+            }
+            inputsHtml += '</div>';
+            div.innerHTML = `<h3>${title}</h3>${inputsHtml}`;
+            list.appendChild(div);
+        }
+    }
+
+    // Save and Download everything back to JSON
+    function saveAndDownload() {
+        if (!gameData) return;
+
+        // 1. Gather dynamic categories
+        document.querySelectorAll('input[data-category]').forEach(input => {
+            const category = input.getAttribute('data-category');
+            const id = input.getAttribute('data-id');
+            const key = input.getAttribute('data-key');
+            gameData[category][id][key] = input.value.includes('.') ? parseFloat(input.value) : parseInt(input.value);
+        });
+
+        // 2. Gather Map Objects (Inputs AND Selects)
+        document.querySelectorAll('input[data-type="map_objects"], select[data-type="map_objects"]').forEach(input => {
+            const key = input.getAttribute('data-key');
+            gameData.map_objects[key] = key.includes('multiplier') ? parseFloat(input.value) : parseInt(input.value);
+        });
+
+        // 3. Gather Hero Stats
+        document.querySelectorAll('input[data-type="hero"]').forEach(input => {
+            const id = input.getAttribute('data-id');
+            const stat = input.getAttribute('data-stat');
+            if(gameData.heroes[id]) gameData.heroes[id][stat] = parseInt(input.value);
+        });
+
+        // 4. Gather Hero Armies & Artifacts
+        for (const heroId of Object.keys(gameData.heroes)) {
+            const troopContainer = document.getElementById(`troop-container-${heroId}`);
+            if (troopContainer) {
+                const newArmy = [];
+                troopContainer.querySelectorAll('.row-item').forEach(row => {
+                    newArmy.push({
+                        id: parseInt(row.querySelector('.troop-select-id').value),
+                        count: parseInt(row.querySelector('.troop-input-count').value)
+                    });
+                });
+                gameData.heroes[heroId].army = newArmy;
+            }
+
+            const artContainer = document.getElementById(`artifact-container-${heroId}`);
+            if (artContainer) {
+                const newArtifacts = [];
+                artContainer.querySelectorAll('.artifact-select-id').forEach(select => {
+                    newArtifacts.push(parseInt(select.value));
+                });
+                gameData.heroes[heroId].artifacts = newArtifacts;
+            }
+        }
+
+        // Trigger Download
+        const blob = new Blob([JSON.stringify(gameData, null, 4)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "stats.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showStatus('File Saved & Downloaded perfectly!', 'var(--success)');
+    }
+
+    function showStatus(msg, color) {
+        const status = document.getElementById('status');
+        status.textContent = msg;
+        status.style.color = color;
+        status.style.display = 'block';
+        setTimeout(() => status.style.display = 'none', 4000);
+    }
+</script>
+
+</body>
+</html>

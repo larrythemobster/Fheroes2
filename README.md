@@ -1,3 +1,27 @@
+# fheroes2: Stat Editor
+
+This is a customized fork of the [fheroes2](https://github.com/ihub/fheroes2) engine, originally developed as a private client project and now released open-source. 
+
+While it retains the incredible engine upgrades of the base fheroes2 project (modernizing the classic Heroes of Might and Magic II experience), this repository introduces a **Visual Modding System** that allows anyone to completely rebalance the game without compiling code.
+
+## 🌟 Custom Features
+
+* **Externalized Game Stats (`stats.json`):** Core game mechanics—including Artifact bonuses, Spell mana costs/damage, and Hero starting armies—have been extracted from the hardcoded C++ source and moved into an easily readable JSON file. 
+* **Visual Mod Editor (`editor.html`):** Included in the root of this project is a lightweight, browser-based GUI editor. Simply open `editor.html` in any web browser to visually edit the game's balance, adjust troop counts, or rewrite artifact bonuses. When you're done, click save, and drop the new `stats.json` into your game folder.
+* **Instant Rebalancing:** Want *The Ultimate Book of Knowledge* to grant +12 Knowledge? Done. Want *Mass Cure* to cost 15 mana? Done. The game reads your custom stats on launch.
+
+## 📦 Downloads & Releases
+
+1. Download the latest `.zip` release from our [Releases page](../../releases). 
+2. Extract the files and ensure your `stats.json` is in the same directory as the executable.
+3. Use the included `editor.html` to create your own custom balance patch!
+
+*(Note: You will still need the original Heroes of Might and Magic II data files to play, just like the base fheroes2 project. See the [Installation Guide](docs/INSTALL.md) for details.)*
+
+---
+*The section below contains the original fheroes2 documentation.*
+
+
 # fheroes2
 
 **fheroes2** is a recreation of the Heroes of Might and Magic II game engine.

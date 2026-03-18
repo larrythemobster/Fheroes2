@@ -363,13 +363,15 @@ namespace
             } \
         } \
         if (!it->second.artifacts.empty()) { \
-            if (GetCountArtifacts() == 0) { \
-                for (int artId : it->second.artifacts) { \
-                    if (artId == Artifact::MAGIC_BOOK) { \
-                        if (!HaveSpellBook()) SpellBookActivate(); \
-                    } else { \
-                        PickupArtifact(Artifact(artId)); \
+            for (int artId : it->second.artifacts) { \
+                if (artId == Artifact::MAGIC_BOOK) { \
+                    if (!HaveSpellBook()) SpellBookActivate(); \
+                } else { \
+                    bool hasArt = false; \
+                    for (size_t i = 0; i < _bagArtifacts.size(); ++i) { \
+                        if (_bagArtifacts[i].GetID() == artId) { hasArt = true; break; } \
                     } \
+                    if (!hasArt) PickupArtifact(Artifact(artId)); \
                 } \
             } \
         } \
