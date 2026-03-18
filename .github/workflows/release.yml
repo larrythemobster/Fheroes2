@@ -1,0 +1,52 @@
+name: Build and Publish Windows Release
+
+on:
+  push:
+    branches:
+      - main
+      - master # Triggers on any standard push to your primary branches
+
+jobs:
+  build-and-release:
+    name: Build Windows Executable
+    runs-on: windows-latest
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Windows Dependencies
+        run: .\script\windows\install_packages.bat
+        shell: cmd
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Executable
+        run: cmake --build build --config Release
+
+      - name: Prepare Release Package
+        run: |
+          mkdir release_package
+          copy build\Release\fheroes2.exe release_package\
+          copy stats.json release_package\                 # <--- Added this
+          copy editor.html release_package\                # <--- Added this
+          xcopy files\data release_package\data\ /E /I
+          xcopy files\lang release_package\lang\ /E /I
+          xcopy files\soundfonts release_package\soundfonts\ /E /I
+        shell: cmd
+
+      - name: Zip Release Package
+        run: Compress-Archive -Path release_package\* -DestinationPath fheroes2-windows-client.zip
+        shell: powershell
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }} # Auto-generates a tag!
+          name: Automated Build #${{ github.run_number }}
+          files: fheroes2-windows-client.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
