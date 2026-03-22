@@ -43,6 +43,7 @@
 #include "logging.h"
 #include "map_format_info.h"
 #include "map_object_info.h"
+#include "map_random_generator_helper.h"
 #include "maps.h"
 #include "maps_fileinfo.h"
 #include "maps_tiles.h"
@@ -50,9 +51,11 @@
 #include "math_base.h"
 #include "monster.h"
 #include "mp2.h"
+#include "mp2_helper.h"
 #include "players.h"
 #include "race.h"
 #include "rand.h"
+#include "serialize.h"
 #include "world.h"
 #include "world_object_uid.h"
 
@@ -97,6 +100,78 @@ namespace
         }
 
         return -1;
+    }
+
+    bool loadOriginalMp2ObjectTypes( const std::string & inputFile, const int32_t expectedWidth, std::vector<MP2::MapObjectType> & objectTypes )
+    {
+        StreamFile fs;
+        if ( !fs.open( inputFile, "rb" ) ) {
+            return false;
+        }
+
+        if ( fs.getBE32() != 0x5C000000 ) {
+            return false;
+        }
+
+        if ( fs.size() < MP2::MP2_MAP_INFO_SIZE ) {
+            return false;
+        }
+
+        fs.seek( MP2::MP2_MAP_INFO_SIZE - 2 * 4 );
+
+        const uint32_t mapWidth = fs.getLE32();
+        const uint32_t mapHeight = fs.getLE32();
+        if ( mapWidth != mapHeight || expectedWidth <= 0 || mapWidth != static_cast<uint32_t>( expectedWidth ) ) {
+            return false;
+        }
+
+        fs.seek( MP2::MP2_MAP_INFO_SIZE );
+
+        objectTypes.resize( static_cast<size_t>( expectedWidth ) * static_cast<size_t>( expectedWidth ) );
+        for ( MP2::MapObjectType & objectType : objectTypes ) {
+            MP2::MP2TileInfo tile{};
+            MP2::loadTile( fs, tile );
+            objectType = static_cast<MP2::MapObjectType>( tile.mapObjectType );
+        }
+
+        return true;
+    }
+
+    MP2::MapObjectType getOriginalTileObjectType( const Maps::MapFormatHelper::ConversionContext & context, const int32_t tileIndex )
+    {
+        if ( tileIndex < 0 || static_cast<size_t>( tileIndex ) >= context.originalObjectTypes.size() ) {
+            return MP2::OBJ_NONE;
+        }
+
+        return context.originalObjectTypes[static_cast<size_t>( tileIndex )];
+    }
+
+    std::pair<Maps::ObjectGroup, uint32_t> getOriginalRandomObjectInfo( const Maps::MapFormatHelper::ConversionContext & context, const int32_t tileIndex )
+    {
+        const MP2::MapObjectType originalObjectType = getOriginalTileObjectType( context, tileIndex );
+
+        switch ( originalObjectType ) {
+        case MP2::OBJ_RANDOM_ARTIFACT:
+        case MP2::OBJ_RANDOM_ARTIFACT_TREASURE:
+        case MP2::OBJ_RANDOM_ARTIFACT_MINOR:
+        case MP2::OBJ_RANDOM_ARTIFACT_MAJOR:
+        case MP2::OBJ_RANDOM_RESOURCE:
+        case MP2::OBJ_RANDOM_MONSTER:
+        case MP2::OBJ_RANDOM_MONSTER_WEAK:
+        case MP2::OBJ_RANDOM_MONSTER_MEDIUM:
+        case MP2::OBJ_RANDOM_MONSTER_STRONG:
+        case MP2::OBJ_RANDOM_MONSTER_VERY_STRONG: {
+            const auto [mappedGroup, mappedIndex] = Maps::Random_Generator::convertMP2ToObjectInfo( originalObjectType );
+            if ( mappedGroup != Maps::ObjectGroup::NONE && mappedIndex >= 0 ) {
+                return { mappedGroup, static_cast<uint32_t>( mappedIndex ) };
+            }
+            break;
+        }
+        default:
+            break;
+        }
+
+        return { Maps::ObjectGroup::NONE, 0 };
     }
 
     bool getHeroObjectIndex( const Heroes & hero, uint32_t & objectIndex )
@@ -1069,39 +1144,41 @@ namespace Maps
             if ( info.info->id != uid ) {
                 uid = info.info->id;
                 if ( map.resourceMetadata.find( uid ) != map.resourceMetadata.end() ) {
-                    VERBOSE_LOG( "`resourceMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`resourceMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.castleMetadata.find( uid ) != map.castleMetadata.end() ) {
-                    VERBOSE_LOG( "`castleMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`castleMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.heroMetadata.find( uid ) != map.heroMetadata.end() ) {
-                    VERBOSE_LOG( "`heroMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`heroMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.sphinxMetadata.find( uid ) != map.sphinxMetadata.end() ) {
-                    VERBOSE_LOG( "`sphinxMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`sphinxMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.signMetadata.find( uid ) != map.signMetadata.end() ) {
-                    VERBOSE_LOG( "`signMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`signMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.adventureMapEventMetadata.find( uid ) != map.adventureMapEventMetadata.end() ) {
-                    VERBOSE_LOG( "`adventureMapEventMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`adventureMapEventMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.selectionObjectMetadata.find( uid ) != map.selectionObjectMetadata.end() ) {
-                    VERBOSE_LOG( "`selectionObjectMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`selectionObjectMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.capturableObjectsMetadata.find( uid ) != map.capturableObjectsMetadata.end() ) {
-                    VERBOSE_LOG( "`capturableObjectsMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`capturableObjectsMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.monsterMetadata.find( uid ) != map.monsterMetadata.end() ) {
-                    VERBOSE_LOG( "`monsterMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`monsterMetadata` belongs to many objects with same UID: " << uid )
                 }
                 if ( map.artifactMetadata.find( uid ) != map.artifactMetadata.end() ) {
-                    VERBOSE_LOG( "`artifactMetadata` belongs to many objects with same UID: " << uid )
+                    DEBUG_LOG( DBG_DEVEL, DBG_WARN, "`artifactMetadata` belongs to many objects with same UID: " << uid )
                 }
             }
 
-            VERBOSE_LOG( "Non-unique UID " << info.info->id << " at " << info.tileIndex << " (" << info.tileIndex % map.width << ", " << info.tileIndex / map.width
-                                           << ") tile for object type: " << MP2::StringObject( getObjectInfo( info.info->group, info.info->index ).objectType ) )
+            DEBUG_LOG( DBG_DEVEL, DBG_WARN,
+                       "Non-unique UID " << info.info->id << " at " << info.tileIndex << " (" << info.tileIndex % map.width << ", "
+                                         << info.tileIndex / map.width << ") tile for object type: "
+                                         << MP2::StringObject( getObjectInfo( info.info->group, info.info->index ).objectType ) )
         }
 #endif
 
@@ -2281,7 +2358,7 @@ namespace Maps
                 map.availablePlayerColors = mapInfo.kingdomColors;
             }
             else {
-                VERBOSE_LOG( "WARNING: Campaign map has no castles assigned to any player color!" )
+                DEBUG_LOG( DBG_GAME, DBG_WARN, "Campaign map has no castles assigned to any player color!" )
                 map.availablePlayerColors = mapInfo.kingdomColors;
             }
         }
@@ -2296,12 +2373,6 @@ namespace Maps
         map.mainLanguage = mapInfo.getSupportedLanguage().value_or( fheroes2::SupportedLanguage::English );
         map.name = mapInfo.name;
         map.description = mapInfo.description;
-
-        VERBOSE_LOG( "Map export: Campaign=" << context.isCampaign << " Victory=" << static_cast<int>(mapInfo.victoryConditionType)
-                     << " Loss=" << static_cast<int>(mapInfo.lossConditionType)
-                     << " HumanColors=" << std::hex << static_cast<int>(map.humanPlayerColors) << std::dec
-                     << " AvailColors=" << std::hex << static_cast<int>(map.availablePlayerColors) << std::dec
-                     << " ColorsWithStart=" << std::hex << static_cast<int>(colorsWithStart) << std::dec )
 
         switch ( mapInfo.victoryConditionType ) {
         case Maps::FileInfo::VICTORY_CAPTURE_TOWN:
@@ -2418,9 +2489,15 @@ namespace Maps
                     metadata.artifactMetadata = event->artifact.getSpellId();
                 }
                 metadata.resources = event->resources;
+                metadata.attack = event->attack;
+                metadata.defense = event->defense;
+                metadata.knowledge = event->knowledge;
+                metadata.spellPower = event->spellPower;
                 metadata.experience = event->experience;
                 metadata.secondarySkill = static_cast<uint8_t>( event->secondarySkill.Skill() );
                 metadata.secondarySkillLevel = static_cast<uint8_t>( event->secondarySkill.Level() );
+                metadata.monsterType = event->monsterType;
+                metadata.monsterCount = event->monsterCount;
             }
 
             if ( const auto * sphinx = dynamic_cast<const MapSphinx *>( object ); sphinx != nullptr ) {
@@ -2437,10 +2514,23 @@ namespace Maps
 
         if ( group == Maps::ObjectGroup::MONSTERS ) {
             map.monsterMetadata[uid].count = static_cast<int32_t>( tile.metadata()[0] );
+
+            const MP2::MapObjectType originalObjectType = getOriginalTileObjectType( context, tileIndex );
+            if ( originalObjectType == MP2::OBJ_RANDOM_MONSTER || originalObjectType == MP2::OBJ_RANDOM_MONSTER_WEAK || originalObjectType == MP2::OBJ_RANDOM_MONSTER_MEDIUM
+                 || originalObjectType == MP2::OBJ_RANDOM_MONSTER_STRONG || originalObjectType == MP2::OBJ_RANDOM_MONSTER_VERY_STRONG ) {
+                const int32_t selectedMonster = static_cast<int32_t>( tile.metadata()[1] );
+                if ( Monster{ selectedMonster }.isValid() ) {
+                    map.monsterMetadata[uid].selected = { selectedMonster };
+                }
+            }
         }
 
         if ( objectType == MP2::OBJ_RESOURCE ) {
             map.resourceMetadata[uid].count = static_cast<int32_t>( tile.metadata()[1] );
+        }
+
+        if ( group == Maps::ObjectGroup::ADVENTURE_ARTIFACTS ) {
+            map.artifactMetadata.try_emplace( uid );
         }
 
         if ( Maps::isCapturableObject( objectType ) ) {
@@ -2474,16 +2564,55 @@ namespace Maps
         case MP2::OBJ_ARTIFACT: {
             // Ensure metadata always exists for artifacts, even if empty
             auto & artifactMeta = map.artifactMetadata[uid];
-            
-            const Artifact artifact = Maps::getArtifactFromTile( tile );
-            if ( artifact == Artifact::SPELL_SCROLL ) {
-                artifactMeta.selected = { artifact.getSpellId() + 1 };
+
+            const MP2::MapObjectType originalObjectType = getOriginalTileObjectType( context, tileIndex );
+            if ( originalObjectType == MP2::OBJ_RANDOM_ARTIFACT || originalObjectType == MP2::OBJ_RANDOM_ARTIFACT_TREASURE
+                 || originalObjectType == MP2::OBJ_RANDOM_ARTIFACT_MINOR || originalObjectType == MP2::OBJ_RANDOM_ARTIFACT_MAJOR ) {
+                const Artifact artifact = Maps::getArtifactFromTile( tile );
+                if ( artifact.isValid() ) {
+                    artifactMeta.selected = { artifact.GetID() };
+                }
+            }
+            else {
+                const Artifact artifact = Maps::getArtifactFromTile( tile );
+                if ( artifact == Artifact::SPELL_SCROLL ) {
+                    artifactMeta.selected = { artifact.getSpellId() + 1 };
+                }
+            }
+
+            if ( artifactMeta.selected.empty() ) {
+                // Keep an entry for editor/runtime metadata lookups.
+                artifactMeta = artifactMeta;
             }
             break;
         }
         default:
             break;
         }
+    }
+
+    std::optional<Maps::Map_Format::TileObjectInfo> getOverriddenRandomObject( const Maps::MapFormatHelper::ConversionContext & context, const int32_t tileIndex,
+                                                                                const uint32_t uid, const Maps::ObjectGroup group, const uint32_t index )
+    {
+        const auto [randomGroup, randomIndex] = getOriginalRandomObjectInfo( context, tileIndex );
+        if ( randomGroup == Maps::ObjectGroup::NONE ) {
+            return std::nullopt;
+        }
+
+        const Maps::ObjectInfo & currentObjectInfo = Maps::getObjectInfo( group, static_cast<int32_t>( index ) );
+        const MP2::MapObjectType currentObjectType = currentObjectInfo.objectType;
+
+        const bool canOverrideMonster = ( randomGroup == Maps::ObjectGroup::MONSTERS && group == Maps::ObjectGroup::MONSTERS && currentObjectType == MP2::OBJ_MONSTER );
+        const bool canOverrideArtifact
+            = ( randomGroup == Maps::ObjectGroup::ADVENTURE_ARTIFACTS && group == Maps::ObjectGroup::ADVENTURE_ARTIFACTS && currentObjectType == MP2::OBJ_ARTIFACT );
+        const bool canOverrideResource = ( randomGroup == Maps::ObjectGroup::ADVENTURE_TREASURES && group == Maps::ObjectGroup::ADVENTURE_TREASURES
+                                           && currentObjectType == MP2::OBJ_RESOURCE );
+
+        if ( !canOverrideMonster && !canOverrideArtifact && !canOverrideResource ) {
+            return std::nullopt;
+        }
+
+        return Maps::Map_Format::TileObjectInfo{ uid, randomGroup, randomIndex };
     }
 
     namespace MapFormatHelper
@@ -2495,7 +2624,12 @@ namespace Maps
                 return false;
             }
 
-            const ConversionContext context{ conversionWorld, mapInfo, isCampaign };
+            std::vector<MP2::MapObjectType> originalObjectTypes;
+            if ( !loadOriginalMp2ObjectTypes( inputFile, mapInfo.width, originalObjectTypes ) ) {
+                return false;
+            }
+
+            ConversionContext context{ conversionWorld, mapInfo, inputFile, std::move( originalObjectTypes ), isCampaign };
             return saveMap( context, outputFile );
         }
 
@@ -2509,13 +2643,9 @@ namespace Maps
 
             populateBaseMapMetadata( map, context );
 
-            const auto synthesizeHeroObject = [&map, &w]( Maps::Map_Format::TileInfo & mapTile, const int32_t tileIndex, const Heroes & hero,
-                                                          const char * const source ) {
+            const auto synthesizeHeroObject = [&map]( Maps::Map_Format::TileInfo & mapTile, const Heroes & hero ) {
                 uint32_t heroObjectIndex = 0;
                 if ( !getHeroObjectIndex( hero, heroObjectIndex ) ) {
-                    VERBOSE_LOG( "Map export: failed to synthesize " << source << " hero object at tile " << tileIndex << " (" << tileIndex % w.w() << ", "
-                                 << tileIndex / w.w() << ")" << ", hero id " << hero.GetID() << ", color " << Color::String( hero.GetColor() ) << ", race "
-                                 << Race::String( hero.GetRace() ) )
                     return false;
                 }
 
@@ -2523,10 +2653,6 @@ namespace Maps
 
                 mapTile.objects.push_back( { synthesizedUid, Maps::ObjectGroup::KINGDOM_HEROES, heroObjectIndex } );
                 map.heroMetadata[synthesizedUid] = hero.getHeroMetadata();
-
-                VERBOSE_LOG( "Map export: synthesized " << source << " hero object at tile " << tileIndex << " (" << tileIndex % w.w() << ", " << tileIndex / w.w()
-                             << ")" << ", hero id " << hero.GetID() << ", color " << Color::String( hero.GetColor() ) << ", race "
-                             << Race::String( hero.GetRace() ) << ", uid " << synthesizedUid )
 
                 return true;
             };
@@ -2557,26 +2683,35 @@ namespace Maps
 
                 for ( const auto * part : parts ) {
                     const uint32_t uid = part->_uid;
-                    
+
                     Maps::ObjectGroup group = Maps::ObjectGroup::NONE;
                     uint32_t index = 0;
                     if ( Maps::getObjectGroupAndIndex( part->icnType, part->icnIndex, group, index ) ) {
-                        if ( uid != 0 && savedUids.count( { uid, group } ) > 0 ) {
-                            continue;
-                        }
-
                         if ( uid != 0 && !isAnchorObjectPart( tile, *part, group, index ) ) {
                             continue;
                         }
 
-                        mapTile.objects.push_back( { uid, group, index } );
-                        if ( group == Maps::ObjectGroup::KINGDOM_HEROES ) {
+                        Maps::ObjectGroup emittedGroup = group;
+                        uint32_t emittedIndex = index;
+                        if ( uid != 0 ) {
+                            if ( const auto overriddenObject = getOverriddenRandomObject( context, i, uid, group, index ); overriddenObject.has_value() ) {
+                                emittedGroup = overriddenObject->group;
+                                emittedIndex = overriddenObject->index;
+                            }
+                        }
+
+                        if ( uid != 0 && savedUids.count( { uid, emittedGroup } ) > 0 ) {
+                            continue;
+                        }
+
+                        mapTile.objects.push_back( { uid, emittedGroup, emittedIndex } );
+                        if ( emittedGroup == Maps::ObjectGroup::KINGDOM_HEROES ) {
                             ++exportedHeroObjects;
                         }
 
                         if ( uid != 0 ) {
-                            savedUids.insert( { uid, group } );
-                            saveObjectMetadata( map, context, tile, i, uid, group, index );
+                            savedUids.insert( { uid, emittedGroup } );
+                            saveObjectMetadata( map, context, tile, i, uid, emittedGroup, emittedIndex );
                         }
                     }
                 }
@@ -2588,13 +2723,9 @@ namespace Maps
                 if ( !isHeroObjectAlreadySaved ) {
                     if ( Heroes * hero = tile.getHero(); hero != nullptr && hero->GetColor() != PlayerColor::NONE ) {
                         if ( w.getCastleEntrance( Maps::GetPoint( i ) ) == nullptr ) {
-                            if ( synthesizeHeroObject( mapTile, i, *hero, "map" ) ) {
+                            if ( synthesizeHeroObject( mapTile, *hero ) ) {
                                 ++synthesizedMapHeroObjects;
                             }
-                        }
-                        else {
-                            VERBOSE_LOG( "Map export: skipping map hero synthesis for castle hero id " << hero->GetID() << " at tile " << i << " ("
-                                         << i % w.w() << ", " << i / w.w() << ")" )
                         }
                     }
                 }
@@ -2616,8 +2747,6 @@ namespace Maps
                     const int32_t castleTileIndex = Maps::GetIndexFromAbsPoint( castle->GetCenter() );
                     const int32_t heroTileIndex = Maps::GetDirectionIndex( castleTileIndex, Direction::BOTTOM );
                     if ( !Maps::isValidAbsIndex( heroTileIndex ) ) {
-                        VERBOSE_LOG( "Map export: failed to synthesize castle hero object for hero id " << hero->GetID() << " because tile below castle "
-                                     << castleTileIndex << " is invalid." )
                         continue;
                     }
 
@@ -2630,21 +2759,11 @@ namespace Maps
                         continue;
                     }
 
-                    if ( synthesizeHeroObject( heroTile, heroTileIndex, *hero, "castle" ) ) {
+                    if ( synthesizeHeroObject( heroTile, *hero ) ) {
                         ++synthesizedCastleHeroObjects;
                     }
                 }
             }
-
-            size_t activeHeroes = 0;
-            for ( int colorIndex = 0; colorIndex < maxNumOfPlayers; ++colorIndex ) {
-                activeHeroes += w.GetKingdom( Color::IndexToColor( colorIndex ) ).GetHeroes().size();
-            }
-
-            VERBOSE_LOG( "Map export hero summary: activeHeroes=" << activeHeroes << " exportedHeroObjects=" << exportedHeroObjects
-                         << " synthesizedMapHeroObjects=" << synthesizedMapHeroObjects << " synthesizedCastleHeroObjects=" << synthesizedCastleHeroObjects
-                         << " totalHeroObjects=" << exportedHeroObjects + synthesizedMapHeroObjects + synthesizedCastleHeroObjects
-                         << " heroMetadata=" << map.heroMetadata.size() )
 
             return Maps::Map_Format::saveMap( fileName, map );
         }

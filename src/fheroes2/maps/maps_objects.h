@@ -94,6 +94,14 @@ struct MapEvent final : public MapBaseObject
 
     Skill::Secondary secondarySkill;
     int32_t experience{ 0 };
+
+    int16_t attack{ 0 };
+    int16_t defense{ 0 };
+    int16_t knowledge{ 0 };
+    int16_t spellPower{ 0 };
+
+    int32_t monsterType{ 0 };
+    int32_t monsterCount{ 0 };
 };
 
 struct MapSphinx final : public MapBaseObject

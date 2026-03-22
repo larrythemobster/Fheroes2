@@ -148,6 +148,8 @@ namespace Maps
         {
             World & world;
             const FileInfo & mapInfo;
+            std::string sourcePath;
+            std::vector<MP2::MapObjectType> originalObjectTypes;
             bool isCampaign{ false };
         };
 

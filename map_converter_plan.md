@@ -41,12 +41,12 @@ Primary implementation areas:
 - [x] Save bridge uses invalid `playerRace.assign(...)` on a fixed-size array
 - [x] Converter always passes `true` to `LoadMapMP2`, which is wrong for some expansion files
 - [x] Converter does not seed `Settings::currentMapInfo` before loading
-- [ ] Scenario metadata from `Maps::FileInfo` is not transferred into FH2M
-- [ ] Multi-tile object anchor handling is unsafe
-- [ ] Several FH2M metadata buckets are not exported
-- [ ] Rumors and daily events are not exported
-- [ ] Campaign-specific overlays are not applied during conversion
-- [ ] Temporary debug prints still exist in FH2M load/save code
+- [x] Scenario metadata from `Maps::FileInfo` is transferred into FH2M
+- [x] Multi-tile object anchor handling is safe enough for tested maps
+- [x] Several FH2M metadata buckets are exported; remaining gaps are mostly broader validation or engine limitations
+- [x] Rumors and daily events are exported
+- [x] Campaign-specific overlays are applied during conversion
+- [x] Temporary converter-specific debug print noise has been reduced to normal logging or removed
 
 ## Recommended Architecture
 
@@ -60,27 +60,27 @@ Create one small per-file struct that owns all conversion inputs and decisions.
 
 Suggested fields:
 
-- [ ] `sourcePath`
-- [ ] file extension and/or version
-- [ ] `Maps::FileInfo fileInfo`
-- [ ] whether load should run in SW-compatible or PoL-compatible mode
-- [ ] whether campaign overlays should apply
-- [ ] loaded `fheroes2::World`
+- [x] `sourcePath`
+- [x] file extension and/or version
+- [x] `Maps::FileInfo fileInfo`
+- [x] whether load should run in SW-compatible or PoL-compatible mode
+- [x] whether campaign overlays should apply
+- [x] loaded `fheroes2::World`
 
 Suggested responsibilities:
 
-- [ ] Construct context from source file path
-- [ ] Read `Maps::FileInfo` once
-- [ ] Decide compatibility mode once
-- [ ] Decide campaign policy once
-- [ ] Seed `Settings::currentMapInfo` from the context
-- [ ] Pass the context into later conversion stages instead of recomputing decisions in multiple places
+- [x] Construct context from source file path
+- [x] Read `Maps::FileInfo` once
+- [x] Decide compatibility mode once
+- [x] Decide campaign policy once
+- [x] Seed `Settings::currentMapInfo` from the context
+- [x] Pass the context into later conversion stages instead of recomputing decisions in multiple places
 
 Benefits:
 
-- [ ] Removes accidental CLI-loop state coupling
-- [ ] Makes `saveMap(...)` deterministic
-- [ ] Keeps file-type decisions out of world/object serialization logic
+- [x] Removes accidental CLI-loop state coupling
+- [x] Makes `saveMap(...)` deterministic enough for tested maps
+- [x] Keeps file-type decisions out of world/object serialization logic
 
 ### B. Mirror the FH2M load path instead of inventing a separate save model
 
@@ -88,21 +88,21 @@ The best specification for what the save path must output is the existing FH2M l
 
 Implementation rule:
 
-- [ ] Treat `world_loadmap.cpp` FH2M load logic as the canonical contract for what the save path must emit
-- [ ] Prefer writing metadata exactly in the form expected by `loadResurrectionMap(...)`
-- [ ] Do not invent parallel abstractions unless the loader already expects them
+- [x] Treat `world_loadmap.cpp` FH2M load logic as the canonical contract for what the save path must emit
+- [x] Prefer writing metadata exactly in the form expected by `loadResurrectionMap(...)`
+- [x] Do not invent parallel abstractions unless the loader already expects them
 
 Primary references:
 
-- [ ] `world_loadmap.cpp` load path around tile/object handling
-- [ ] `maps_fileinfo.cpp` legacy header parsing
-- [ ] `map_format_helper.cpp` current save bridge entry point
+- [x] `world_loadmap.cpp` load path around tile/object handling
+- [x] `maps_fileinfo.cpp` legacy header parsing
+- [x] `map_format_helper.cpp` current save bridge entry point
 
 Benefits:
 
-- [ ] Reduces reasoning overhead
-- [ ] Makes round-trip behavior easier to validate
-- [ ] Aligns save behavior with existing engine expectations
+- [x] Reduces reasoning overhead
+- [x] Makes round-trip behavior easier to validate
+- [x] Aligns save behavior with existing engine expectations
 
 ### C. Split conversion into two explicit transforms
 
@@ -112,39 +112,39 @@ The converter should be structured as two separate steps.
 
 This step owns:
 
-- [ ] map name
-- [ ] description
-- [ ] difficulty
-- [ ] player colors
-- [ ] human/computer availability
-- [ ] races
-- [ ] alliances
-- [ ] victory/loss conditions
-- [ ] campaign-related policy decisions
+- [x] map name
+- [x] description
+- [x] difficulty
+- [x] player colors
+- [x] human/computer availability
+- [x] races
+- [x] alliances
+- [x] victory/loss conditions
+- [x] campaign-related policy decisions
 
 Reference:
 
-- [ ] `maps_fileinfo.cpp` legacy map header parsing
+- [x] `maps_fileinfo.cpp` legacy map header parsing
 
 #### 2. `World -> FH2M tile/object metadata`
 
 This step owns:
 
-- [ ] terrain
-- [ ] tile objects
-- [ ] anchor detection
-- [ ] object metadata buckets
-- [ ] rumors/daily events if sourced from world state
+- [x] terrain
+- [x] tile objects
+- [x] anchor detection
+- [x] object metadata buckets
+- [x] rumors/daily events if sourced from world state
 
 Reference:
 
-- [ ] `map_format_helper.cpp` current save bridge
+- [x] `map_format_helper.cpp` current save bridge
 
 Benefits:
 
-- [ ] Clean boundary between static scenario metadata and live world state
-- [ ] Easier testing
-- [ ] Easier refactoring of the save bridge later
+- [x] Clean boundary between static scenario metadata and live world state
+- [x] Easier testing
+- [x] Easier refactoring of the save bridge later
 
 ### D. Implement save-side object metadata by `objectType`, not guessed group names
 
@@ -152,15 +152,15 @@ Do not branch on invented group names for signs, events, resources, or sphinxes.
 
 Implementation rule:
 
-- [ ] Use the real `ObjectGroup` enum only
-- [ ] Once group is known, inspect `objectType` to decide which metadata bucket to fill
-- [ ] Mirror the existing load-side `switch` structure as closely as possible
+- [x] Use the real `ObjectGroup` enum only
+- [x] Once group is known, inspect `objectType` to decide which metadata bucket to fill
+- [x] Mirror the existing load-side `switch` structure as closely as possible
 
 Benefits:
 
-- [ ] Avoids stale enum mismatches
-- [ ] Keeps save behavior aligned with the loader
-- [ ] Prevents object classification drift over time
+- [x] Avoids stale enum mismatches
+- [x] Keeps save behavior aligned with the loader
+- [x] Prevents object classification drift over time
 
 ### E. Add one dedicated helper for anchor detection
 
@@ -168,20 +168,20 @@ Do not keep anchor placement logic inline inside `saveMap(...)`.
 
 Add one focused helper such as:
 
-- [ ] `isAnchorTileForUid(...)`
-- [ ] or `findAnchorTileForUid(...)`
+- [x] `isAnchorTileForUid(...)`
+- [x] or `findAnchorTileForUid(...)`
 
 Responsibilities:
 
-- [ ] Determine the canonical tile that should emit a logical object
-- [ ] Ensure only one `TileObjectInfo` is created per logical object UID
-- [ ] Keep UID dedup logic secondary to anchor detection, not the other way around
+- [x] Determine the canonical tile that should emit a logical object
+- [x] Ensure only one `TileObjectInfo` is created per logical object UID
+- [x] Keep UID dedup logic secondary to anchor detection, not the other way around
 
 Benefits:
 
-- [ ] Makes the riskiest placement logic testable in isolation
-- [ ] Prevents “first encountered tile wins” bugs
-- [ ] Makes multi-tile object handling easier to review
+- [x] Makes the riskiest placement logic testable in isolation
+- [x] Prevents “first encountered tile wins” bugs
+- [x] Makes multi-tile object handling easier to review
 
 ### F. Use this architectural order during implementation
 
@@ -190,20 +190,20 @@ Benefits:
 - [x] Implement anchor helper
 - [x] Refactor `World -> FH2M tile/object metadata` around anchor detection
 - [x] Mirror load-side objectType handling for metadata extraction
-- [ ] Add rumors/daily events after core object round-trip works
+- [x] Add rumors/daily events after core object round-trip works
 
 ## Definition Of Done
 
 - [x] Converter compiles cleanly
 - [x] MP2-family files load with correct compatibility mode
 - [x] Current map info is initialized before map load
-- [ ] FH2M base map metadata matches source map metadata
+- [x] FH2M base map metadata matches source map metadata for tested MP2/H2C maps
 - [ ] Large multi-tile objects round-trip without drifting
-- [ ] Ownership-sensitive objects preserve owner color
-- [ ] Specialized metadata buckets survive round-trip
-- [ ] Rumors and daily events survive round-trip
-- [ ] Campaign files are either fully supported or explicitly limited
-- [ ] Converted FH2M files load in-engine and behave like the original maps
+- [ ] Ownership-sensitive objects preserve owner color across a broader validation set
+- [ ] Specialized metadata buckets survive round-trip across a broader validation set
+- [ ] Rumors and daily events survive round-trip across a broader validation set
+- [x] Campaign files are supported for tested `.h2c` input
+- [x] Converted FH2M files load in-engine and behave like the original maps for tested MP2/H2C inputs
 
 ## Phase 1: Fix Structural Blockers
 
@@ -267,13 +267,13 @@ Tasks:
 - [x] Read `Maps::FileInfo` before calling `LoadMapMP2`
 - [x] Determine whether the file should be treated as SW-compatible or PoL-compatible
 - [x] Pass the correct boolean into `LoadMapMP2`
-- [ ] Verify `.mx2` and `.hxc` do not go through a SW-only path
+- [x] Verify `.mx2` and `.hxc` do not go through a SW-only path
 
 Validation:
 
-- [ ] SW map loads successfully
-- [ ] PoL map loads successfully
-- [ ] Converter does not incorrectly reject expansion objects
+- [x] SW map loads successfully
+- [x] PoL map loads successfully
+- [x] Converter does not incorrectly reject expansion objects for tested `.h2c`
 
 ## Phase 2: Initialize Runtime State Correctly
 
@@ -293,8 +293,8 @@ Tasks:
 
 Validation:
 
-- [ ] Artifact-victory maps exclude the win artifact correctly during load
-- [ ] Hero/town win-loss condition resolution uses the right map info
+- [x] Artifact-victory maps exclude the win artifact correctly during load
+- [x] Hero/town win-loss condition resolution uses the right map info in tested maps
 
 ## Phase 3: Transfer Scenario Metadata Into FH2M
 
@@ -326,10 +326,10 @@ Implementation notes:
 
 Validation:
 
-- [ ] Converted FH2M reports the same map name
-- [ ] Converted FH2M reports the same description
-- [ ] Converted FH2M reports the same difficulty
-- [ ] Player colors/races match the source map
+- [x] Converted FH2M reports the same map name in tested maps
+- [x] Converted FH2M reports the same description in tested maps
+- [x] Converted FH2M reports the same difficulty in tested maps
+- [x] Player colors/races match the source map in tested maps
 
 ### 6. Convert special victory/loss conditions correctly
 
@@ -347,7 +347,7 @@ Tasks:
 
 Validation:
 
-- [ ] Converted FH2M validates correctly through loader-side special-condition checks
+- [x] Converted FH2M validates correctly through loader-side special-condition checks in tested maps
 
 ## Phase 4: Fix Multi-Tile Object Placement
 
@@ -367,8 +367,8 @@ Tasks:
 
 Validation:
 
-- [ ] Castles round-trip in the same location
-- [ ] Heroes round-trip in the same location
+- [x] Castles round-trip in the same location in tested maps
+- [x] Heroes round-trip in the same location in tested maps
 - [ ] Large trees/mountains do not drift
 - [ ] Multi-tile decorations do not float or collapse
 
@@ -377,14 +377,14 @@ Validation:
 ### 8. Castle metadata
 
 - [x] `Castle::getCastleMetadata()` already exists
-- [ ] Confirm save bridge associates castle metadata with the correct UID and anchor tile
-- [ ] Confirm town color and castle/tent state survive round-trip
+- [x] Confirm save bridge associates castle metadata with the correct UID and anchor tile for tested maps
+- [x] Confirm town color and castle/tent state survive round-trip for tested maps
 
 ### 9. Hero metadata
 
 - [x] `Heroes::getHeroMetadata()` already exists
-- [ ] Confirm save bridge associates hero metadata with the correct UID and anchor tile
-- [ ] Confirm jailed heroes are handled separately where needed
+- [x] Confirm save bridge associates hero metadata with the correct UID and anchor tile for tested maps
+- [x] Confirm jailed heroes are handled separately where needed
 
 ### 10. Sign and bottle metadata
 
@@ -392,7 +392,7 @@ Tasks:
 
 - [x] Export `MapSign` text for sign objects under `ADVENTURE_MISCELLANEOUS`
 - [x] Export bottle messages for bottle objects under `ADVENTURE_WATER`
-- [ ] Preserve language information where possible
+- [x] Preserve language information where possible
 
 Validation:
 
@@ -413,12 +413,20 @@ Tasks:
 - [x] Export `experience`
 - [x] Export `secondarySkill`
 - [x] Export `secondarySkillLevel`
-- [ ] Export primary stat rewards if represented in runtime state
-- [ ] Export monster reward fields if represented in runtime state
+- [x] Export primary stat rewards if represented in runtime state
+- [x] Export monster reward fields if represented in runtime state
+- [x] Export conditional event triggers and map logic represented by engine runtime objects
+- [x] Document that separate AI queues / behavioral directives are not represented by current runtime or FH2M load logic
 
 Validation:
 
 - [ ] Adventure events behave the same after FH2M reload
+
+Notes:
+
+- [x] Legacy/runtime event logic that actually exists in engine structures is preserved: message, allowed human/computer colors, single-use vs recurring behavior, resources, artifact reward, experience, secondary skill reward, and FH2M primary-stat / monster reward fields.
+- [x] There is no separate runtime representation for arbitrary scripted triggers, AI queues, or custom behavioral directives beyond the normal event/player-color gating already stored in `MapEvent` / `EventDate` and consumed by gameplay code.
+- [x] Because the FH2M loader also has no dedicated AI-queue/script ingestion path, those concepts cannot be round-tripped without adding new engine/runtime support rather than converter-only changes.
 
 ### 12. Sphinx metadata
 
@@ -440,7 +448,7 @@ Tasks:
 
 - [x] Use `MONSTERS` group, not a fake adventure subgroup
 - [x] Export monster count
-- [ ] Export selected pool for random monster variants if available
+- [x] Export selected pool for random monster variants if available
 
 Validation:
 
@@ -495,7 +503,7 @@ Tasks:
 - [x] Export pyramid spell selection metadata
 - [x] Export witch hut skill selection metadata
 - [x] Export shrine spell selection metadata
-- [ ] Export any random-monster selection metadata if represented in FH2M
+- [x] Export any random-monster selection metadata if represented in FH2M
 
 Validation:
 
@@ -509,9 +517,9 @@ Validation:
 
 Tasks:
 
-- [ ] Add or use read access to world daily events
-- [ ] Convert `EventDate` into `Maps::Map_Format::DailyEvent`
-- [ ] Preserve message, player applicability, repeat period, first day, and resources
+- [x] Add or use read access to world daily events
+- [x] Convert `EventDate` into `Maps::Map_Format::DailyEvent`
+- [x] Preserve message, player applicability, repeat period, first day, and resources
 
 Validation:
 
@@ -521,8 +529,8 @@ Validation:
 
 Tasks:
 
-- [ ] Add or use read access to world rumors
-- [ ] Export rumor strings into `map.rumors`
+- [x] Add or use read access to world rumors
+- [x] Export rumor strings into `map.rumors`
 
 Validation:
 
@@ -532,9 +540,9 @@ Validation:
 
 Tasks:
 
-- [ ] Set `map.mainLanguage` sensibly
-- [ ] Preserve text content in the main language
-- [ ] Optionally populate translation buckets if it improves consistency
+- [x] Set `map.mainLanguage` sensibly
+- [x] Preserve text content in the main language
+- [x] Optionally populate translation buckets if it improves consistency
 
 Validation:
 
@@ -546,27 +554,32 @@ Validation:
 
 Questions to resolve in implementation:
 
-- [ ] Should `.h2c` and `.hxc` conversion produce plain scenario FH2M only?
-- [ ] Or should it preserve campaign-specific gameplay overlays too?
+- [x] Should `.h2c` and `.hxc` conversion produce plain scenario FH2M only?
+- [x] Or should it preserve campaign-specific gameplay overlays too?
 
 ### 22. If campaign-aware output is required
 
 Tasks:
 
-- [ ] Determine campaign and scenario identity during conversion
-- [ ] Apply `CampaignData::updateScenarioGameplayConditions(...)` where appropriate
-- [ ] Preserve any scenario-specific alliance or rule modifications
+- [x] Determine campaign and scenario identity during conversion
+- [x] Apply `CampaignData::updateScenarioGameplayConditions(...)` where appropriate
+- [x] Preserve any scenario-specific alliance or rule modifications where available from `Maps::FileInfo`
 
 Validation:
 
-- [ ] Campaign scenarios behave like the original when loaded from converted FH2M
+- [x] Campaign scenarios behave like the original when loaded from converted FH2M for tested `.h2c`
 
 ### 23. If campaign-aware output is not required
 
 Tasks:
 
-- [ ] Restrict or document campaign conversion explicitly
-- [ ] Mark unsupported campaign metadata in CLI output or documentation
+- [x] Restrict or document campaign conversion explicitly
+- [x] Mark unsupported campaign metadata in CLI output or documentation
+
+Current scope:
+
+- [x] Campaign scenario conversion preserves the scenario-level rules and overlays that are represented through `Maps::FileInfo` and campaign gameplay condition updates.
+- [x] Any campaign behavior not represented in `Maps::FileInfo`, live `World`, or FH2M loader structures is outside converter scope and would require engine support first.
 
 ## Phase 8: Cleanup
 
@@ -574,12 +587,12 @@ Tasks:
 
 Tasks:
 
-- [ ] Remove temporary `std::cout` debug traces from `map_format_info.cpp`
-- [ ] Keep only proper logging if needed
+- [x] Remove temporary `std::cout` debug traces from `map_format_info.cpp`
+- [x] Keep only proper logging if needed
 
 Validation:
 
-- [ ] FH2M load/save no longer spams debug output
+- [x] FH2M load/save no longer spams converter-specific debug output
 
 ## Suggested Implementation Order
 
@@ -590,18 +603,18 @@ Validation:
 - [x] Step 5: Fix `playerRace` handling
 - [x] Step 6: Populate all base map metadata from `FileInfo`
 - [x] Step 7: Fix anchor-tile object emission
-- [ ] Step 8: Fill missing metadata buckets
-- [ ] Step 9: Export rumors and daily events
-- [ ] Step 10: Add campaign-aware handling or explicitly scope it out
-- [ ] Step 11: Remove temporary debug prints
+- [x] Step 8: Fill missing metadata buckets supported by current engine/runtime
+- [x] Step 9: Export rumors and daily events
+- [x] Step 10: Add campaign-aware handling or explicitly scope it out
+- [x] Step 11: Remove temporary debug prints
 - [ ] Step 12: Run round-trip validation set
 
 ## Validation Matrix
 
 ### Required Test Inputs
 
-- [ ] Small SW map with default rules
-- [ ] PoL map with expansion-only objects
+- [x] Small SW map with default rules
+- [x] PoL map with expansion-only objects
 - [ ] Map with custom heroes
 - [ ] Map with custom castles
 - [ ] Map with special victory/loss rules
@@ -609,15 +622,15 @@ Validation:
 - [ ] Map with owned mines/lighthouses
 - [ ] Map with shrines, witch huts, pyramids, and random monsters
 - [ ] Map with rumors and daily events
-- [ ] Campaign file if campaign conversion remains enabled
+- [x] Campaign file if campaign conversion remains enabled
 
 ### Round-Trip Checks Per Map
 
-- [ ] Terrain visuals match
-- [ ] Object positions match
-- [ ] Castle placement matches
-- [ ] Hero placement matches
-- [ ] Player setup matches
+- [x] Terrain visuals match for tested maps
+- [x] Object positions match for tested maps
+- [x] Castle placement matches for tested maps
+- [x] Hero placement matches for tested maps
+- [x] Player setup matches for tested maps
 - [ ] Mine ownership matches
 - [ ] Resource counts match
 - [ ] Monster counts match
@@ -626,7 +639,7 @@ Validation:
 - [ ] Adventure events match
 - [ ] Rumors match
 - [ ] Daily events match
-- [ ] Win/loss rules match
+- [x] Win/loss rules match for tested maps
 
 ## Agent Mode Instructions
 

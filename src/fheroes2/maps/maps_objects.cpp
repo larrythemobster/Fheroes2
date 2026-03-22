@@ -344,7 +344,8 @@ IStreamBase & operator>>( IStreamBase & stream, MapBaseObject & obj )
 OStreamBase & operator<<( OStreamBase & stream, const MapEvent & obj )
 {
     return stream << static_cast<const MapBaseObject &>( obj ) << obj.resources << obj.artifact << obj.isComputerPlayerAllowed << obj.isSingleTimeEvent << obj.colors
-                  << obj.message << obj.secondarySkill << obj.experience;
+                  << obj.message << obj.secondarySkill << obj.experience << obj.attack << obj.defense << obj.knowledge << obj.spellPower << obj.monsterType
+                  << obj.monsterCount;
 }
 
 IStreamBase & operator>>( IStreamBase & stream, MapEvent & obj )
@@ -367,9 +368,29 @@ IStreamBase & operator>>( IStreamBase & stream, MapEvent & obj )
     if ( Game::GetVersionOfCurrentSaveFile() < FORMAT_VERSION_1106_RELEASE ) {
         obj.secondarySkill = {};
         obj.experience = 0;
+
+        obj.attack = 0;
+        obj.defense = 0;
+        obj.knowledge = 0;
+        obj.spellPower = 0;
+        obj.monsterType = 0;
+        obj.monsterCount = 0;
     }
     else {
         stream >> obj.secondarySkill >> obj.experience;
+
+        static_assert( LAST_SUPPORTED_FORMAT_VERSION < FORMAT_VERSION_1111_RELEASE, "Remove the logic below." );
+        if ( Game::GetVersionOfCurrentSaveFile() < FORMAT_VERSION_1111_RELEASE ) {
+            obj.attack = 0;
+            obj.defense = 0;
+            obj.knowledge = 0;
+            obj.spellPower = 0;
+            obj.monsterType = 0;
+            obj.monsterCount = 0;
+        }
+        else {
+            stream >> obj.attack >> obj.defense >> obj.knowledge >> obj.spellPower >> obj.monsterType >> obj.monsterCount;
+        }
     }
 
     return stream;

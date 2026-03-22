@@ -413,8 +413,6 @@ int main( int argc, char ** argv )
         // Initialize game data.
         Game::Init();
 
-        // =========================================================================
-        // --- YOUR CUSTOM BATCH CONVERTER INJECTION ---
         for ( int i = 1; i < argc; ++i ) {
             if ( std::string(argv[i]) == "--convert" && i + 1 < argc ) {
                 std::string dirPath = argv[i + 1];
@@ -517,9 +515,6 @@ int main( int argc, char ** argv )
                 return EXIT_SUCCESS;
             }
         }
-        // --- END INJECTION ---
-        // =========================================================================
-
         if ( conf.isShowIntro() ) {
             fheroes2::showTeamInfo();
             for ( const char * logo : { "NWCLOGO.SMK", "CYLOGO.SMK", "H2XINTRO.SMK" } ) {
