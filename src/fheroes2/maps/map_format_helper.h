@@ -22,14 +22,15 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 class Army;
+class World;
 
 namespace fheroes2
 {
     enum class SupportedLanguage : uint8_t;
-    class World;
 }
 
 namespace MP2
@@ -40,6 +41,7 @@ namespace MP2
 namespace Maps
 {
     class Tile;
+    struct FileInfo;
 
     namespace Map_Format
     {
@@ -142,6 +144,14 @@ namespace Maps
 
     namespace MapFormatHelper
     {
-        bool saveMap( const fheroes2::World & world, const std::string & path );
+        struct ConversionContext
+        {
+            World & world;
+            const FileInfo & mapInfo;
+            bool isCampaign{ false };
+        };
+
+        bool convertMapFile( const std::string & inputFile, const std::string & outputFile, const FileInfo & mapInfo, bool isCampaign );
+        bool saveMap( const ConversionContext & context, const std::string & path );
     }
 }

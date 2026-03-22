@@ -784,6 +784,8 @@ bool World::loadResurrectionMap( const std::string & filename )
     };
 
     std::set<size_t> hiredHeroTileId;
+    size_t loadedKingdomHeroObjects = 0;
+    size_t loadedJailHeroObjects = 0;
 
     for ( size_t tileId = 0; tileId < map.tiles.size(); ++tileId ) {
         const auto & tile = map.tiles[tileId];
@@ -796,6 +798,7 @@ bool World::loadResurrectionMap( const std::string & filename )
                 assert( map.castleMetadata.find( object.id ) != map.castleMetadata.end() );
                 auto & castleInfo = map.castleMetadata[object.id];
 
+                const MP2::MapObjectType townObjectType = townObjects[object.index].objectType;
                 const PlayerColor color = Color::IndexToColor( Maps::getTownColorIndex( map, tileId, object.id ) );
 
                 int race = Race::IndexToRace( static_cast<int>( townObjects[object.index].metadata[0] ) );
@@ -816,10 +819,27 @@ bool World::loadResurrectionMap( const std::string & filename )
                     }
                 }
 
-                assert( ( std::find( castleInfo.builtBuildings.begin(), castleInfo.builtBuildings.end(), BUILD_CASTLE ) != castleInfo.builtBuildings.end() )
-                        == ( townObjects[object.index].metadata[1] != 0 ) );
-                assert( ( std::find( castleInfo.builtBuildings.begin(), castleInfo.builtBuildings.end(), BUILD_TENT ) != castleInfo.builtBuildings.end() )
-                        == ( townObjects[object.index].metadata[1] == 0 ) );
+                const bool shouldBeCastle = ( townObjects[object.index].metadata[1] != 0 );
+
+                const auto hasBuilding = [&castleInfo]( const uint32_t buildingId ) {
+                    return std::find( castleInfo.builtBuildings.begin(), castleInfo.builtBuildings.end(), buildingId ) != castleInfo.builtBuildings.end();
+                };
+                const auto removeBuilding = [&castleInfo]( const uint32_t buildingId ) {
+                    castleInfo.builtBuildings.erase( std::remove( castleInfo.builtBuildings.begin(), castleInfo.builtBuildings.end(), buildingId ),
+                                                     castleInfo.builtBuildings.end() );
+                };
+
+                const bool hasCastleBuilding = hasBuilding( BUILD_CASTLE );
+                const bool hasTownBuilding = hasBuilding( BUILD_TENT );
+                if ( hasCastleBuilding != shouldBeCastle || hasTownBuilding == shouldBeCastle ) {
+                    VERBOSE_LOG( "FH2M load: normalizing town metadata at tile " << tileId << " uid " << object.id << ", object type "
+                                 << MP2::StringObject( townObjectType ) << ", expected " << ( shouldBeCastle ? "castle" : "town" ) << ", builtBuildings size "
+                                 << castleInfo.builtBuildings.size() )
+
+                    removeBuilding( BUILD_CASTLE );
+                    removeBuilding( BUILD_TENT );
+                    castleInfo.builtBuildings.push_back( shouldBeCastle ? BUILD_CASTLE : BUILD_TENT );
+                }
 
                 fheroes2::Point castleCenter;
                 bool isCastle;
@@ -835,7 +855,7 @@ bool World::loadResurrectionMap( const std::string & filename )
                     vec_castles.AddCastle( std::move( castle ) );
                 }
 
-                if ( isRandom ) {
+                if ( isRandom || townObjectType == MP2::OBJ_RANDOM_CASTLE || townObjectType == MP2::OBJ_RANDOM_TOWN ) {
                     Maps::UpdateCastleSprite( castleCenter, race, isCastle, true );
                     Maps::ReplaceRandomCastleObjectId( castleCenter );
                 }
@@ -846,6 +866,7 @@ bool World::loadResurrectionMap( const std::string & filename )
 #if defined( WITH_DEBUG )
                 heroMetadataUIDs.emplace( object.id );
 #endif
+                ++loadedKingdomHeroObjects;
 
                 assert( map.heroMetadata.find( object.id ) != map.heroMetadata.end() );
 
@@ -871,13 +892,27 @@ bool World::loadResurrectionMap( const std::string & filename )
                 if ( kingdom.AllowRecruitHero( false ) ) {
                     Heroes * hero = GetHeroForHire( heroInfo.race );
                     if ( hero != nullptr ) {
-                        hero->SetCenter( { static_cast<int32_t>( tileId ) % width, static_cast<int32_t>( tileId ) / width } );
+                        const fheroes2::Point heroPosition{ static_cast<int32_t>( tileId ) % width, static_cast<int32_t>( tileId ) / width };
 
-                        hero->SetColor( color );
+                        VERBOSE_LOG( "FH2M load: kingdom hero object at tile " << tileId << " (" << heroPosition.x << ", " << heroPosition.y << ")"
+                                     << ", uid " << object.id << ", object index " << object.index << ", object color " << Color::String( color )
+                                     << ", metadata race " << Race::String( heroInfo.race ) << ", hero id " << hero->GetID() << ", hero name "
+                                     << hero->GetName() )
 
-                        hero->applyHeroMetadata( heroInfo, false, false );
+                        if ( hero->Recruit( color, heroPosition ) ) {
+                            hero->applyHeroMetadata( heroInfo, false, false );
 
-                        hiredHeroTileId.emplace( tileId );
+                            VERBOSE_LOG( "FH2M load: recruited kingdom hero id " << hero->GetID() << " at tile " << tileId
+                                         << ", tile object type " << MP2::StringObject( getTile( static_cast<int32_t>( tileId ) ).getMainObjectType() )
+                                         << ", tile hero id "
+                                         << ( getTile( static_cast<int32_t>( tileId ) ).getHero() ? getTile( static_cast<int32_t>( tileId ) ).getHero()->GetID() : -1 )
+                                         << ", kingdom hero count " << GetKingdom( color ).GetHeroes().size() )
+
+                            hiredHeroTileId.emplace( tileId );
+                        }
+                        else {
+                            VERBOSE_LOG( "A hero at position " << tileId << " with UID " << object.id << " failed to be recruited." )
+                        }
                     }
                     else {
                         VERBOSE_LOG( "A hero at position " << tileId << " with UID " << object.id << " failed to be hired." )
@@ -981,6 +1016,7 @@ bool World::loadResurrectionMap( const std::string & filename )
 #if defined( WITH_DEBUG )
                     heroMetadataUIDs.emplace( object.id );
 #endif
+                    ++loadedJailHeroObjects;
 
                     assert( map.heroMetadata.find( object.id ) != map.heroMetadata.end() );
 
@@ -999,6 +1035,9 @@ bool World::loadResurrectionMap( const std::string & filename )
                         hero->SetColor( color );
 
                         hero->applyHeroMetadata( heroInfo, true, false );
+
+                        VERBOSE_LOG( "FH2M load: jail hero object at tile " << tileId << " uid " << object.id << ", hero id " << hero->GetID()
+                                     << ", race " << Race::String( heroInfo.race ) )
                     }
                     else {
                         VERBOSE_LOG( "A hero at position " << tileId << " with UID " << object.id << " failed to be hired." )
@@ -1352,6 +1391,9 @@ bool World::loadResurrectionMap( const std::string & filename )
     updateCastleNames( vec_castles );
 
     updateArtifactStats();
+
+    VERBOSE_LOG( "FH2M load pre-process summary: heroMetadata=" << map.heroMetadata.size() << ", kingdomHeroObjects=" << loadedKingdomHeroObjects
+                 << ", jailHeroObjects=" << loadedJailHeroObjects << ", hiredHeroTileIds=" << hiredHeroTileId.size() )
 
     if ( !_processNewResurrectionMap( filename ) ) {
         return false;

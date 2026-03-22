@@ -384,7 +384,8 @@ bool Maps::FileInfo::readMP2Map( std::string filePath, const bool isForEditor )
     if ( pos != std::string::npos ) {
         const std::string fileExtension = StringLower( filename.substr( pos + 1 ) );
 
-        version = ( fileExtension == "mx2" || fileExtension == "hxc" ) ? GameVersion::PRICE_OF_LOYALTY : GameVersion::SUCCESSION_WARS;
+        // Campaign files (.h2c, .hxc) and expansion maps (.mx2) use Price of Loyalty features
+        version = ( fileExtension == "h2c" || fileExtension == "hxc" || fileExtension == "mx2" ) ? GameVersion::PRICE_OF_LOYALTY : GameVersion::SUCCESSION_WARS;
     }
 
     return true;
@@ -445,6 +446,7 @@ bool Maps::FileInfo::loadResurrectionMap( const Map_Format::BaseMapFormat & map,
     kingdomColors = map.availablePlayerColors;
     colorsAvailableForHumans = map.humanPlayerColors;
     colorsAvailableForComp = map.computerPlayerColors;
+    startWithHeroInFirstCastle = map.startWithHeroInFirstCastle;
 
     races = map.playerRace;
 

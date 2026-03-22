@@ -26,6 +26,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <initializer_list>
+#include <iterator>
 #include <map>
 #include <ostream>
 #include <set>
@@ -57,6 +58,8 @@
 
 namespace
 {
+    constexpr uint32_t kingdomHeroObjectCountPerColor{ 7 };
+
     void addObjectToTile( Maps::Map_Format::TileInfo & info, const Maps::ObjectGroup group, const uint32_t index, const uint32_t uid )
     {
         auto & object = info.objects.emplace_back();
@@ -71,6 +74,46 @@ namespace
 
         const Maps::Map_Format::TileObjectInfo * info{ nullptr };
     };
+
+    int32_t getHeroRaceObjectIndex( const int race )
+    {
+        switch ( race ) {
+        case Race::KNGT:
+            return 0;
+        case Race::BARB:
+            return 1;
+        case Race::SORC:
+            return 2;
+        case Race::WRLK:
+            return 3;
+        case Race::WZRD:
+            return 4;
+        case Race::NECR:
+            return 5;
+        case Race::RAND:
+            return 6;
+        default:
+            break;
+        }
+
+        return -1;
+    }
+
+    bool getHeroObjectIndex( const Heroes & hero, uint32_t & objectIndex )
+    {
+        const int colorIndex = Color::GetIndex( hero.GetColor() );
+        if ( colorIndex < 0 || colorIndex >= maxNumOfPlayers ) {
+            return false;
+        }
+
+        const int32_t raceIndex = getHeroRaceObjectIndex( hero.GetRace() );
+        if ( raceIndex < 0 ) {
+            return false;
+        }
+
+        objectIndex = static_cast<uint32_t>( colorIndex ) * kingdomHeroObjectCountPerColor + static_cast<uint32_t>( raceIndex );
+        return true;
+    }
 
     void loadArmyFromMetadata( Army & army, const std::array<int32_t, 5> & unitType, const std::array<int32_t, 5> & unitCount )
     {
@@ -1727,39 +1770,82 @@ namespace Maps
 
         const auto & flagObjects = getObjectsByGroup( ObjectGroup::LANDSCAPE_FLAGS );
 
-        uint32_t leftFlagColor = 0;
-        uint32_t rightFlagColor = 0;
+        struct TownFlagInfo
+        {
+            uint32_t color{ 0 };
+            uint32_t index{ 0 };
+            bool isFound{ false };
+            bool isExpectedSide{ false };
+        };
 
-        for ( const auto & tempObject : map.tiles[tileIndex - 1].objects ) {
-            if ( tempObject.group == ObjectGroup::LANDSCAPE_FLAGS && tempObject.id == id ) {
-                if ( tempObject.index >= flagObjects.size() ) {
-                    assert( 0 );
-                    return 0;
+        const auto getFlagInfo = [&flagObjects, id]( const std::vector<Map_Format::TileObjectInfo> & objects, const bool shouldBeLeftFlag ) {
+            TownFlagInfo result;
+
+            for ( const auto & tempObject : objects ) {
+                if ( tempObject.group != ObjectGroup::LANDSCAPE_FLAGS || tempObject.id != id ) {
+                    continue;
                 }
 
-                leftFlagColor = flagObjects[tempObject.index].metadata[0];
-                break;
-            }
-        }
-
-        for ( const auto & tempObject : map.tiles[tileIndex + 1].objects ) {
-            if ( tempObject.group == ObjectGroup::LANDSCAPE_FLAGS && tempObject.id == id ) {
                 if ( tempObject.index >= flagObjects.size() ) {
                     assert( 0 );
-                    return 0;
+                    return result;
                 }
 
-                rightFlagColor = flagObjects[tempObject.index].metadata[0];
-                break;
+                const bool isExpectedSide = ( tempObject.index % 2 ) == ( shouldBeLeftFlag ? 0U : 1U );
+                if ( !result.isFound || ( isExpectedSide && !result.isExpectedSide ) ) {
+                    result.color = flagObjects[tempObject.index].metadata[0];
+                    result.index = tempObject.index;
+                    result.isFound = true;
+                    result.isExpectedSide = isExpectedSide;
+                }
+
+                if ( result.isExpectedSide ) {
+                    break;
+                }
             }
+
+            return result;
+        };
+
+        const TownFlagInfo leftFlagInfo = getFlagInfo( map.tiles[tileIndex - 1].objects, true );
+        const TownFlagInfo rightFlagInfo = getFlagInfo( map.tiles[tileIndex + 1].objects, false );
+
+        if ( leftFlagInfo.isFound && rightFlagInfo.isFound ) {
+            if ( leftFlagInfo.color == rightFlagInfo.color ) {
+                return static_cast<uint8_t>( leftFlagInfo.color );
+            }
+
+            if ( leftFlagInfo.isExpectedSide && !rightFlagInfo.isExpectedSide ) {
+                DEBUG_LOG( DBG_GAME, DBG_WARN, "Town " << id << " at tile " << tileIndex << " has malformed right flag index " << rightFlagInfo.index
+                                                        << ". Using left flag color " << leftFlagInfo.color << '.' )
+                return static_cast<uint8_t>( leftFlagInfo.color );
+            }
+
+            if ( !leftFlagInfo.isExpectedSide && rightFlagInfo.isExpectedSide ) {
+                DEBUG_LOG( DBG_GAME, DBG_WARN, "Town " << id << " at tile " << tileIndex << " has malformed left flag index " << leftFlagInfo.index
+                                                        << ". Using right flag color " << rightFlagInfo.color << '.' )
+                return static_cast<uint8_t>( rightFlagInfo.color );
+            }
+
+            DEBUG_LOG( DBG_GAME, DBG_WARN, "Town " << id << " at tile " << tileIndex << " has mismatched flag colors " << leftFlagInfo.color << " and "
+                                                    << rightFlagInfo.color << ". Using the left flag color." )
+            return static_cast<uint8_t>( leftFlagInfo.color );
         }
 
-        if ( leftFlagColor != rightFlagColor ) {
-            assert( 0 );
-            return 0;
+        if ( leftFlagInfo.isFound ) {
+            DEBUG_LOG( DBG_GAME, DBG_WARN,
+                       "Town " << id << " at tile " << tileIndex << " is missing a right flag. Using left flag color " << leftFlagInfo.color << '.' )
+            return static_cast<uint8_t>( leftFlagInfo.color );
         }
 
-        return static_cast<uint8_t>( leftFlagColor );
+        if ( rightFlagInfo.isFound ) {
+            DEBUG_LOG( DBG_GAME, DBG_WARN,
+                       "Town " << id << " at tile " << tileIndex << " is missing a left flag. Using right flag color " << rightFlagInfo.color << '.' )
+            return static_cast<uint8_t>( rightFlagInfo.color );
+        }
+
+        DEBUG_LOG( DBG_GAME, DBG_WARN, "Town " << id << " at tile " << tileIndex << " has no ownership flags. Falling back to neutral." )
+        return static_cast<uint8_t>( Color::GetIndex( PlayerColor::NONE ) );
     }
 
     bool isJailObject( const ObjectGroup group, const uint32_t index )
@@ -2090,23 +2176,368 @@ namespace Maps
         map.translationInfo.erase( language );
     }
 
+    std::vector<PlayerColorsSet> getMapAlliances( const Maps::FileInfo & mapInfo )
+    {
+        std::vector<PlayerColorsSet> alliances;
+
+        if ( mapInfo.victoryConditionType != Maps::FileInfo::VICTORY_DEFEAT_OTHER_SIDE ) {
+            return alliances;
+        }
+
+        for ( int colorIndex = 0; colorIndex < maxNumOfPlayers; ++colorIndex ) {
+            const PlayerColor color = Color::IndexToColor( colorIndex );
+            if ( ( mapInfo.kingdomColors & color ) == 0 ) {
+                continue;
+            }
+
+            const PlayerColorsSet alliance = mapInfo.unions[colorIndex] & mapInfo.kingdomColors;
+            if ( alliance == 0 ) {
+                continue;
+            }
+
+            if ( std::find( alliances.begin(), alliances.end(), alliance ) == alliances.end() ) {
+                alliances.push_back( alliance );
+            }
+        }
+
+        return alliances;
+    }
+
+    int32_t getTileIndex( const Maps::FileInfo & mapInfo, const fheroes2::Point & position )
+    {
+        return position.x + position.y * mapInfo.width;
+    }
+
+    uint32_t getTileOwnerColor( const World & currentWorld, const int32_t tileIndex )
+    {
+        if ( tileIndex < 0 || static_cast<size_t>( tileIndex ) >= currentWorld.getSize() ) {
+            return static_cast<uint32_t>( PlayerColor::NONE );
+        }
+
+        return static_cast<uint32_t>( Maps::getColorFromTile( currentWorld.getTile( tileIndex ) ) );
+    }
+
+    const Castle * findCastleOnTile( const World & currentWorld, const int32_t tileIndex )
+    {
+        if ( tileIndex < 0 || static_cast<size_t>( tileIndex ) >= currentWorld.getSize() ) {
+            return nullptr;
+        }
+
+        return currentWorld.getCastleEntrance( { tileIndex % currentWorld.w(), tileIndex / currentWorld.w() } );
+    }
+
+    Heroes * findHeroOnTile( World & currentWorld, const int32_t tileIndex )
+    {
+        if ( tileIndex >= 0 && static_cast<size_t>( tileIndex ) < currentWorld.getSize() ) {
+            if ( Heroes * hero = currentWorld.getTile( tileIndex ).getHero(); hero != nullptr ) {
+                return hero;
+            }
+
+            if ( Heroes * hero = currentWorld.GetHeroes( { tileIndex % currentWorld.w(), tileIndex / currentWorld.w() } ); hero != nullptr ) {
+                return hero;
+            }
+
+            if ( Heroes * hero = currentWorld.FromJailHeroes( tileIndex ); hero != nullptr ) {
+                return hero;
+            }
+        }
+
+        return nullptr;
+    }
+
+    void populateBaseMapMetadata( Map_Format::MapFormat & map, const Maps::MapFormatHelper::ConversionContext & context )
+    {
+        const Maps::FileInfo & mapInfo = context.mapInfo;
+
+        map.isCampaign = context.isCampaign;
+        map.difficulty = mapInfo.difficulty;
+        map.availablePlayerColors = mapInfo.kingdomColors;
+        map.humanPlayerColors = mapInfo.colorsAvailableForHumans;
+        map.computerPlayerColors = mapInfo.colorsAvailableForComp;
+        map.startWithHeroInFirstCastle = mapInfo.startWithHeroInFirstCastle;
+
+        // CRITICAL FIX: Only mark player colors as available if they have castles or heroes
+        // Otherwise they will be marked as defeated immediately on game load (kingdom.h:103)
+        PlayerColorsSet colorsWithStart = 0;
+        for ( int colorIndex = 0; colorIndex < maxNumOfPlayers; ++colorIndex ) {
+            const PlayerColor color = Color::IndexToColor( colorIndex );
+            if ( ( mapInfo.kingdomColors & color ) == 0 ) continue;
+
+            const Kingdom & kingdom = context.world.GetKingdom( color );
+            if ( !kingdom.GetCastles().empty() || !kingdom.GetHeroes().empty() ) {
+                colorsWithStart |= color;
+            }
+        }
+
+        // Filter available colors to only those with actual castles or heroes
+        map.availablePlayerColors &= colorsWithStart;
+        map.humanPlayerColors &= colorsWithStart;
+        map.computerPlayerColors &= colorsWithStart;
+
+        if ( map.availablePlayerColors == 0 ) {
+            // If no colors have castles, fall back to original for manual maps (non-campaign)
+            // Campaign maps should always have player castles, so this is unusual
+            if ( !context.isCampaign ) {
+                map.availablePlayerColors = mapInfo.kingdomColors;
+            }
+            else {
+                VERBOSE_LOG( "WARNING: Campaign map has no castles assigned to any player color!" )
+                map.availablePlayerColors = mapInfo.kingdomColors;
+            }
+        }
+        
+        map.alliances = getMapAlliances( mapInfo );
+        map.playerRace = mapInfo.races;
+        map.victoryConditionType = mapInfo.victoryConditionType;
+        map.isVictoryConditionApplicableForAI = mapInfo.compAlsoWins;
+        map.allowNormalVictory = mapInfo.allowNormalVictory;
+        map.lossConditionType = mapInfo.lossConditionType;
+        map.width = mapInfo.width;
+        map.mainLanguage = mapInfo.getSupportedLanguage().value_or( fheroes2::SupportedLanguage::English );
+        map.name = mapInfo.name;
+        map.description = mapInfo.description;
+
+        VERBOSE_LOG( "Map export: Campaign=" << context.isCampaign << " Victory=" << static_cast<int>(mapInfo.victoryConditionType)
+                     << " Loss=" << static_cast<int>(mapInfo.lossConditionType)
+                     << " HumanColors=" << std::hex << static_cast<int>(map.humanPlayerColors) << std::dec
+                     << " AvailColors=" << std::hex << static_cast<int>(map.availablePlayerColors) << std::dec
+                     << " ColorsWithStart=" << std::hex << static_cast<int>(colorsWithStart) << std::dec )
+
+        switch ( mapInfo.victoryConditionType ) {
+        case Maps::FileInfo::VICTORY_CAPTURE_TOWN:
+        case Maps::FileInfo::VICTORY_KILL_HERO: {
+            const int32_t tileIndex = getTileIndex( mapInfo, mapInfo.WinsMapsPositionObject() );
+            map.victoryConditionMetadata = { static_cast<uint32_t>( tileIndex ), getTileOwnerColor( context.world, tileIndex ) };
+            break;
+        }
+        case Maps::FileInfo::VICTORY_OBTAIN_ARTIFACT:
+            map.victoryConditionMetadata = { static_cast<uint32_t>( mapInfo.WinsFindArtifactID() ) };
+            break;
+        case Maps::FileInfo::VICTORY_COLLECT_ENOUGH_GOLD:
+            map.victoryConditionMetadata = { mapInfo.getWinningGoldAccumulationValue() };
+            break;
+        case Maps::FileInfo::VICTORY_DEFEAT_EVERYONE:
+        case Maps::FileInfo::VICTORY_DEFEAT_OTHER_SIDE:
+            break;
+        default:
+            assert( 0 );
+            break;
+        }
+
+        switch ( mapInfo.lossConditionType ) {
+        case Maps::FileInfo::LOSS_TOWN:
+        case Maps::FileInfo::LOSS_HERO: {
+            const int32_t tileIndex = getTileIndex( mapInfo, mapInfo.LossMapsPositionObject() );
+            map.lossConditionMetadata = { static_cast<uint32_t>( tileIndex ), getTileOwnerColor( context.world, tileIndex ) };
+            break;
+        }
+        case Maps::FileInfo::LOSS_OUT_OF_TIME:
+            map.lossConditionMetadata = { mapInfo.LossCountDays() };
+            break;
+        case Maps::FileInfo::LOSS_EVERYTHING:
+            break;
+        default:
+            assert( 0 );
+            break;
+        }
+
+        // Export daily events from the world
+        // Collect events from all player colors and deduplicate by message
+        std::set<std::string> uniqueEventMessages;
+        for ( const PlayerColor color : { PlayerColor::BLUE, PlayerColor::GREEN, PlayerColor::RED, 
+                                                PlayerColor::YELLOW, PlayerColor::ORANGE, PlayerColor::PURPLE } ) {
+            const EventsDate eventsForColor = context.world.GetEventsDate( color );
+            for ( const EventDate & event : eventsForColor ) {
+                if ( uniqueEventMessages.find( event.message ) == uniqueEventMessages.end() ) {
+                    auto & dailyEvent = map.dailyEvents.emplace_back();
+                    dailyEvent.message = event.message;
+                    dailyEvent.humanPlayerColors = event.colors & context.mapInfo.colorsAvailableForHumans;
+                    dailyEvent.computerPlayerColors = event.colors & context.mapInfo.colorsAvailableForComp;
+                    dailyEvent.firstOccurrenceDay = event.firstOccurrenceDay;
+                    dailyEvent.repeatPeriodInDays = event.repeatPeriodInDays;
+                    dailyEvent.resources = event.resource;
+                    uniqueEventMessages.insert( event.message );
+                }
+            }
+        }
+    }
+
+    bool isAnchorObjectPart( const Maps::Tile & tile, const Maps::ObjectPart & part, const Maps::ObjectGroup group, const uint32_t index )
+    {
+        if ( group == Maps::ObjectGroup::KINGDOM_TOWNS && part == tile.getMainObjectPart() ) {
+            switch ( tile.getMainObjectType() ) {
+            case MP2::OBJ_CASTLE:
+            case MP2::OBJ_RANDOM_CASTLE:
+            case MP2::OBJ_RANDOM_TOWN:
+                return true;
+            default:
+                break;
+            }
+        }
+
+        const Maps::ObjectInfo & objectInfo = Maps::getObjectInfo( group, static_cast<int32_t>( index ) );
+        if ( objectInfo.groundLevelParts.empty() ) {
+            return false;
+        }
+
+        const Maps::ObjectPartInfo & mainObjectPart = objectInfo.groundLevelParts.front();
+        return part.icnType == mainObjectPart.icnType && part.icnIndex == mainObjectPart.icnIndex;
+    }
+
+    void saveObjectMetadata( Map_Format::MapFormat & map, const Maps::MapFormatHelper::ConversionContext & context, const Maps::Tile & tile, const int32_t tileIndex,
+                             const uint32_t uid, const Maps::ObjectGroup group, const uint32_t index )
+    {
+        const Maps::ObjectInfo & objectInfo = Maps::getObjectInfo( group, static_cast<int32_t>( index ) );
+        const MP2::MapObjectType objectType = objectInfo.objectType;
+
+        if ( group == Maps::ObjectGroup::KINGDOM_TOWNS ) {
+            if ( const Castle * castle = findCastleOnTile( context.world, tileIndex ); castle != nullptr ) {
+                map.castleMetadata[uid] = castle->getCastleMetadata();
+            }
+        }
+
+        if ( group == Maps::ObjectGroup::KINGDOM_HEROES || objectType == MP2::OBJ_JAIL ) {
+            if ( const Heroes * hero = findHeroOnTile( context.world, tileIndex ); hero != nullptr ) {
+                map.heroMetadata[uid] = hero->getHeroMetadata();
+            }
+        }
+
+        if ( const MapBaseObject * object = context.world.GetMapObject( uid ); object != nullptr ) {
+            if ( const auto * sign = dynamic_cast<const MapSign *>( object ); sign != nullptr ) {
+                map.signMetadata[uid].message = sign->message.text;
+            }
+
+            if ( const auto * event = dynamic_cast<const MapEvent *>( object ); event != nullptr ) {
+                auto & metadata = map.adventureMapEventMetadata[uid];
+                metadata.message = event->message;
+                metadata.humanPlayerColors = event->colors & context.mapInfo.colorsAvailableForHumans;
+                metadata.computerPlayerColors = event->colors & context.mapInfo.colorsAvailableForComp;
+                metadata.isRecurringEvent = !event->isSingleTimeEvent;
+                metadata.artifact = event->artifact.GetID();
+                if ( metadata.artifact == Artifact::SPELL_SCROLL ) {
+                    metadata.artifactMetadata = event->artifact.getSpellId();
+                }
+                metadata.resources = event->resources;
+                metadata.experience = event->experience;
+                metadata.secondarySkill = static_cast<uint8_t>( event->secondarySkill.Skill() );
+                metadata.secondarySkillLevel = static_cast<uint8_t>( event->secondarySkill.Level() );
+            }
+
+            if ( const auto * sphinx = dynamic_cast<const MapSphinx *>( object ); sphinx != nullptr ) {
+                auto & metadata = map.sphinxMetadata[uid];
+                metadata.riddle = sphinx->riddle;
+                metadata.answers.assign( sphinx->answers.begin(), sphinx->answers.end() );
+                metadata.artifact = sphinx->artifact.GetID();
+                if ( metadata.artifact == Artifact::SPELL_SCROLL ) {
+                    metadata.artifactMetadata = sphinx->artifact.getSpellId();
+                }
+                metadata.resources = sphinx->resources;
+            }
+        }
+
+        if ( group == Maps::ObjectGroup::MONSTERS ) {
+            map.monsterMetadata[uid].count = static_cast<int32_t>( tile.metadata()[0] );
+        }
+
+        if ( objectType == MP2::OBJ_RESOURCE ) {
+            map.resourceMetadata[uid].count = static_cast<int32_t>( tile.metadata()[1] );
+        }
+
+        if ( Maps::isCapturableObject( objectType ) ) {
+            const PlayerColor ownerColor = Maps::getColorFromTile( tile );
+            if ( ownerColor != PlayerColor::NONE ) {
+                map.capturableObjectsMetadata[uid].ownerColor = ownerColor;
+            }
+        }
+
+        switch ( objectType ) {
+        case MP2::OBJ_WITCHS_HUT: {
+            const Skill::Secondary skill = Maps::getSecondarySkillFromWitchsHut( tile );
+            if ( skill.isValid() ) {
+                map.selectionObjectMetadata[uid].selectedItems = { skill.Skill() };
+            }
+            break;
+        }
+        case MP2::OBJ_SHRINE_FIRST_CIRCLE:
+        case MP2::OBJ_SHRINE_SECOND_CIRCLE:
+        case MP2::OBJ_SHRINE_THIRD_CIRCLE:
+        case MP2::OBJ_PYRAMID: {
+            const Spell spell = Maps::getSpellFromTile( tile );
+            if ( spell.isValid() ) {
+                map.selectionObjectMetadata[uid].selectedItems = { spell.GetID() };
+            }
+            break;
+        }
+        case MP2::OBJ_RANDOM_ULTIMATE_ARTIFACT:
+            map.artifactMetadata[uid].radius = static_cast<int32_t>( tile.metadata()[0] );
+            break;
+        case MP2::OBJ_ARTIFACT: {
+            // Ensure metadata always exists for artifacts, even if empty
+            auto & artifactMeta = map.artifactMetadata[uid];
+            
+            const Artifact artifact = Maps::getArtifactFromTile( tile );
+            if ( artifact == Artifact::SPELL_SCROLL ) {
+                artifactMeta.selected = { artifact.getSpellId() + 1 };
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
     namespace MapFormatHelper
     {
-        bool saveMap( const fheroes2::World & w, const std::string & fileName )
+        bool convertMapFile( const std::string & inputFile, const std::string & outputFile, const FileInfo & mapInfo, const bool isCampaign )
         {
+            World & conversionWorld = World::Get();
+            if ( !conversionWorld.LoadMapMP2( inputFile, mapInfo.version == GameVersion::SUCCESSION_WARS ) ) {
+                return false;
+            }
+
+            const ConversionContext context{ conversionWorld, mapInfo, isCampaign };
+            return saveMap( context, outputFile );
+        }
+
+        bool saveMap( const ConversionContext & context, const std::string & fileName )
+        {
+            World & w = context.world;
             Maps::Map_Format::MapFormat map;
+            size_t exportedHeroObjects = 0;
+            size_t synthesizedMapHeroObjects = 0;
+            size_t synthesizedCastleHeroObjects = 0;
 
-            map.width = w.width;
-            map.height = w.height;
-            map.version = Maps::Map_Format::FORMAT_VERSION_LATEST;
-            map.difficulty = 0; 
-            map.isCampaign = false;
+            populateBaseMapMetadata( map, context );
+
+            const auto synthesizeHeroObject = [&map, &w]( Maps::Map_Format::TileInfo & mapTile, const int32_t tileIndex, const Heroes & hero,
+                                                          const char * const source ) {
+                uint32_t heroObjectIndex = 0;
+                if ( !getHeroObjectIndex( hero, heroObjectIndex ) ) {
+                    VERBOSE_LOG( "Map export: failed to synthesize " << source << " hero object at tile " << tileIndex << " (" << tileIndex % w.w() << ", "
+                                 << tileIndex / w.w() << ")" << ", hero id " << hero.GetID() << ", color " << Color::String( hero.GetColor() ) << ", race "
+                                 << Race::String( hero.GetRace() ) )
+                    return false;
+                }
+
+                const uint32_t synthesizedUid = Maps::getNewObjectUID();
+
+                mapTile.objects.push_back( { synthesizedUid, Maps::ObjectGroup::KINGDOM_HEROES, heroObjectIndex } );
+                map.heroMetadata[synthesizedUid] = hero.getHeroMetadata();
+
+                VERBOSE_LOG( "Map export: synthesized " << source << " hero object at tile " << tileIndex << " (" << tileIndex % w.w() << ", " << tileIndex / w.w()
+                             << ")" << ", hero id " << hero.GetID() << ", color " << Color::String( hero.GetColor() ) << ", race "
+                             << Race::String( hero.GetRace() ) << ", uid " << synthesizedUid )
+
+                return true;
+            };
             
-            map.tiles.resize( w.width * w.height );
-            std::set<uint32_t> savedUids;
+            map.tiles.resize( static_cast<size_t>( w.w() ) * static_cast<size_t>( w.h() ) );
+            // In MP2 maps, castle/town objects share their UID with associated flag and basement sprites.
+            // We use pair<uid, group> so that different parts of a town don't block each other from being saved.
+            std::set<std::pair<uint32_t, Maps::ObjectGroup>> savedUids;
 
-            for ( int32_t i = 0; i < static_cast<int32_t>( w.vec_tiles.size() ); ++i ) {
-                const Maps::Tile & tile = w.vec_tiles[i];
+            for ( int32_t i = 0; i < static_cast<int32_t>( w.getSize() ); ++i ) {
+                const Maps::Tile & tile = w.getTile( i );
                 Maps::Map_Format::TileInfo & mapTile = map.tiles[i];
 
                 mapTile.terrainIndex = tile.getTerrainImageIndex();
@@ -2127,78 +2558,93 @@ namespace Maps
                 for ( const auto * part : parts ) {
                     const uint32_t uid = part->_uid;
                     
-                    if ( uid != 0 ) {
-                        if ( savedUids.find( uid ) != savedUids.end() ) {
+                    Maps::ObjectGroup group = Maps::ObjectGroup::NONE;
+                    uint32_t index = 0;
+                    if ( Maps::getObjectGroupAndIndex( part->icnType, part->icnIndex, group, index ) ) {
+                        if ( uid != 0 && savedUids.count( { uid, group } ) > 0 ) {
                             continue;
                         }
-                    }
 
-                    uint8_t group = 0;
-                    uint8_t index = 0;
-                    if ( Maps::getObjectGroupAndIndex( part->icnType, part->icnIndex, group, index ) ) {
+                        if ( uid != 0 && !isAnchorObjectPart( tile, *part, group, index ) ) {
+                            continue;
+                        }
+
                         mapTile.objects.push_back( { uid, group, index } );
+                        if ( group == Maps::ObjectGroup::KINGDOM_HEROES ) {
+                            ++exportedHeroObjects;
+                        }
+
                         if ( uid != 0 ) {
-                            savedUids.insert( uid );
+                            savedUids.insert( { uid, group } );
+                            saveObjectMetadata( map, context, tile, i, uid, group, index );
                         }
-                        
-                        // Handle Metadata
-                        if ( group == static_cast<uint8_t>( Maps::ObjectGroup::KINGDOM_TOWNS ) ) {
-                            for ( const auto * castle : w.vec_castles ) {
-                                if ( castle->GetIndex() == i ) {
-                                    map.castleMetadata[uid] = castle->getCastleMetadata();
-                                    break;
-                                }
+                    }
+                }
+
+                const bool isHeroObjectAlreadySaved = std::any_of( mapTile.objects.begin(), mapTile.objects.end(), []( const Maps::Map_Format::TileObjectInfo & object ) {
+                    return object.group == Maps::ObjectGroup::KINGDOM_HEROES;
+                } );
+
+                if ( !isHeroObjectAlreadySaved ) {
+                    if ( Heroes * hero = tile.getHero(); hero != nullptr && hero->GetColor() != PlayerColor::NONE ) {
+                        if ( w.getCastleEntrance( Maps::GetPoint( i ) ) == nullptr ) {
+                            if ( synthesizeHeroObject( mapTile, i, *hero, "map" ) ) {
+                                ++synthesizedMapHeroObjects;
                             }
                         }
-                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::KINGDOM_HEROES ) ) {
-                            for ( const auto * hero : w.vec_heroes ) {
-                                if ( hero->GetIndex() == i ) {
-                                    map.heroMetadata[uid] = hero->getHeroMetadata();
-                                    break;
-                                }
-                            }
-                        }
-                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_SIGNS ) ) {
-                            const auto * obj = w.map_objects.get( uid );
-                            if ( const auto * sign = dynamic_cast<const MapSign *>( obj ) ) {
-                                map.signMetadata[uid].message = sign->message.text;
-                            }
-                        }
-                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_EVENTS ) ) {
-                            const auto * obj = w.map_objects.get( uid );
-                            if ( const auto * event = dynamic_cast<const MapEvent *>( obj ) ) {
-                                auto & meta = map.adventureMapEventMetadata[uid];
-                                meta.message = event->message;
-                                meta.isSingleTimeEvent = event->isSingleTimeEvent;
-                                meta.isComputerPlayerAllowed = event->isComputerPlayerAllowed;
-                                meta.resources = event->resources;
-                                meta.artifact = event->artifact;
-                                meta.experience = event->experience;
-                                meta.secondarySkill = event->secondarySkill;
-                            }
-                        }
-                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_SPHINX ) ) {
-                            const auto * obj = w.map_objects.get( uid );
-                            if ( const auto * sphinx = dynamic_cast<const MapSphinx *>( obj ) ) {
-                                auto & meta = map.sphinxMetadata[uid];
-                                meta.riddle = sphinx->riddle;
-                                meta.answers = sphinx->answers;
-                                meta.resources = sphinx->resources;
-                                meta.artifact = sphinx->artifact;
-                            }
-                        }
-                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_MONSTERS ) ) {
-                            map.monsterMetadata[uid].count = tile.metadata()[0];
-                        }
-                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_RESOURCES ) ) {
-                            map.resourceMetadata[uid].count = tile.metadata()[0];
+                        else {
+                            VERBOSE_LOG( "Map export: skipping map hero synthesis for castle hero id " << hero->GetID() << " at tile " << i << " ("
+                                         << i % w.w() << ", " << i / w.w() << ")" )
                         }
                     }
                 }
             }
 
-            map.availablePlayerColors = 0x3F;
-            map.playerRace.assign( 6, static_cast<uint8_t>( Race::RANDOM ) );
+            for ( int colorIndex = 0; colorIndex < maxNumOfPlayers; ++colorIndex ) {
+                const Kingdom & kingdom = w.GetKingdom( Color::IndexToColor( colorIndex ) );
+
+                for ( const Castle * castle : kingdom.GetCastles() ) {
+                    if ( castle == nullptr ) {
+                        continue;
+                    }
+
+                    const Heroes * hero = w.GetHero( *castle );
+                    if ( hero == nullptr || hero->GetColor() == PlayerColor::NONE ) {
+                        continue;
+                    }
+
+                    const int32_t castleTileIndex = Maps::GetIndexFromAbsPoint( castle->GetCenter() );
+                    const int32_t heroTileIndex = Maps::GetDirectionIndex( castleTileIndex, Direction::BOTTOM );
+                    if ( !Maps::isValidAbsIndex( heroTileIndex ) ) {
+                        VERBOSE_LOG( "Map export: failed to synthesize castle hero object for hero id " << hero->GetID() << " because tile below castle "
+                                     << castleTileIndex << " is invalid." )
+                        continue;
+                    }
+
+                    Maps::Map_Format::TileInfo & heroTile = map.tiles[heroTileIndex];
+                    const bool isHeroObjectAlreadySaved = std::any_of( heroTile.objects.begin(), heroTile.objects.end(), []( const Maps::Map_Format::TileObjectInfo & object ) {
+                        return object.group == Maps::ObjectGroup::KINGDOM_HEROES;
+                    } );
+
+                    if ( isHeroObjectAlreadySaved ) {
+                        continue;
+                    }
+
+                    if ( synthesizeHeroObject( heroTile, heroTileIndex, *hero, "castle" ) ) {
+                        ++synthesizedCastleHeroObjects;
+                    }
+                }
+            }
+
+            size_t activeHeroes = 0;
+            for ( int colorIndex = 0; colorIndex < maxNumOfPlayers; ++colorIndex ) {
+                activeHeroes += w.GetKingdom( Color::IndexToColor( colorIndex ) ).GetHeroes().size();
+            }
+
+            VERBOSE_LOG( "Map export hero summary: activeHeroes=" << activeHeroes << " exportedHeroObjects=" << exportedHeroObjects
+                         << " synthesizedMapHeroObjects=" << synthesizedMapHeroObjects << " synthesizedCastleHeroObjects=" << synthesizedCastleHeroObjects
+                         << " totalHeroObjects=" << exportedHeroObjects + synthesizedMapHeroObjects + synthesizedCastleHeroObjects
+                         << " heroMetadata=" << map.heroMetadata.size() )
 
             return Maps::Map_Format::saveMap( fileName, map );
         }

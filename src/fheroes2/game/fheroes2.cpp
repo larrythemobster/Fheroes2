@@ -29,6 +29,7 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -59,7 +60,9 @@
 
 #include <filesystem>
 
+#include "../campaign/campaign_data.h"
 #include "../maps/map_format_helper.h"
+#include "../maps/maps_fileinfo.h"
 #include "../world/world.h"
 #include "agg.h"
 #include "agg_image.h"
@@ -85,8 +88,48 @@
 #include "settings.h"
 #include "system.h"
 #include "timing.h"
+#include "ui_language.h"
 #include "ui_tool.h"
 #include "zzlib.h"
+
+namespace
+{
+    std::string toLower( std::string value )
+    {
+        std::transform( value.begin(), value.end(), value.begin(), []( unsigned char character ) { return static_cast<char>( std::tolower( character ) ); } );
+        return value;
+    }
+
+    std::optional<Campaign::ScenarioInfoId> findCampaignScenarioInfo( const std::string & inputFile )
+    {
+        const std::string fileName = toLower( std::filesystem::path( inputFile ).filename().string() );
+
+        const std::array<int, 6> campaignIds = {
+            Campaign::ROLAND_CAMPAIGN,
+            Campaign::ARCHIBALD_CAMPAIGN,
+            Campaign::PRICE_OF_LOYALTY_CAMPAIGN,
+            Campaign::DESCENDANTS_CAMPAIGN,
+            Campaign::WIZARDS_ISLE_CAMPAIGN,
+            Campaign::VOYAGE_HOME_CAMPAIGN,
+        };
+
+        for ( const int campaignId : campaignIds ) {
+            const auto & scenarios = Campaign::CampaignData::getCampaignData( campaignId ).getAllScenarios();
+            for ( const Campaign::ScenarioData & scenario : scenarios ) {
+                const Maps::FileInfo scenarioMapInfo = scenario.loadMap();
+                if ( scenarioMapInfo.filename.empty() ) {
+                    continue;
+                }
+
+                if ( toLower( std::filesystem::path( scenarioMapInfo.filename ).filename().string() ) == fileName ) {
+                    return scenario.getScenarioInfoId();
+                }
+            }
+        }
+
+        return std::nullopt;
+    }
+}
 
 namespace
 {
@@ -381,26 +424,67 @@ int main( int argc, char ** argv )
                     if (!entry.is_regular_file()) continue;
 
                     std::string ext = entry.path().extension().string();
-                    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c){ return std::tolower(c); });
+                    std::transform( ext.begin(), ext.end(), ext.begin(), []( unsigned char c ) { return static_cast<char>( std::tolower( c ) ); } );
 
                     if (ext == ".mp2" || ext == ".mpx" || ext == ".mx2" || ext == ".h2c" || ext == ".hxc") {
                         std::string inputFile = entry.path().string();
                         std::string outputFile = inputFile.substr(0, inputFile.find_last_of('.')) + ".fh2m";
+                        const bool isCampaignMap = ext == ".h2c" || ext == ".hxc";
 
                         std::cout << "Converting " << inputFile << "...\n";
 
-                        // 1. Let the engine load the map into its internal state
-                        fheroes2::World world;
-                        if (!world.LoadMapMP2(inputFile, true)) {
-                            std::cout << " -> Engine failed to load MP2.\n";
+                        Maps::FileInfo mapInfo;
+                        if ( !mapInfo.readMP2Map( inputFile, false ) ) {
+                            std::cout << " -> Failed to read map metadata.\n";
                             continue;
                         }
 
-                        // TODO: Inject campaign win/loss rules into 'world' here if it's a campaign map
+                        if ( isCampaignMap ) {
+                            if ( const std::optional<Campaign::ScenarioInfoId> scenarioInfo = findCampaignScenarioInfo( inputFile ); scenarioInfo.has_value() ) {
+                                Campaign::CampaignData::updateScenarioGameplayConditions( *scenarioInfo, mapInfo );
+                                
+                                // Apply campaign-specific victory/loss conditions
+                                const auto & scenarios = Campaign::CampaignData::getCampaignData( scenarioInfo->campaignId ).getAllScenarios();
+                                const Campaign::ScenarioData * scenarioData = nullptr;
+                                for ( const Campaign::ScenarioData & scenario : scenarios ) {
+                                    if ( scenario.getScenarioInfoId() == *scenarioInfo ) {
+                                        scenarioData = &scenario;
+                                        break;
+                                    }
+                                }
+                                
+                                if ( scenarioData != nullptr ) {
+                                    const Campaign::ScenarioVictoryCondition campaignVictory = scenarioData->getVictoryCondition();
+                                    if ( campaignVictory != Campaign::ScenarioVictoryCondition::STANDARD ) {
+                                        // Campaign has a specific victory condition - convert and apply it
+                                        if ( campaignVictory == Campaign::ScenarioVictoryCondition::CAPTURE_DRAGON_CITY ) {
+                                            mapInfo.victoryConditionType = Maps::FileInfo::VICTORY_CAPTURE_TOWN;
+                                        }
+                                        else if ( campaignVictory == Campaign::ScenarioVictoryCondition::OBTAIN_ULTIMATE_CROWN ) {
+                                            mapInfo.victoryConditionType = Maps::FileInfo::VICTORY_OBTAIN_ARTIFACT;
+                                        }
+                                        else if ( campaignVictory == Campaign::ScenarioVictoryCondition::OBTAIN_SPHERE_NEGATION ) {
+                                            mapInfo.victoryConditionType = Maps::FileInfo::VICTORY_OBTAIN_ARTIFACT;
+                                        }
+                                    }
+                                    
+                                    const Campaign::ScenarioLossCondition campaignLoss = scenarioData->getLossCondition();
+                                    if ( campaignLoss != Campaign::ScenarioLossCondition::STANDARD ) {
+                                        // Campaign has a specific loss condition
+                                        if ( campaignLoss == Campaign::ScenarioLossCondition::LOSE_ALL_SORCERESS_VILLAGES ) {
+                                            mapInfo.lossConditionType = Maps::FileInfo::LOSS_TOWN;
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
-                        // 2. Save the perfectly translated internal state to FH2M
-                        if (!Maps::MapFormatHelper::saveMap(world, outputFile)) {
-                            std::cout << " -> Engine failed to save FH2M.\n";
+                        conf.setCurrentMapInfo( mapInfo );
+                        conf.GetPlayers().Init( mapInfo );
+                        conf.GetPlayers().SetStartGame();
+
+                        if ( !Maps::MapFormatHelper::convertMapFile( inputFile, outputFile, mapInfo, isCampaignMap ) ) {
+                            std::cout << " -> Engine failed to convert map.\n";
                             continue;
                         }
                         std::cout << " -> Success!\n";
@@ -408,6 +492,29 @@ int main( int argc, char ** argv )
                 }
                 std::cout << "Conversion complete! Exiting engine.\n";
                 return EXIT_SUCCESS; // Exit before the main menu launches
+            }
+
+            if ( std::string(argv[i]) == "--load-fh2m" && i + 1 < argc ) {
+                const std::string inputFile = argv[i + 1];
+                std::cout << "Loading FH2M map: " << inputFile << "\n";
+
+                Maps::FileInfo mapInfo;
+                if ( !mapInfo.readResurrectionMap( inputFile, false, fheroes2::getLanguageFromAbbreviation( conf.getGameLanguage() ) ) ) {
+                    std::cout << " -> Failed to read FH2M metadata.\n";
+                    return EXIT_FAILURE;
+                }
+
+                conf.setCurrentMapInfo( mapInfo );
+                conf.GetPlayers().Init( mapInfo );
+                conf.GetPlayers().SetStartGame();
+
+                if ( !World::Get().loadResurrectionMap( inputFile ) ) {
+                    std::cout << " -> Failed to load FH2M map.\n";
+                    return EXIT_FAILURE;
+                }
+
+                std::cout << " -> FH2M load completed.\n";
+                return EXIT_SUCCESS;
             }
         }
         // --- END INJECTION ---

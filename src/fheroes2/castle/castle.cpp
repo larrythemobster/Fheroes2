@@ -432,7 +432,7 @@ Maps::Map_Format::CastleMetadata Castle::getCastleMetadata() const
     metadata.customName = _name;
     Maps::saveCastleArmy( _army, metadata );
 
-    metadata.customBuildings = ( Modes( CUSTOM ) || _constructedBuildings != 0 );
+    metadata.customBuildings = ( _constructedBuildings != 0 );
 
     const std::vector<uint32_t> allPossibleBuildings = {
         BUILD_THIEVESGUILD, BUILD_TAVERN, BUILD_SHIPYARD, BUILD_WELL, BUILD_STATUE,
