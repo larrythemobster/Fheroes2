@@ -39,6 +39,16 @@
 
 namespace
 {
+    std::string getConvertedCampaignMapName( const std::string & fileName )
+    {
+        const size_t extensionPos = fileName.find_last_of( '.' );
+        if ( extensionPos == std::string::npos ) {
+            return fileName + ".fh2m";
+        }
+
+        return fileName.substr( 0, extensionPos ) + ".fh2m";
+    }
+
     std::vector<Campaign::ScenarioBonusData> getRolandCampaignBonusData( const int scenarioID )
     {
         std::vector<Campaign::ScenarioBonusData> bonus;
@@ -787,12 +797,27 @@ namespace Campaign
     bool Campaign::ScenarioData::isMapFilePresent() const
     {
         std::string matchingFilePath;
+        const std::string convertedFileName = getConvertedCampaignMapName( _fileName );
+
+        if ( Maps::tryGetMatchingFile( convertedFileName, matchingFilePath ) ) {
+            return true;
+        }
+
         return Maps::tryGetMatchingFile( _fileName, matchingFilePath );
     }
 
     Maps::FileInfo Campaign::ScenarioData::loadMap() const
     {
         std::string matchingFilePath;
+
+        const std::string convertedFileName = getConvertedCampaignMapName( _fileName );
+        if ( Maps::tryGetMatchingFile( convertedFileName, matchingFilePath ) ) {
+            Maps::FileInfo fi;
+
+            if ( fi.readResurrectionMap( matchingFilePath, false, fheroes2::SupportedLanguage::English ) ) {
+                return fi;
+            }
+        }
 
         if ( Maps::tryGetMatchingFile( _fileName, matchingFilePath ) ) {
             Maps::FileInfo fi;
