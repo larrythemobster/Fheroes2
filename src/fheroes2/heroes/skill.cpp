@@ -27,7 +27,9 @@
 #include <array>
 #include <cassert>
 #include <unordered_set>
+#include <fstream>
 
+#include "../json.hpp"
 #include "artifact.h"
 #include "artifact_info.h"
 #include "game_static.h"
@@ -45,6 +47,50 @@
 
 namespace
 {
+
+    struct HeroSkillModLoader {
+        nlohmann::json skillData;
+
+        HeroSkillModLoader() {
+            std::ifstream file("stats.json");
+            bool saveRequired = false;
+
+            if (file.is_open()) {
+                try { file >> skillData; } catch (...) { }
+                file.close();
+            }
+
+            if (!skillData.contains("hero_starting_skills")) {
+                // Pre-fill with the vanilla game defaults so Dhan can easily edit them
+                skillData["hero_starting_skills"] = {
+                    {"knight",      {{"skill1", 11}, {"level1", 1}, {"skill2", 7}, {"level2", 1}}},
+                    {"barbarian",   {{"skill1", 1},  {"level1", 1}, {"skill2", -1}, {"level2", 0}}},
+                    {"sorceress",   {{"skill1", 6},  {"level1", 1}, {"skill2", 8}, {"level2", 1}}},
+                    {"warlock",     {{"skill1", 4},  {"level1", 1}, {"skill2", -1}, {"level2", 0}}},
+                    {"wizard",      {{"skill1", 9},  {"level1", 1}, {"skill2", 8}, {"level2", 1}}},
+                    {"necromancer", {{"skill1", 13}, {"level1", 1}, {"skill2", -1}, {"level2", 0}}}
+                };
+                saveRequired = true;
+            }
+
+            if (saveRequired) {
+                std::ofstream outFile("stats.json");
+                outFile << skillData.dump(4);
+            }
+        }
+        
+        std::string getRaceKey(int race) {
+            if (race == Race::KNGT) return "knight";
+            if (race == Race::BARB) return "barbarian";
+            if (race == Race::SORC) return "sorceress";
+            if (race == Race::WRLK) return "warlock";
+            if (race == Race::WZRD) return "wizard";
+            if (race == Race::NECR) return "necromancer";
+            return "unknown";
+        }
+    };
+    static HeroSkillModLoader heroSkillModLoader;
+
     constexpr std::array<int, Skill::numOfSecondarySkills> allSecondarySkills{ Skill::Secondary::PATHFINDING, Skill::Secondary::ARCHERY,    Skill::Secondary::LOGISTICS,
                                                                                Skill::Secondary::SCOUTING,    Skill::Secondary::DIPLOMACY,  Skill::Secondary::NAVIGATION,
                                                                                Skill::Secondary::LEADERSHIP,  Skill::Secondary::WISDOM,     Skill::Secondary::MYSTICISM,
@@ -628,6 +674,23 @@ Skill::SecSkills::SecSkills( const int race )
     reserve( Heroes::maxNumOfSecSkills );
 
     if ( !( race & Race::ALL ) ) {
+        return;
+    }
+
+    std::string raceKey = heroSkillModLoader.getRaceKey(race);
+    
+    
+    if (raceKey != "unknown" && heroSkillModLoader.skillData["hero_starting_skills"].contains(raceKey)) {
+        auto& data = heroSkillModLoader.skillData["hero_starting_skills"][raceKey];
+        
+        int s1 = data["skill1"];
+        int l1 = data["level1"];
+        if (s1 > 0 && l1 > 0) AddSkill( Secondary( s1, l1 ) );
+
+        int s2 = data["skill2"];
+        int l2 = data["level2"];
+        if (s2 > 0 && l2 > 0) AddSkill( Secondary( s2, l2 ) );
+        
         return;
     }
 

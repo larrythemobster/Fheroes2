@@ -1513,6 +1513,44 @@
             "type_id": 2048
         }
     },
+    "hero_starting_skills": {
+        "barbarian": {
+            "level1": 1,
+            "level2": 0,
+            "skill1": 1,
+            "skill2": -1
+        },
+        "knight": {
+            "level1": 1,
+            "level2": 1,
+            "skill1": 11,
+            "skill2": 7
+        },
+        "necromancer": {
+            "level1": 1,
+            "level2": 0,
+            "skill1": 13,
+            "skill2": -1
+        },
+        "sorceress": {
+            "level1": 1,
+            "level2": 1,
+            "skill1": 6,
+            "skill2": 8
+        },
+        "warlock": {
+            "level1": 1,
+            "level2": 0,
+            "skill1": 4,
+            "skill2": -1
+        },
+        "wizard": {
+            "level1": 1,
+            "level2": 1,
+            "skill1": 9,
+            "skill2": 8
+        }
+    },
     "heroes": {
         "1": {
             "army": [],

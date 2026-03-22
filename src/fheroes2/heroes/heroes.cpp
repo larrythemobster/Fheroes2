@@ -233,7 +233,6 @@ namespace
     }
 
     struct HeroModLoader {
-        // NEW: Struct to hold army data
         struct Troop { int id; int count; };
 
         struct HeroOverride {
@@ -308,10 +307,6 @@ namespace
             } else {
                 for (int i = Heroes::UNKNOWN + 1; i < Heroes::HEROES_COUNT; ++i) {
                     std::string idStr = std::to_string(i);
-<<<<<<< HEAD
-=======
-
->>>>>>> 3ecb147b6 (// WIP)
                     int race = Race::KNGT;
                     if (i >= Heroes::THUNDAX && i <= Heroes::ATLAS) race = Race::BARB;
                     else if (i >= Heroes::ASTRA && i <= Heroes::LUNA) race = Race::SORC;
@@ -325,13 +320,10 @@ namespace
                         {"defense", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::DEFENSE, race)},
                         {"power", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::POWER, race)},
                         {"knowledge", Skill::Primary::getHeroDefaultSkillValue(Skill::Primary::KNOWLEDGE, race)},
-<<<<<<< HEAD
-                        {"experience", 40}
-=======
                         {"experience", 40},
                         {"army", nlohmann::json::array()},
                         {"artifacts", nlohmann::json::array()}
->>>>>>> 3ecb147b6 (// WIP)
+
                     };
                 }
                 saveRequired = true;
@@ -433,7 +425,7 @@ Heroes::Heroes( const int heroId, const int race )
     }
     _movePoints = GetMaxMovePoints();
 
-<<<<<<< HEAD
+
     {
         auto it = heroModLoader.overrides.find(_id);
         if (it != heroModLoader.overrides.end()) {
@@ -449,9 +441,9 @@ Heroes::Heroes( const int heroId, const int race )
             _movePoints = GetMaxMovePoints();
         }
     }
-=======
+
     APPLY_JSON_HERO_OVERRIDES();
->>>>>>> 3ecb147b6 (// WIP)
+
 }
 
 void Heroes::LoadFromMP2( const int32_t mapIndex, const PlayerColor colorType, const int raceType, const bool isInJail, const std::vector<uint8_t> & data )

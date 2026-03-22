@@ -44,6 +44,7 @@ namespace
     // This map is used for searching object parts based on their ICN information.
     // Since we have a lot of objects it is important to speed up the search even if we take several more KB of memory.
     std::map<std::pair<MP2::ObjectIcnType, uint32_t>, const Maps::ObjectPartInfo *> objectInfoByIcn;
+    std::map<std::pair<MP2::ObjectIcnType, uint32_t>, std::pair<Maps::ObjectGroup, uint32_t>> objectGroupIndexByIcn;
 
     void populateRoads( std::vector<Maps::ObjectInfo> & objects )
     {
@@ -6059,16 +6060,22 @@ namespace
 
         populateExtraBoatDirections( objectData[static_cast<size_t>( Maps::ObjectGroup::MAP_EXTRAS )] );
 
-        for ( const auto & objects : objectData ) {
-            for ( const auto & objectInfo : objects ) {
-                // We accept that there could be duplicates so we don't check if the insertion is successful for the map.
+        for ( size_t g = 0; g < static_cast<size_t>( Maps::ObjectGroup::GROUP_COUNT ); ++g ) {
+            const auto & objects = objectData[g];
+            const Maps::ObjectGroup group = static_cast<Maps::ObjectGroup>( g );
+
+            for ( size_t i = 0; i < objects.size(); ++i ) {
+                const auto & objectInfo = objects[i];
+                const uint32_t index = static_cast<uint32_t>( i );
 
                 for ( const auto & info : objectInfo.groundLevelParts ) {
                     objectInfoByIcn.try_emplace( std::make_pair( info.icnType, info.icnIndex ), &info );
+                    objectGroupIndexByIcn.try_emplace( std::make_pair( info.icnType, info.icnIndex ), std::make_pair( group, index ) );
                 }
 
                 for ( const auto & info : objectInfo.topLevelParts ) {
                     objectInfoByIcn.try_emplace( std::make_pair( info.icnType, info.icnIndex ), &info );
+                    objectGroupIndexByIcn.try_emplace( std::make_pair( info.icnType, info.icnIndex ), std::make_pair( group, index ) );
                 }
             }
         }
@@ -6239,6 +6246,20 @@ namespace Maps
         }
 
         return MP2::OBJ_NONE;
+    }
+
+    bool getObjectGroupAndIndex( const MP2::ObjectIcnType icnType, const uint32_t icnIndex, ObjectGroup & group, uint32_t & index )
+    {
+        populateObjectData();
+
+        auto iter = objectGroupIndexByIcn.find( std::make_pair( icnType, icnIndex ) );
+        if ( iter != objectGroupIndexByIcn.end() ) {
+            group = iter->second.first;
+            index = iter->second.second;
+            return true;
+        }
+
+        return false;
     }
 
     std::vector<fheroes2::Point> getGroundLevelOccupiedTileOffset( const ObjectInfo & info )

@@ -27,6 +27,7 @@
 #include <initializer_list>
 #include <set>
 #include <utility>
+#include <iostream>
 
 #include "artifact.h"
 #include "direction.h"
@@ -448,16 +449,56 @@ namespace
     bool loadFromStream( IStreamBase & stream, Maps::Map_Format::BaseMapFormat & map )
     {
         stream >> map.version;
+        std::cout << "[DEBUG] Version: " << map.version << std::endl;
+
         if ( map.version < minimumSupportedVersion || map.version > currentSupportedVersion ) {
             return false;
         }
 
-        stream >> map.isCampaign >> map.difficulty >> map.availablePlayerColors >> map.humanPlayerColors >> map.computerPlayerColors >> map.alliances >> map.playerRace
-            >> map.victoryConditionType >> map.isVictoryConditionApplicableForAI >> map.allowNormalVictory >> map.victoryConditionMetadata >> map.lossConditionType
-            >> map.lossConditionMetadata >> map.width;
+        stream >> map.isCampaign;
+        std::cout << "[DEBUG] isCampaign: " << (int)map.isCampaign << std::endl;
+
+        stream >> map.difficulty;
+        std::cout << "[DEBUG] difficulty: " << (int)map.difficulty << std::endl;
+
+        stream >> map.availablePlayerColors;
+        std::cout << "[DEBUG] availablePlayerColors: " << (int)map.availablePlayerColors << std::endl;
+
+        stream >> map.humanPlayerColors;
+        std::cout << "[DEBUG] humanPlayerColors: " << (int)map.humanPlayerColors << std::endl;
+
+        stream >> map.computerPlayerColors;
+        std::cout << "[DEBUG] computerPlayerColors: " << (int)map.computerPlayerColors << std::endl;
+
+        stream >> map.alliances;
+        std::cout << "[DEBUG] alliances vector size: " << map.alliances.size() << std::endl;
+
+        stream >> map.playerRace;
+        std::cout << "[DEBUG] playerRace array/vector size: " << map.playerRace.size() << std::endl;
+
+        stream >> map.victoryConditionType;
+        std::cout << "[DEBUG] victoryConditionType: " << (int)map.victoryConditionType << std::endl;
+
+        stream >> map.isVictoryConditionApplicableForAI;
+        std::cout << "[DEBUG] isVicAI: " << (int)map.isVictoryConditionApplicableForAI << std::endl;
+
+        stream >> map.allowNormalVictory;
+        std::cout << "[DEBUG] allowNormalVic: " << (int)map.allowNormalVictory << std::endl;
+
+        stream >> map.victoryConditionMetadata;
+        std::cout << "[DEBUG] victoryConditionMetadata size: " << map.victoryConditionMetadata.size() << std::endl;
+
+        stream >> map.lossConditionType;
+        std::cout << "[DEBUG] lossConditionType: " << (int)map.lossConditionType << std::endl;
+
+        stream >> map.lossConditionMetadata;
+        std::cout << "[DEBUG] lossConditionMetadata size: " << map.lossConditionMetadata.size() << std::endl;
+
+        stream >> map.width;
+        std::cout << "[DEBUG] Width: " << map.width << std::endl;
 
         if ( map.width <= 0 ) {
-            // This is not a correct map size.
+            std::cout << "[DEBUG] Width <= 0! Aborting." << std::endl;
             return false;
         }
 
@@ -471,7 +512,6 @@ namespace
         }
 
         if ( map.version < 11 ) {
-            // True translation support was added in version 11.
             map.translations = {};
         }
         else {
@@ -505,11 +545,16 @@ namespace
 
     bool loadFromStream( IStreamBase & stream, Maps::Map_Format::MapFormat & map )
     {
+        std::cout << "[DEBUG] --- STARTING FULL MAPFORMAT LOAD ---" << std::endl;
+
         // TODO: verify the correctness of metadata.
         if ( !loadFromStream( stream, static_cast<Maps::Map_Format::BaseMapFormat &>( map ) ) ) {
+            std::cout << "[DEBUG] BaseMapFormat failed to load!" << std::endl;
             map = {};
             return false;
         }
+
+        std::cout << "[DEBUG] Base Header OK. Reading Compressed Block..." << std::endl;
 
         RWStreamBuf decompressed;
         decompressed.setBigendian( true );
@@ -517,17 +562,19 @@ namespace
         {
             std::vector<uint8_t> temp = stream.getRaw( 0 );
             if ( temp.empty() ) {
-                // This is a corrupted file.
+                std::cout << "[DEBUG] Compressed data is empty!" << std::endl;
                 map = {};
                 return false;
             }
 
             const std::vector<uint8_t> decompressedData = Compression::unzipData( temp.data(), temp.size() );
             if ( decompressedData.empty() ) {
-                // This is a corrupted file.
+                std::cout << "[DEBUG] unzipData failed! Invalid zlib data." << std::endl;
                 map = {};
                 return false;
             }
+
+            std::cout << "[DEBUG] Unzipped Size: " << decompressedData.size() << " bytes." << std::endl;
 
             // Let's try to free up some memory
             temp = std::vector<uint8_t>{};
@@ -536,13 +583,16 @@ namespace
         }
 
         decompressed >> map.additionalInfo >> map.tiles;
+        std::cout << "[DEBUG] Tiles read. Count: " << map.tiles.size() << " | Expected: " << ( map.width * map.width ) << std::endl;
 
         if ( map.tiles.size() != static_cast<size_t>( map.width ) * map.width ) {
+            std::cout << "[DEBUG] Tile size mismatch! Aborting." << std::endl;
             map = {};
             return false;
         }
 
         decompressed >> map.dailyEvents >> map.rumors;
+        std::cout << "[DEBUG] dailyEvents/rumors fail state: " << decompressed.fail() << std::endl;
 
         std::map<uint32_t, Maps::Map_Format::StandardObjectMetadata> standardMetadata;
         if ( map.version < 10 ) {
@@ -550,10 +600,12 @@ namespace
         }
 
         decompressed >> map.castleMetadata >> map.heroMetadata >> map.sphinxMetadata >> map.signMetadata >> map.adventureMapEventMetadata >> map.selectionObjectMetadata;
+        std::cout << "[DEBUG] basic metadata fail state: " << decompressed.fail() << std::endl;
 
         static_assert( minimumSupportedVersion <= 8, "Remove this check." );
         if ( map.version > 8 ) {
             decompressed >> map.capturableObjectsMetadata;
+            std::cout << "[DEBUG] capturableObjects fail state: " << decompressed.fail() << std::endl;
         }
 
         convertFromV2ToV3( map );
@@ -565,6 +617,7 @@ namespace
 
         if ( map.version > 9 ) {
             decompressed >> map.monsterMetadata >> map.artifactMetadata >> map.resourceMetadata;
+            std::cout << "[DEBUG] monster/artifact/resource fail state: " << decompressed.fail() << std::endl;
         }
         else {
             convertFromV9ToV10( map, std::move( standardMetadata ) );
@@ -575,10 +628,13 @@ namespace
         }
         else {
             decompressed >> map.translationInfo;
+            std::cout << "[DEBUG] translationInfo fail state: " << decompressed.fail() << std::endl;
         }
 
         convertFromV11ToV12( map );
         convertFromV12ToV13( map );
+
+        std::cout << "[DEBUG] Main Stream Fail: " << stream.fail() << " | Decompressed Fail: " << decompressed.fail() << std::endl;
 
         return !stream.fail();
     }
@@ -773,25 +829,37 @@ namespace Maps::Map_Format
             return false;
         }
 
+        // --- CUSTOM LOGGING TRIGGER ---
+        bool isOurMap = (path.find("converted_map") != std::string::npos);
+        if (isOurMap) std::cout << "\n[DEBUG] --- ATTEMPTING TO LOAD: " << path << " ---" << std::endl;
+
         StreamFile fileStream;
         fileStream.setBigendian( true );
 
         if ( !fileStream.open( path, "rb" ) ) {
+            if (isOurMap) std::cout << "[DEBUG] Failed to open file." << std::endl;
             return false;
         }
 
         const size_t fileSize = fileStream.size();
         if ( fileSize < minFileSize ) {
+            if (isOurMap) std::cout << "[DEBUG] File too small. Size: " << fileSize << " (Min: " << minFileSize << ")" << std::endl;
             return false;
         }
 
         for ( const uint8_t value : magicWord ) {
             if ( fileStream.get() != value ) {
+                if (isOurMap) std::cout << "[DEBUG] Magic Word mismatch!" << std::endl;
                 return false;
             }
         }
 
-        return loadFromStream( fileStream, map );
+        bool result = loadFromStream( fileStream, map );
+        if (isOurMap && !result) {
+            std::cout << "[DEBUG] loadFromStream returned false!" << std::endl;
+        }
+
+        return result;
     }
 
     bool loadMap( const std::string & path, MapFormat & map )

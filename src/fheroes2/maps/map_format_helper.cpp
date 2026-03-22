@@ -2089,4 +2089,118 @@ namespace Maps
         map.translations.erase( language );
         map.translationInfo.erase( language );
     }
+
+    namespace MapFormatHelper
+    {
+        bool saveMap( const fheroes2::World & w, const std::string & fileName )
+        {
+            Maps::Map_Format::MapFormat map;
+
+            map.width = w.width;
+            map.height = w.height;
+            map.version = Maps::Map_Format::FORMAT_VERSION_LATEST;
+            map.difficulty = 0; 
+            map.isCampaign = false;
+            
+            map.tiles.resize( w.width * w.height );
+            std::set<uint32_t> savedUids;
+
+            for ( int32_t i = 0; i < static_cast<int32_t>( w.vec_tiles.size() ); ++i ) {
+                const Maps::Tile & tile = w.vec_tiles[i];
+                Maps::Map_Format::TileInfo & mapTile = map.tiles[i];
+
+                mapTile.terrainIndex = tile.getTerrainImageIndex();
+                mapTile.terrainFlags = tile.getTerrainFlags();
+
+                // Collect all parts on this tile
+                std::vector<const Maps::ObjectPart *> parts;
+                if ( tile.getMainObjectPart().icnType != MP2::OBJ_ICN_TYPE_UNKNOWN ) {
+                    parts.push_back( &tile.getMainObjectPart() );
+                }
+                for ( const auto & part : tile.getGroundObjectParts() ) {
+                    parts.push_back( &part );
+                }
+                for ( const auto & part : tile.getTopObjectParts() ) {
+                    parts.push_back( &part );
+                }
+
+                for ( const auto * part : parts ) {
+                    const uint32_t uid = part->_uid;
+                    
+                    if ( uid != 0 ) {
+                        if ( savedUids.find( uid ) != savedUids.end() ) {
+                            continue;
+                        }
+                    }
+
+                    uint8_t group = 0;
+                    uint8_t index = 0;
+                    if ( Maps::getObjectGroupAndIndex( part->icnType, part->icnIndex, group, index ) ) {
+                        mapTile.objects.push_back( { uid, group, index } );
+                        if ( uid != 0 ) {
+                            savedUids.insert( uid );
+                        }
+                        
+                        // Handle Metadata
+                        if ( group == static_cast<uint8_t>( Maps::ObjectGroup::KINGDOM_TOWNS ) ) {
+                            for ( const auto * castle : w.vec_castles ) {
+                                if ( castle->GetIndex() == i ) {
+                                    map.castleMetadata[uid] = castle->getCastleMetadata();
+                                    break;
+                                }
+                            }
+                        }
+                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::KINGDOM_HEROES ) ) {
+                            for ( const auto * hero : w.vec_heroes ) {
+                                if ( hero->GetIndex() == i ) {
+                                    map.heroMetadata[uid] = hero->getHeroMetadata();
+                                    break;
+                                }
+                            }
+                        }
+                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_SIGNS ) ) {
+                            const auto * obj = w.map_objects.get( uid );
+                            if ( const auto * sign = dynamic_cast<const MapSign *>( obj ) ) {
+                                map.signMetadata[uid].message = sign->message.text;
+                            }
+                        }
+                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_EVENTS ) ) {
+                            const auto * obj = w.map_objects.get( uid );
+                            if ( const auto * event = dynamic_cast<const MapEvent *>( obj ) ) {
+                                auto & meta = map.adventureMapEventMetadata[uid];
+                                meta.message = event->message;
+                                meta.isSingleTimeEvent = event->isSingleTimeEvent;
+                                meta.isComputerPlayerAllowed = event->isComputerPlayerAllowed;
+                                meta.resources = event->resources;
+                                meta.artifact = event->artifact;
+                                meta.experience = event->experience;
+                                meta.secondarySkill = event->secondarySkill;
+                            }
+                        }
+                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_SPHINX ) ) {
+                            const auto * obj = w.map_objects.get( uid );
+                            if ( const auto * sphinx = dynamic_cast<const MapSphinx *>( obj ) ) {
+                                auto & meta = map.sphinxMetadata[uid];
+                                meta.riddle = sphinx->riddle;
+                                meta.answers = sphinx->answers;
+                                meta.resources = sphinx->resources;
+                                meta.artifact = sphinx->artifact;
+                            }
+                        }
+                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_MONSTERS ) ) {
+                            map.monsterMetadata[uid].count = tile.metadata()[0];
+                        }
+                        else if ( group == static_cast<uint8_t>( Maps::ObjectGroup::ADVENTURE_RESOURCES ) ) {
+                            map.resourceMetadata[uid].count = tile.metadata()[0];
+                        }
+                    }
+                }
+            }
+
+            map.availablePlayerColors = 0x3F;
+            map.playerRace.assign( 6, static_cast<uint8_t>( Race::RANDOM ) );
+
+            return Maps::Map_Format::saveMap( fileName, map );
+        }
+    }
 }

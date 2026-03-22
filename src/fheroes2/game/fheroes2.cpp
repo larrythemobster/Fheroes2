@@ -32,6 +32,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 // Managing compiler warnings for SDL headers
 #if defined( __GNUC__ )
@@ -56,6 +57,10 @@
 #include <cassert>
 #endif
 
+#include <filesystem>
+
+#include "../maps/map_format_helper.h"
+#include "../world/world.h"
 #include "agg.h"
 #include "agg_image.h"
 #include "audio_manager.h"
@@ -364,6 +369,49 @@ int main( int argc, char ** argv )
 
         // Initialize game data.
         Game::Init();
+
+        // =========================================================================
+        // --- YOUR CUSTOM BATCH CONVERTER INJECTION ---
+        for ( int i = 1; i < argc; ++i ) {
+            if ( std::string(argv[i]) == "--convert" && i + 1 < argc ) {
+                std::string dirPath = argv[i + 1];
+                std::cout << "Starting native fheroes2 map conversion in: " << dirPath << "\n";
+
+                for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
+                    if (!entry.is_regular_file()) continue;
+
+                    std::string ext = entry.path().extension().string();
+                    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c){ return std::tolower(c); });
+
+                    if (ext == ".mp2" || ext == ".mpx" || ext == ".mx2" || ext == ".h2c" || ext == ".hxc") {
+                        std::string inputFile = entry.path().string();
+                        std::string outputFile = inputFile.substr(0, inputFile.find_last_of('.')) + ".fh2m";
+
+                        std::cout << "Converting " << inputFile << "...\n";
+
+                        // 1. Let the engine load the map into its internal state
+                        fheroes2::World world;
+                        if (!world.LoadMapMP2(inputFile, true)) {
+                            std::cout << " -> Engine failed to load MP2.\n";
+                            continue;
+                        }
+
+                        // TODO: Inject campaign win/loss rules into 'world' here if it's a campaign map
+
+                        // 2. Save the perfectly translated internal state to FH2M
+                        if (!Maps::MapFormatHelper::saveMap(world, outputFile)) {
+                            std::cout << " -> Engine failed to save FH2M.\n";
+                            continue;
+                        }
+                        std::cout << " -> Success!\n";
+                    }
+                }
+                std::cout << "Conversion complete! Exiting engine.\n";
+                return EXIT_SUCCESS; // Exit before the main menu launches
+            }
+        }
+        // --- END INJECTION ---
+        // =========================================================================
 
         if ( conf.isShowIntro() ) {
             fheroes2::showTeamInfo();

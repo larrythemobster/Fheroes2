@@ -29,6 +29,7 @@ class Army;
 namespace fheroes2
 {
     enum class SupportedLanguage : uint8_t;
+    class World;
 }
 
 namespace MP2
@@ -138,4 +139,9 @@ namespace Maps
 
     // This function is used exclusively by the Editor when a map maker wants to remove a translation from the list of supported languages.
     void removeTranslation( Map_Format::MapFormat & map, const fheroes2::SupportedLanguage language );
+
+    namespace MapFormatHelper
+    {
+        bool saveMap( const fheroes2::World & world, const std::string & path );
+    }
 }

@@ -61,6 +61,8 @@
 
 namespace {
     struct MapModLoader {
+        double initialStackMultiplier = 1.0;
+        double weeklyGrowthMultiplier = 1.0;
         double chestMultiplier = 1.0;
         int shrine1 = -1;
         int shrine2 = -1;
@@ -96,6 +98,8 @@ namespace {
 
             if (jsonData.contains("map_objects")) {
                 auto& mo = jsonData["map_objects"];
+                if (mo.contains("map_initial_stack_multiplier")) initialStackMultiplier = mo["map_initial_stack_multiplier"];
+                if (mo.contains("map_weekly_growth_multiplier")) weeklyGrowthMultiplier = mo["map_weekly_growth_multiplier"];
                 if (mo.contains("chest_multiplier")) chestMultiplier = mo["chest_multiplier"];
                 if (mo.contains("shrine_1_spell")) shrine1 = mo["shrine_1_spell"];
                 if (mo.contains("shrine_2_spell")) shrine2 = mo["shrine_2_spell"];
@@ -120,6 +124,8 @@ namespace {
                 if (mo.contains("survivor_artifact")) survivorArtifact = mo["survivor_artifact"];
             } else {
                 jsonData["map_objects"] = {
+                    {"map_initial_stack_multiplier", 1.0},
+                    {"map_weekly_growth_multiplier", 1.0},
                     {"chest_multiplier", 1.0},
                     {"shrine_1_spell", -1},
                     {"shrine_2_spell", -1},
@@ -161,11 +167,18 @@ namespace
         const uint32_t troopCount = troop.GetCount();
 
         if ( troopCount == 0 ) {
-            Maps::setMonsterCountOnTile( tile, troop.GetRNDSize() );
+            const double diffMult = mapModLoader.initialStackMultiplier;
+            uint32_t newCount = std::max<uint32_t>(1, static_cast<uint32_t>(troop.GetRNDSize() * diffMult));
+            Maps::setMonsterCountOnTile( tile, newCount );
         }
         else {
             const uint32_t bonusUnit = ( Rand::Get( 1, 7 ) <= ( troopCount % 7 ) ) ? 1 : 0;
-            Maps::setMonsterCountOnTile( tile, troopCount * 8 / 7 + bonusUnit );
+            const uint32_t vanillaNewTroops = (troopCount / 7) + bonusUnit;
+        
+            const double growthMult = mapModLoader.weeklyGrowthMultiplier;
+            const uint32_t actualNewTroops = static_cast<uint32_t>(vanillaNewTroops * growthMult);
+        
+            Maps::setMonsterCountOnTile( tile, troopCount + actualNewTroops );
         }
     }
 
@@ -1883,12 +1896,16 @@ namespace Maps
         mainObjectPart.icnIndex = static_cast<IcnIndexType>( monsSpriteIndex );
 
         const bool setDefinedCount = ( count > 0 );
+    
+        const double diffMult = mapModLoader.initialStackMultiplier;
 
         if ( setDefinedCount ) {
-            setMonsterCountOnTile( tile, count );
+            uint32_t newCount = std::max<uint32_t>(1, static_cast<uint32_t>(count * diffMult));
+            setMonsterCountOnTile( tile, newCount );
         }
         else {
-            setMonsterCountOnTile( tile, mons.GetRNDSize() );
+            uint32_t newCount = std::max<uint32_t>(1, static_cast<uint32_t>(mons.GetRNDSize() * diffMult));
+            setMonsterCountOnTile( tile, newCount );
         }
 
         if ( mons.GetID() == Monster::GHOST || mons.isElemental() ) {

@@ -164,6 +164,7 @@ public:
     void LoadFromMP2( const std::vector<uint8_t> & data );
 
     void loadFromResurrectionMap( const Maps::Map_Format::CastleMetadata & metadata );
+    Maps::Map_Format::CastleMetadata getCastleMetadata() const;
 
     Captain & GetCaptain()
     {

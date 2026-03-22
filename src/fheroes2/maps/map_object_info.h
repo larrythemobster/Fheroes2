@@ -174,6 +174,8 @@ namespace Maps
 
     MP2::MapObjectType getObjectTypeByIcn( const MP2::ObjectIcnType icnType, const uint32_t icnIndex );
 
+    bool getObjectGroupAndIndex( const MP2::ObjectIcnType icnType, const uint32_t icnIndex, ObjectGroup & group, uint32_t & index );
+
     // The function returns tile offsets only for ground level objects located on OBJECT_LAYER and BACKGROUND_LAYER layers.
     // Objects on other layers do not affect passabilities of tiles so they do not 'occupy' these tiles.
     std::vector<fheroes2::Point> getGroundLevelOccupiedTileOffset( const ObjectInfo & info );

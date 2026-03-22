@@ -425,6 +425,41 @@ void Castle::loadFromResurrectionMap( const Maps::Map_Format::CastleMetadata & m
     _postLoad();
 }
 
+Maps::Map_Format::CastleMetadata Castle::getCastleMetadata() const
+{
+    Maps::Map_Format::CastleMetadata metadata;
+
+    metadata.customName = _name;
+    Maps::saveCastleArmy( _army, metadata );
+
+    metadata.customBuildings = ( Modes( CUSTOM ) || _constructedBuildings != 0 );
+
+    const std::vector<uint32_t> allPossibleBuildings = {
+        BUILD_THIEVESGUILD, BUILD_TAVERN, BUILD_SHIPYARD, BUILD_WELL, BUILD_STATUE,
+        BUILD_LEFTTURRET, BUILD_RIGHTTURRET, BUILD_MARKETPLACE, BUILD_WEL2, BUILD_MOAT,
+        BUILD_SPEC, BUILD_CAPTAIN, BUILD_CASTLE, BUILD_SHRINE,
+        BUILD_MAGEGUILD1, BUILD_MAGEGUILD2, BUILD_MAGEGUILD3, BUILD_MAGEGUILD4, BUILD_MAGEGUILD5,
+        DWELLING_MONSTER1, DWELLING_MONSTER2, DWELLING_MONSTER3, DWELLING_MONSTER4, DWELLING_MONSTER5, DWELLING_MONSTER6,
+        DWELLING_UPGRADE2, DWELLING_UPGRADE3, DWELLING_UPGRADE4, DWELLING_UPGRADE5, DWELLING_UPGRADE6, DWELLING_UPGRADE7
+    };
+
+    for ( uint32_t building : allPossibleBuildings ) {
+        if ( isBuild( building ) ) {
+            metadata.builtBuildings.push_back( building );
+        }
+
+        if ( isBuildingDisabled( building ) ) {
+            metadata.bannedBuildings.push_back( building );
+        }
+    }
+
+    for ( size_t i = 0; i < _dwelling.size(); ++i ) {
+        metadata.availableToHireMonsterCount[i] = static_cast<int32_t>( _dwelling[i] );
+    }
+
+    return metadata;
+}
+
 void Castle::_postLoad()
 {
     // Fix dwelling upgrades dependent from race. (For random race towns.)
