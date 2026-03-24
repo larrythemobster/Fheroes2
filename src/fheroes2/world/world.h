@@ -476,6 +476,10 @@ public:
 
     MapEvent * GetMapEvent( const fheroes2::Point & pos );
 
+    MapSign * GetMapSign( const fheroes2::Point & pos );
+
+    MapSphinx * GetMapSphinx( const fheroes2::Point & pos );
+
     MapBaseObject * GetMapObject( const uint32_t uid )
     {
         return uid ? map_objects.get( uid ) : nullptr;

@@ -31,6 +31,7 @@
 #include <ostream>
 #include <set>
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "army.h"
@@ -190,15 +191,29 @@ namespace
         return true;
     }
 
-    void loadArmyFromMetadata( Army & army, const std::array<int32_t, 5> & unitType, const std::array<int32_t, 5> & unitCount )
+    bool loadArmyFromMetadata( Army & army, const std::array<int32_t, 5> & unitType, const std::array<int32_t, 5> & unitCount )
     {
         std::vector<Troop> troops( unitType.size() );
+        bool hasValidTroops = false;
+
         for ( size_t i = 0; i < troops.size(); ++i ) {
-            assert( unitType[i] >= 0 && unitCount[i] >= 0 );
+            assert( unitCount[i] >= 0 );
+
+            if ( unitType[i] <= 0 || unitCount[i] == 0 ) {
+                continue;
+            }
+
+            if ( !Monster{ unitType[i] }.isValid() ) {
+                DEBUG_LOG( DBG_GAME, DBG_WARN, "Ignoring invalid monster id " << unitType[i] << " in army metadata slot " << i )
+                continue;
+            }
+
             troops[i] = Troop{ unitType[i], static_cast<uint32_t>( unitCount[i] ) };
+            hasValidTroops = true;
         }
 
         army.Assign( troops.data(), troops.data() + troops.size() );
+        return hasValidTroops;
     }
 
     void saveArmyToMetadata( const Army & army, std::array<int32_t, 5> & unitType, std::array<int32_t, 5> & unitCount )
@@ -1986,8 +2001,7 @@ namespace Maps
             return false;
         }
 
-        loadArmyFromMetadata( army, metadata.defenderMonsterType, metadata.defenderMonsterCount );
-        return true;
+        return loadArmyFromMetadata( army, metadata.defenderMonsterType, metadata.defenderMonsterCount );
     }
 
     void saveCastleArmy( const Army & army, Map_Format::CastleMetadata & metadata )
@@ -2002,8 +2016,7 @@ namespace Maps
             return false;
         }
 
-        loadArmyFromMetadata( army, metadata.armyMonsterType, metadata.armyMonsterCount );
-        return true;
+        return loadArmyFromMetadata( army, metadata.armyMonsterType, metadata.armyMonsterCount );
     }
 
     void saveHeroArmy( const Army & army, Map_Format::HeroMetadata & metadata )
@@ -2455,6 +2468,186 @@ namespace Maps
         return part.icnType == mainObjectPart.icnType && part.icnIndex == mainObjectPart.icnIndex;
     }
 
+    struct ExportObjectPartInfo
+    {
+        fheroes2::Point tilePosition;
+        MP2::ObjectIcnType icnType{ MP2::OBJ_ICN_TYPE_UNKNOWN };
+        uint8_t icnIndex{ 0 };
+        bool isTopPart{ false };
+    };
+
+    using ExportObjectAnchorCandidates = std::map<std::pair<MP2::ObjectIcnType, uint32_t>, std::vector<std::pair<Maps::ObjectGroup, uint32_t>>>;
+    using ExportObjectPartsByUID = std::map<uint32_t, std::vector<ExportObjectPartInfo>>;
+
+    void addObjectPartForExport( ExportObjectPartsByUID & objectPartsByUID, const fheroes2::Point & tilePosition, const Maps::ObjectPart & part, const bool isTopPart )
+    {
+        if ( part._uid == 0 || part.icnType == MP2::OBJ_ICN_TYPE_UNKNOWN ) {
+            return;
+        }
+
+        objectPartsByUID[part._uid].push_back( { tilePosition, part.icnType, part.icnIndex, isTopPart } );
+    }
+
+    ExportObjectPartsByUID collectObjectPartsByUID( const World & currentWorld )
+    {
+        ExportObjectPartsByUID objectPartsByUID;
+
+        for ( int32_t tileIndex = 0; tileIndex < static_cast<int32_t>( currentWorld.getSize() ); ++tileIndex ) {
+            const Maps::Tile & tile = currentWorld.getTile( tileIndex );
+            const fheroes2::Point tilePosition = Maps::GetPoint( tileIndex );
+
+            addObjectPartForExport( objectPartsByUID, tilePosition, tile.getMainObjectPart(), false );
+
+            for ( const Maps::ObjectPart & part : tile.getGroundObjectParts() ) {
+                addObjectPartForExport( objectPartsByUID, tilePosition, part, false );
+            }
+
+            for ( const Maps::ObjectPart & part : tile.getTopObjectParts() ) {
+                addObjectPartForExport( objectPartsByUID, tilePosition, part, true );
+            }
+        }
+
+        return objectPartsByUID;
+    }
+
+    ExportObjectAnchorCandidates collectObjectAnchorCandidates()
+    {
+        ExportObjectAnchorCandidates candidates;
+
+        for ( size_t groupIndex = 0; groupIndex < static_cast<size_t>( Maps::ObjectGroup::GROUP_COUNT ); ++groupIndex ) {
+            const Maps::ObjectGroup group = static_cast<Maps::ObjectGroup>( groupIndex );
+            const auto & objects = Maps::getObjectsByGroup( group );
+
+            for ( size_t objectIndex = 0; objectIndex < objects.size(); ++objectIndex ) {
+                const Maps::ObjectInfo & objectInfo = objects[objectIndex];
+                if ( objectInfo.groundLevelParts.empty() ) {
+                    continue;
+                }
+
+                const auto & anchorPart = objectInfo.groundLevelParts.front();
+                candidates[std::make_pair( anchorPart.icnType, anchorPart.icnIndex )].emplace_back( group, static_cast<uint32_t>( objectIndex ) );
+            }
+        }
+
+        return candidates;
+    }
+
+    MP2::MapObjectType normalizeObjectType( const MP2::MapObjectType objectType )
+    {
+        if ( ( objectType & MP2::OBJ_ACTION_OBJECT_TYPE ) == MP2::OBJ_ACTION_OBJECT_TYPE ) {
+            return static_cast<MP2::MapObjectType>( objectType & ~MP2::OBJ_ACTION_OBJECT_TYPE );
+        }
+
+        return objectType;
+    }
+
+    bool doesObjectTypeMatchForExport( const MP2::MapObjectType candidateType, const MP2::MapObjectType preferredType )
+    {
+        return preferredType != MP2::OBJ_NONE && normalizeObjectType( candidateType ) == normalizeObjectType( preferredType );
+    }
+
+    bool doesObjectStructureMatchForExport( const std::vector<ExportObjectPartInfo> & actualParts, const fheroes2::Point & anchorTilePosition,
+                                            const Maps::ObjectInfo & objectInfo )
+    {
+        std::multiset<std::tuple<int32_t, int32_t, MP2::ObjectIcnType, uint32_t, bool>> expectedParts;
+        for ( const auto & part : objectInfo.groundLevelParts ) {
+            expectedParts.emplace( part.tileOffset.x, part.tileOffset.y, part.icnType, part.icnIndex, false );
+        }
+        for ( const auto & part : objectInfo.topLevelParts ) {
+            expectedParts.emplace( part.tileOffset.x, part.tileOffset.y, part.icnType, part.icnIndex, true );
+        }
+
+        if ( actualParts.size() != expectedParts.size() ) {
+            return false;
+        }
+
+        std::multiset<std::tuple<int32_t, int32_t, MP2::ObjectIcnType, uint32_t, bool>> relativeActualParts;
+        for ( const ExportObjectPartInfo & part : actualParts ) {
+            relativeActualParts.emplace( part.tilePosition.x - anchorTilePosition.x, part.tilePosition.y - anchorTilePosition.y, part.icnType, part.icnIndex,
+                                         part.isTopPart );
+        }
+
+        return relativeActualParts == expectedParts;
+    }
+
+    bool findObjectInfoForExport( const Maps::MapFormatHelper::ConversionContext & context, const ExportObjectAnchorCandidates & anchorCandidates,
+                                  const ExportObjectPartsByUID & objectPartsByUID, const Maps::Tile & tile, const int32_t tileIndex,
+                                  const Maps::ObjectPart & part, Maps::ObjectGroup & group, uint32_t & index )
+    {
+        const auto candidateIter = anchorCandidates.find( std::make_pair( part.icnType, static_cast<uint32_t>( part.icnIndex ) ) );
+        if ( candidateIter == anchorCandidates.end() ) {
+            return false;
+        }
+
+        if ( part._uid == 0 ) {
+            return Maps::getObjectGroupAndIndex( part.icnType, part.icnIndex, group, index );
+        }
+
+        const auto actualPartsIter = objectPartsByUID.find( part._uid );
+        if ( actualPartsIter == objectPartsByUID.end() ) {
+            return false;
+        }
+
+        const fheroes2::Point anchorTilePosition = Maps::GetPoint( tileIndex );
+        const MP2::MapObjectType mainObjectType = tile.getMainObjectType( false );
+        const MP2::MapObjectType originalObjectType = getOriginalTileObjectType( context, tileIndex );
+
+        std::vector<std::pair<Maps::ObjectGroup, uint32_t>> exactMatches;
+        std::vector<std::pair<Maps::ObjectGroup, uint32_t>> preferredTypeMatches;
+
+        for ( const auto & candidate : candidateIter->second ) {
+            const Maps::ObjectGroup candidateGroup = candidate.first;
+            if ( candidateGroup == Maps::ObjectGroup::KINGDOM_TOWNS || candidateGroup == Maps::ObjectGroup::LANDSCAPE_TOWN_BASEMENTS
+                 || candidateGroup == Maps::ObjectGroup::LANDSCAPE_FLAGS ) {
+                continue;
+            }
+
+            const Maps::ObjectInfo & objectInfo = Maps::getObjectInfo( candidateGroup, static_cast<int32_t>( candidate.second ) );
+            if ( !doesObjectStructureMatchForExport( actualPartsIter->second, anchorTilePosition, objectInfo ) ) {
+                continue;
+            }
+
+            exactMatches.push_back( candidate );
+
+            if ( doesObjectTypeMatchForExport( objectInfo.objectType, mainObjectType ) || doesObjectTypeMatchForExport( objectInfo.objectType, originalObjectType ) ) {
+                preferredTypeMatches.push_back( candidate );
+            }
+        }
+
+        const auto & resolvedMatches = preferredTypeMatches.empty() ? exactMatches : preferredTypeMatches;
+        if ( resolvedMatches.size() != 1 ) {
+            return false;
+        }
+
+        group = resolvedMatches.front().first;
+        index = resolvedMatches.front().second;
+        return true;
+    }
+
+    const MapBaseObject * getMapObjectForMetadataExport( const Maps::MapFormatHelper::ConversionContext & context, const int32_t tileIndex, const uint32_t uid,
+                                                         const MP2::MapObjectType objectType )
+    {
+        const auto isTileIndexedObjectType = []( const MP2::MapObjectType type ) {
+            return type == MP2::OBJ_BOTTLE || type == MP2::OBJ_EVENT || type == MP2::OBJ_SIGN || type == MP2::OBJ_SPHINX;
+        };
+
+        if ( !isTileIndexedObjectType( objectType ) ) {
+            return context.world.GetMapObject( uid );
+        }
+
+        // These runtime objects are attached to MapObjects by tile index when maps are loaded,
+        // while FH2M metadata is keyed by serialized object UID.
+        if ( const MapBaseObject * const object = context.world.GetMapObject( static_cast<uint32_t>( tileIndex ) ); object != nullptr && object->GetIndex() == tileIndex ) {
+            return object;
+        }
+
+        if ( const MapBaseObject * const object = context.world.GetMapObject( uid ); object != nullptr && object->GetIndex() == tileIndex ) {
+            return object;
+        }
+
+        return nullptr;
+    }
+
     void saveObjectMetadata( Map_Format::MapFormat & map, const Maps::MapFormatHelper::ConversionContext & context, const Maps::Tile & tile, const int32_t tileIndex,
                              const uint32_t uid, const Maps::ObjectGroup group, const uint32_t index )
     {
@@ -2473,12 +2666,26 @@ namespace Maps
             }
         }
 
-        if ( const MapBaseObject * object = context.world.GetMapObject( uid ); object != nullptr ) {
-            if ( const auto * sign = dynamic_cast<const MapSign *>( object ); sign != nullptr ) {
+        switch ( objectType ) {
+        case MP2::OBJ_BOTTLE:
+        case MP2::OBJ_SIGN: {
+            map.signMetadata.try_emplace( uid );
+
+            if ( const MapBaseObject * const object = getMapObjectForMetadataExport( context, tileIndex, uid, objectType ); object != nullptr ) {
+                const auto * sign = dynamic_cast<const MapSign *>( object );
+                assert( sign != nullptr );
+
                 map.signMetadata[uid].message = sign->message.text;
             }
+            break;
+        }
+        case MP2::OBJ_EVENT: {
+            map.adventureMapEventMetadata.try_emplace( uid );
 
-            if ( const auto * event = dynamic_cast<const MapEvent *>( object ); event != nullptr ) {
+            if ( const MapBaseObject * const object = getMapObjectForMetadataExport( context, tileIndex, uid, objectType ); object != nullptr ) {
+                const auto * event = dynamic_cast<const MapEvent *>( object );
+                assert( event != nullptr );
+
                 auto & metadata = map.adventureMapEventMetadata[uid];
                 metadata.message = event->message;
                 metadata.humanPlayerColors = event->colors & context.mapInfo.colorsAvailableForHumans;
@@ -2499,8 +2706,15 @@ namespace Maps
                 metadata.monsterType = event->monsterType;
                 metadata.monsterCount = event->monsterCount;
             }
+            break;
+        }
+        case MP2::OBJ_SPHINX: {
+            map.sphinxMetadata.try_emplace( uid );
 
-            if ( const auto * sphinx = dynamic_cast<const MapSphinx *>( object ); sphinx != nullptr ) {
+            if ( const MapBaseObject * const object = getMapObjectForMetadataExport( context, tileIndex, uid, objectType ); object != nullptr ) {
+                const auto * sphinx = dynamic_cast<const MapSphinx *>( object );
+                assert( sphinx != nullptr );
+
                 auto & metadata = map.sphinxMetadata[uid];
                 metadata.riddle = sphinx->riddle;
                 metadata.answers.assign( sphinx->answers.begin(), sphinx->answers.end() );
@@ -2510,6 +2724,10 @@ namespace Maps
                 }
                 metadata.resources = sphinx->resources;
             }
+            break;
+        }
+        default:
+            break;
         }
 
         if ( group == Maps::ObjectGroup::MONSTERS ) {
@@ -2659,8 +2877,10 @@ namespace Maps
             
             map.tiles.resize( static_cast<size_t>( w.w() ) * static_cast<size_t>( w.h() ) );
             // In MP2 maps, castle/town objects share their UID with associated flag and basement sprites.
-            // We use pair<uid, group> so that different parts of a town don't block each other from being saved.
-            std::set<std::pair<uint32_t, Maps::ObjectGroup>> savedUids;
+            // Keep tile index and object index as well so both left/right flags and basement parts are preserved.
+            std::set<std::tuple<uint32_t, Maps::ObjectGroup, uint32_t, int32_t>> savedObjects;
+            const ExportObjectAnchorCandidates anchorCandidates = collectObjectAnchorCandidates();
+            const ExportObjectPartsByUID objectPartsByUID = collectObjectPartsByUID( w );
 
             for ( int32_t i = 0; i < static_cast<int32_t>( w.getSize() ); ++i ) {
                 const Maps::Tile & tile = w.getTile( i );
@@ -2686,7 +2906,7 @@ namespace Maps
 
                     Maps::ObjectGroup group = Maps::ObjectGroup::NONE;
                     uint32_t index = 0;
-                    if ( Maps::getObjectGroupAndIndex( part->icnType, part->icnIndex, group, index ) ) {
+                    if ( findObjectInfoForExport( context, anchorCandidates, objectPartsByUID, tile, i, *part, group, index ) ) {
                         if ( uid != 0 && !isAnchorObjectPart( tile, *part, group, index ) ) {
                             continue;
                         }
@@ -2700,7 +2920,7 @@ namespace Maps
                             }
                         }
 
-                        if ( uid != 0 && savedUids.count( { uid, emittedGroup } ) > 0 ) {
+                        if ( uid != 0 && savedObjects.count( { uid, emittedGroup, emittedIndex, i } ) > 0 ) {
                             continue;
                         }
 
@@ -2710,7 +2930,7 @@ namespace Maps
                         }
 
                         if ( uid != 0 ) {
-                            savedUids.insert( { uid, emittedGroup } );
+                            savedObjects.insert( { uid, emittedGroup, emittedIndex, i } );
                             saveObjectMetadata( map, context, tile, i, uid, emittedGroup, emittedIndex );
                         }
                     }

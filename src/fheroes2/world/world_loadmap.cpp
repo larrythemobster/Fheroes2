@@ -931,7 +931,7 @@ bool World::loadResurrectionMap( const std::string & filename )
                                         selected.end() );
                     }
                     else {
-                        const auto level = Monster{ static_cast<int>( object.index ) + 1 }.GetRandomUnitLevel();
+                        const auto level = Monster{ static_cast<int>( monsterObjects[object.index].metadata[0] ) }.GetRandomUnitLevel();
 
                         selected.erase( std::remove_if( selected.begin(), selected.end(),
                                                         [level]( const int value ) {
@@ -993,7 +993,8 @@ bool World::loadResurrectionMap( const std::string & filename )
                     eventObject->monsterType = eventInfo.monsterType;
                     eventObject->monsterCount = eventInfo.monsterCount;
 
-                    eventObject->setUIDAndIndex( static_cast<int32_t>( tileId ) );
+                    eventObject->SetUID( object.id );
+                    eventObject->SetIndex( static_cast<int32_t>( tileId ) );
 
                     map_objects.add( std::move( eventObject ) );
 
@@ -1050,7 +1051,8 @@ bool World::loadResurrectionMap( const std::string & filename )
 
                     auto signObject = std::make_unique<MapSign>();
                     signObject->message.text = std::move( signInfo.message );
-                    signObject->setUIDAndIndex( static_cast<int32_t>( tileId ) );
+                    signObject->SetUID( object.id );
+                    signObject->SetIndex( static_cast<int32_t>( tileId ) );
                     if ( signObject->message.text.empty() ) {
                         signObject->setDefaultMessage();
                     }
@@ -1091,7 +1093,8 @@ bool World::loadResurrectionMap( const std::string & filename )
 
                     sphinxObject->validate();
 
-                    sphinxObject->setUIDAndIndex( static_cast<int32_t>( tileId ) );
+                    sphinxObject->SetUID( object.id );
+                    sphinxObject->SetIndex( static_cast<int32_t>( tileId ) );
 
                     // The original game assumes answers only to be up to 4 characters.
                     // However, it seems logically incorrect.
@@ -1148,7 +1151,8 @@ bool World::loadResurrectionMap( const std::string & filename )
 
                     auto signObject = std::make_unique<MapSign>();
                     signObject->message.text = std::move( signInfo.message );
-                    signObject->setUIDAndIndex( static_cast<int32_t>( tileId ) );
+                    signObject->SetUID( object.id );
+                    signObject->SetIndex( static_cast<int32_t>( tileId ) );
                     if ( signObject->message.text.empty() ) {
                         signObject->setDefaultMessage();
                     }

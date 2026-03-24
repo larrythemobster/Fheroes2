@@ -917,11 +917,40 @@ void World::ActionForMagellanMaps( const PlayerColor color )
 MapEvent * World::GetMapEvent( const fheroes2::Point & pos )
 {
     std::list<MapBaseObject *> res = map_objects.get( pos );
-    if ( res.empty() ) {
-        return nullptr;
+
+    for ( MapBaseObject * object : res ) {
+        if ( auto * event = dynamic_cast<MapEvent *>( object ); event != nullptr ) {
+            return event;
+        }
     }
 
-    return dynamic_cast<MapEvent *>( res.front() );
+    return nullptr;
+}
+
+MapSign * World::GetMapSign( const fheroes2::Point & pos )
+{
+    std::list<MapBaseObject *> res = map_objects.get( pos );
+
+    for ( MapBaseObject * object : res ) {
+        if ( auto * sign = dynamic_cast<MapSign *>( object ); sign != nullptr ) {
+            return sign;
+        }
+    }
+
+    return nullptr;
+}
+
+MapSphinx * World::GetMapSphinx( const fheroes2::Point & pos )
+{
+    std::list<MapBaseObject *> res = map_objects.get( pos );
+
+    for ( MapBaseObject * object : res ) {
+        if ( auto * sphinx = dynamic_cast<MapSphinx *>( object ); sphinx != nullptr ) {
+            return sphinx;
+        }
+    }
+
+    return nullptr;
 }
 
 void World::RemoveMapObject( const MapBaseObject * obj )
@@ -1317,21 +1346,21 @@ void World::fixFrenchCharactersInStrings()
         switch ( tile.getMainObjectType() ) {
         case MP2::OBJ_SIGN:
         case MP2::OBJ_BOTTLE: {
-            MapSign * sign = dynamic_cast<MapSign *>( map_objects.get( tile.GetIndex() ) );
+            MapSign * sign = GetMapSign( Maps::GetPoint( tile.GetIndex() ) );
             if ( sign != nullptr ) {
                 fheroes2::fixFrenchCharactersForMP2Map( sign->message.text );
             }
             break;
         }
         case MP2::OBJ_EVENT: {
-            MapEvent * event = dynamic_cast<MapEvent *>( map_objects.get( tile.GetIndex() ) );
+            MapEvent * event = GetMapEvent( Maps::GetPoint( tile.GetIndex() ) );
             if ( event != nullptr ) {
                 fheroes2::fixFrenchCharactersForMP2Map( event->message );
             }
             break;
         }
         case MP2::OBJ_SPHINX: {
-            MapSphinx * sphinx = dynamic_cast<MapSphinx *>( map_objects.get( tile.GetIndex() ) );
+            MapSphinx * sphinx = GetMapSphinx( Maps::GetPoint( tile.GetIndex() ) );
             if ( sphinx != nullptr ) {
                 for ( std::string & text : sphinx->answers ) {
                     fheroes2::fixFrenchCharactersForMP2Map( text );

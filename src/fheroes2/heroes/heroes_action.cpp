@@ -336,7 +336,7 @@ namespace
 
     void showSignMessage( const int32_t tileIndex )
     {
-        const MapSign * sign = dynamic_cast<MapSign *>( world.GetMapObject( tileIndex ) );
+        const MapSign * sign = world.GetMapSign( Maps::GetPoint( tileIndex ) );
         if ( sign == nullptr ) {
             assert( sign != nullptr );
             return;
@@ -3528,7 +3528,7 @@ namespace
             IncorrectAnswer
         };
 
-        MapSphinx * riddle = dynamic_cast<MapSphinx *>( world.GetMapObject( dst_index ) );
+        MapSphinx * riddle = world.GetMapSphinx( Maps::GetPoint( dst_index ) );
 
         const Outcome outcome = [objectType, riddle]() {
             const std::string title = MP2::StringObject( objectType );

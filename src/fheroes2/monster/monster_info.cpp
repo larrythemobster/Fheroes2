@@ -32,6 +32,7 @@
 
 #include <fstream>
 #include "icn.h"
+#include "logging.h"
 #include "m82.h"
 #include "monster.h"
 #include "race.h"
@@ -684,6 +685,10 @@ namespace fheroes2
     {
         if ( monsterData.empty() ) {
             populateMonsterData();
+        }
+
+        if ( monsterId < 0 || static_cast<size_t>( monsterId ) >= monsterData.size() ) {
+            ERROR_LOG( "Invalid monster id requested: " << monsterId << ", monster data size: " << monsterData.size() );
         }
 
         assert( monsterId >= 0 && static_cast<size_t>( monsterId ) < monsterData.size() );

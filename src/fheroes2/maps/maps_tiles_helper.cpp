@@ -60,6 +60,11 @@
 #include <fstream>
 
 namespace {
+    uint8_t normalizeMonsterSpriteIndex( const uint8_t spriteIndex )
+    {
+        return spriteIndex % 128;
+    }
+
     struct MapModLoader {
         double initialStackMultiplier = 1.0;
         double weeklyGrowthMultiplier = 1.0;
@@ -672,7 +677,7 @@ namespace Maps
         case MP2::OBJ_BARROW_MOUNDS:
             return { Monster::GHOST };
         case MP2::OBJ_MONSTER:
-            return { tile.getMainObjectPart().icnIndex + 1 };
+            return { static_cast<int>( normalizeMonsterSpriteIndex( tile.getMainObjectPart().icnIndex ) ) + 1 };
         default:
             break;
         }
@@ -1865,7 +1870,8 @@ namespace Maps
 
     void updateMonsterInfoOnTile( Tile & tile )
     {
-        const Monster mons = Monster( tile.getMainObjectPart().icnIndex + 1 ); // ICN::MONS32 start from PEASANT
+        tile.getMainObjectPart().icnIndex = normalizeMonsterSpriteIndex( tile.getMainObjectPart().icnIndex );
+        const Monster mons = Monster( static_cast<int>( tile.getMainObjectPart().icnIndex ) + 1 ); // ICN::MONS32 start from PEASANT
         setMonsterOnTile( tile, mons, tile.metadata()[0] );
     }
 
