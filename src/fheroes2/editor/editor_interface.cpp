@@ -2305,6 +2305,7 @@ namespace Interface
         Maps::resetObjectUID();
 
         _loadedFileName.clear();
+        _loadedFileDirectory.clear();
 
         conf.getCurrentMapInfo().version = GameVersion::RESURRECTION;
 
@@ -2324,6 +2325,7 @@ namespace Interface
         }
 
         _loadedFileName = System::GetStem( filePath );
+        _loadedFileDirectory = System::GetParentDirectory( filePath );
 
         // Set the loaded map as a default map for the new Standard Game.
         Maps::FileInfo fi;
@@ -2344,17 +2346,20 @@ namespace Interface
             return;
         }
 
-        const std::string dataPath = System::GetDataDirectory( "fheroes2" );
-        if ( dataPath.empty() ) {
-            fheroes2::showStandardTextMessage( _( "Error" ), _( "Unable to locate data directory to save the map." ), Dialog::OK );
-            return;
-        }
+        std::string mapDirectory = _loadedFileDirectory;
+        if ( mapDirectory.empty() ) {
+            const std::string dataPath = System::GetDataDirectory( "fheroes2" );
+            if ( dataPath.empty() ) {
+                fheroes2::showStandardTextMessage( _( "Error" ), _( "Unable to locate data directory to save the map." ), Dialog::OK );
+                return;
+            }
 
-        std::string mapDirectory = System::concatPath( dataPath, "maps" );
+            mapDirectory = System::concatPath( dataPath, "maps" );
 
-        if ( !System::IsDirectory( mapDirectory ) && !System::MakeDirectory( mapDirectory ) ) {
-            fheroes2::showStandardTextMessage( _( "Error" ), _( "Unable to create a directory to save the map." ), Dialog::OK );
-            return;
+            if ( !System::IsDirectory( mapDirectory ) && !System::MakeDirectory( mapDirectory ) ) {
+                fheroes2::showStandardTextMessage( _( "Error" ), _( "Unable to create a directory to save the map." ), Dialog::OK );
+                return;
+            }
         }
 
         // Since the name of the map directory can be in arbitrary case, we need to get its real case-sensitive name first
@@ -2400,6 +2405,7 @@ namespace Interface
                 assert( 0 );
             }
 
+            _loadedFileDirectory = System::GetParentDirectory( fullPath );
             _warningMessage.reset( _( "Map saved to: " ) + std::move( fullPath ) );
 
             return;

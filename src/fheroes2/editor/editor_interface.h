@@ -192,5 +192,6 @@ namespace Interface
         WarningMessage _warningMessage;
 
         std::string _loadedFileName;
+        std::string _loadedFileDirectory;
     };
 }
