@@ -1125,8 +1125,47 @@ namespace Maps
             worldTile.setTerrain( map.tiles[i].terrainIndex, map.tiles[i].terrainFlags );
         }
 
+        const auto getLoadPriority = []( const IndexedObjectInfo & info ) {
+            switch ( info.info->group ) {
+            case ObjectGroup::LANDSCAPE_TOWN_BASEMENTS:
+                return 0;
+            case ObjectGroup::KINGDOM_TOWNS:
+                return 1;
+            case ObjectGroup::LANDSCAPE_FLAGS:
+                return 2;
+            default:
+                return 3;
+            }
+        };
+
         // Read objects from all tiles and place them based on their IDs.
-        auto sortObjects = []( const IndexedObjectInfo & left, const IndexedObjectInfo & right ) { return left.info->id < right.info->id; };
+        // Town basements, town cores and flags intentionally share the same UID and overlap on a few tiles,
+        // so they must be reloaded in the same order as they are placed by the editor/generator.
+        auto sortObjects = [&getLoadPriority]( const IndexedObjectInfo & left, const IndexedObjectInfo & right ) {
+            if ( left.info->id != right.info->id ) {
+                return left.info->id < right.info->id;
+            }
+
+            const int leftPriority = getLoadPriority( left );
+            const int rightPriority = getLoadPriority( right );
+            if ( leftPriority != rightPriority ) {
+                return leftPriority < rightPriority;
+            }
+
+            if ( left.tileIndex != right.tileIndex ) {
+                return left.tileIndex < right.tileIndex;
+            }
+
+            if ( left.info->group != right.info->group ) {
+                return left.info->group < right.info->group;
+            }
+
+            if ( left.info->index != right.info->index ) {
+                return left.info->index < right.info->index;
+            }
+
+            return left.info < right.info;
+        };
         std::multiset<IndexedObjectInfo, decltype( sortObjects )> sortedObjects( sortObjects );
 
 #if defined( WITH_DEBUG )
@@ -2346,36 +2385,6 @@ namespace Maps
         map.computerPlayerColors = mapInfo.colorsAvailableForComp;
         map.startWithHeroInFirstCastle = mapInfo.startWithHeroInFirstCastle;
 
-        // CRITICAL FIX: Only mark player colors as available if they have castles or heroes
-        // Otherwise they will be marked as defeated immediately on game load (kingdom.h:103)
-        PlayerColorsSet colorsWithStart = 0;
-        for ( int colorIndex = 0; colorIndex < maxNumOfPlayers; ++colorIndex ) {
-            const PlayerColor color = Color::IndexToColor( colorIndex );
-            if ( ( mapInfo.kingdomColors & color ) == 0 ) continue;
-
-            const Kingdom & kingdom = context.world.GetKingdom( color );
-            if ( !kingdom.GetCastles().empty() || !kingdom.GetHeroes().empty() ) {
-                colorsWithStart |= color;
-            }
-        }
-
-        // Filter available colors to only those with actual castles or heroes
-        map.availablePlayerColors &= colorsWithStart;
-        map.humanPlayerColors &= colorsWithStart;
-        map.computerPlayerColors &= colorsWithStart;
-
-        if ( map.availablePlayerColors == 0 ) {
-            // If no colors have castles, fall back to original for manual maps (non-campaign)
-            // Campaign maps should always have player castles, so this is unusual
-            if ( !context.isCampaign ) {
-                map.availablePlayerColors = mapInfo.kingdomColors;
-            }
-            else {
-                DEBUG_LOG( DBG_GAME, DBG_WARN, "Campaign map has no castles assigned to any player color!" )
-                map.availablePlayerColors = mapInfo.kingdomColors;
-            }
-        }
-        
         map.alliances = getMapAlliances( mapInfo );
         map.playerRace = mapInfo.races;
         map.victoryConditionType = mapInfo.victoryConditionType;
@@ -2524,8 +2533,22 @@ namespace Maps
                     continue;
                 }
 
-                const auto & anchorPart = objectInfo.groundLevelParts.front();
-                candidates[std::make_pair( anchorPart.icnType, anchorPart.icnIndex )].emplace_back( group, static_cast<uint32_t>( objectIndex ) );
+                const auto addCandidate = [&candidates, group, objectIndex]( const Maps::ObjectPartInfo & objectPart ) {
+                    auto & objectCandidates = candidates[std::make_pair( objectPart.icnType, static_cast<uint32_t>( objectPart.icnIndex ) )];
+                    const std::pair<Maps::ObjectGroup, uint32_t> candidate{ group, static_cast<uint32_t>( objectIndex ) };
+
+                    if ( std::find( objectCandidates.cbegin(), objectCandidates.cend(), candidate ) == objectCandidates.cend() ) {
+                        objectCandidates.push_back( candidate );
+                    }
+                };
+
+                for ( const Maps::ObjectPartInfo & objectPart : objectInfo.groundLevelParts ) {
+                    addCandidate( objectPart );
+                }
+
+                for ( const Maps::ObjectPartInfo & objectPart : objectInfo.topLevelParts ) {
+                    addCandidate( objectPart );
+                }
             }
         }
 
@@ -2544,6 +2567,85 @@ namespace Maps
     bool doesObjectTypeMatchForExport( const MP2::MapObjectType candidateType, const MP2::MapObjectType preferredType )
     {
         return preferredType != MP2::OBJ_NONE && normalizeObjectType( candidateType ) == normalizeObjectType( preferredType );
+    }
+
+    bool isSharedTownObjectGroup( const Maps::ObjectGroup group )
+    {
+        return group == Maps::ObjectGroup::KINGDOM_TOWNS || group == Maps::ObjectGroup::LANDSCAPE_TOWN_BASEMENTS
+               || group == Maps::ObjectGroup::LANDSCAPE_FLAGS;
+    }
+
+    uint32_t getTownObjectIndexForExport( const Castle & castle )
+    {
+        const int race = castle.GetRace();
+
+        uint32_t raceIndex = 0;
+        switch ( race ) {
+        case Race::KNGT:
+            raceIndex = 0;
+            break;
+        case Race::BARB:
+            raceIndex = 1;
+            break;
+        case Race::SORC:
+            raceIndex = 2;
+            break;
+        case Race::WRLK:
+            raceIndex = 3;
+            break;
+        case Race::WZRD:
+            raceIndex = 4;
+            break;
+        case Race::NECR:
+            raceIndex = 5;
+            break;
+        case Race::RAND:
+            raceIndex = 6;
+            break;
+        default:
+            assert( 0 );
+            break;
+        }
+
+        if ( race == Race::RAND ) {
+            return castle.isCastle() ? 12U : 13U;
+        }
+
+        return raceIndex * 2U + ( castle.isCastle() ? 0U : 1U );
+    }
+
+    bool isSensitiveMetadataObjectType( const MP2::MapObjectType objectType )
+    {
+        switch ( objectType ) {
+        case MP2::OBJ_BOTTLE:
+        case MP2::OBJ_EVENT:
+        case MP2::OBJ_SIGN:
+        case MP2::OBJ_SPHINX:
+            return true;
+        default:
+            break;
+        }
+
+        return false;
+    }
+
+    bool tryGetDirectObjectInfoForExport( const Maps::ObjectPart & part, Maps::ObjectGroup & group, uint32_t & index )
+    {
+        if ( !Maps::getObjectGroupAndIndex( part.icnType, part.icnIndex, group, index ) ) {
+            return false;
+        }
+
+        const Maps::ObjectInfo & directObjectInfo = Maps::getObjectInfo( group, static_cast<int32_t>( index ) );
+        if ( directObjectInfo.groundLevelParts.empty() ) {
+            return false;
+        }
+
+        const auto & anchorPart = directObjectInfo.groundLevelParts.front();
+        if ( anchorPart.icnType != part.icnType || anchorPart.icnIndex != part.icnIndex ) {
+            return false;
+        }
+
+        return isSharedTownObjectGroup( group ) || !isSensitiveMetadataObjectType( directObjectInfo.objectType );
     }
 
     bool doesObjectStructureMatchForExport( const std::vector<ExportObjectPartInfo> & actualParts, const fheroes2::Point & anchorTilePosition,
@@ -2570,17 +2672,71 @@ namespace Maps
         return relativeActualParts == expectedParts;
     }
 
+    bool doesObjectStructureMatchForExport( const std::vector<ExportObjectPartInfo> & actualParts, const fheroes2::Point & currentTilePosition,
+                                            const Maps::ObjectPart & currentPart, const bool isTopPart, const Maps::ObjectInfo & objectInfo )
+    {
+        const auto matchesCurrentPart = [&currentPart]( const Maps::ObjectPartInfo & objectPart ) {
+            return objectPart.icnType == currentPart.icnType && objectPart.icnIndex == currentPart.icnIndex;
+        };
+
+        for ( const Maps::ObjectPartInfo & objectPart : objectInfo.groundLevelParts ) {
+            if ( isTopPart || !matchesCurrentPart( objectPart ) ) {
+                continue;
+            }
+
+            const fheroes2::Point anchorTilePosition{ currentTilePosition.x - objectPart.tileOffset.x, currentTilePosition.y - objectPart.tileOffset.y };
+            if ( doesObjectStructureMatchForExport( actualParts, anchorTilePosition, objectInfo ) ) {
+                return true;
+            }
+        }
+
+        for ( const Maps::ObjectPartInfo & objectPart : objectInfo.topLevelParts ) {
+            if ( !isTopPart || !matchesCurrentPart( objectPart ) ) {
+                continue;
+            }
+
+            const fheroes2::Point anchorTilePosition{ currentTilePosition.x - objectPart.tileOffset.x, currentTilePosition.y - objectPart.tileOffset.y };
+            if ( doesObjectStructureMatchForExport( actualParts, anchorTilePosition, objectInfo ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool findObjectInfoForExport( const Maps::MapFormatHelper::ConversionContext & context, const ExportObjectAnchorCandidates & anchorCandidates,
-                                  const ExportObjectPartsByUID & objectPartsByUID, const Maps::Tile & tile, const int32_t tileIndex,
+                                  const ExportObjectPartsByUID & objectPartsByUID, const Maps::Tile & tile, const int32_t tileIndex, const bool isTopPart,
                                   const Maps::ObjectPart & part, Maps::ObjectGroup & group, uint32_t & index )
     {
+        Maps::ObjectGroup directGroup = Maps::ObjectGroup::NONE;
+        uint32_t directIndex = 0;
+        const bool hasDirectMapping = tryGetDirectObjectInfoForExport( part, directGroup, directIndex );
+
         const auto candidateIter = anchorCandidates.find( std::make_pair( part.icnType, static_cast<uint32_t>( part.icnIndex ) ) );
         if ( candidateIter == anchorCandidates.end() ) {
+            if ( hasDirectMapping ) {
+                group = directGroup;
+                index = directIndex;
+                return true;
+            }
+
             return false;
         }
 
         if ( part._uid == 0 ) {
+            if ( hasDirectMapping ) {
+                group = directGroup;
+                index = directIndex;
+                return true;
+            }
+
             return Maps::getObjectGroupAndIndex( part.icnType, part.icnIndex, group, index );
+        }
+
+        if ( hasDirectMapping && isSharedTownObjectGroup( directGroup ) ) {
+            group = directGroup;
+            index = directIndex;
+            return true;
         }
 
         const auto actualPartsIter = objectPartsByUID.find( part._uid );
@@ -2588,7 +2744,7 @@ namespace Maps
             return false;
         }
 
-        const fheroes2::Point anchorTilePosition = Maps::GetPoint( tileIndex );
+        const fheroes2::Point currentTilePosition = Maps::GetPoint( tileIndex );
         const MP2::MapObjectType mainObjectType = tile.getMainObjectType( false );
         const MP2::MapObjectType originalObjectType = getOriginalTileObjectType( context, tileIndex );
 
@@ -2603,7 +2759,7 @@ namespace Maps
             }
 
             const Maps::ObjectInfo & objectInfo = Maps::getObjectInfo( candidateGroup, static_cast<int32_t>( candidate.second ) );
-            if ( !doesObjectStructureMatchForExport( actualPartsIter->second, anchorTilePosition, objectInfo ) ) {
+            if ( !doesObjectStructureMatchForExport( actualPartsIter->second, currentTilePosition, part, isTopPart, objectInfo ) ) {
                 continue;
             }
 
@@ -2616,6 +2772,12 @@ namespace Maps
 
         const auto & resolvedMatches = preferredTypeMatches.empty() ? exactMatches : preferredTypeMatches;
         if ( resolvedMatches.size() != 1 ) {
+            if ( hasDirectMapping ) {
+                group = directGroup;
+                index = directIndex;
+                return true;
+            }
+
             return false;
         }
 
@@ -2890,29 +3052,43 @@ namespace Maps
                 mapTile.terrainFlags = tile.getTerrainFlags();
 
                 // Collect all parts on this tile
-                std::vector<const Maps::ObjectPart *> parts;
+                struct ExportTilePartInfo
+                {
+                    const Maps::ObjectPart * part;
+                    bool isTopPart;
+                };
+
+                std::vector<ExportTilePartInfo> parts;
                 if ( tile.getMainObjectPart().icnType != MP2::OBJ_ICN_TYPE_UNKNOWN ) {
-                    parts.push_back( &tile.getMainObjectPart() );
+                    parts.push_back( { &tile.getMainObjectPart(), false } );
                 }
                 for ( const auto & part : tile.getGroundObjectParts() ) {
-                    parts.push_back( &part );
+                    parts.push_back( { &part, false } );
                 }
                 for ( const auto & part : tile.getTopObjectParts() ) {
-                    parts.push_back( &part );
+                    parts.push_back( { &part, true } );
                 }
 
-                for ( const auto * part : parts ) {
-                    const uint32_t uid = part->_uid;
+                for ( const ExportTilePartInfo & tilePart : parts ) {
+                    const Maps::ObjectPart & part = *tilePart.part;
+                    const uint32_t uid = part._uid;
 
                     Maps::ObjectGroup group = Maps::ObjectGroup::NONE;
                     uint32_t index = 0;
-                    if ( findObjectInfoForExport( context, anchorCandidates, objectPartsByUID, tile, i, *part, group, index ) ) {
-                        if ( uid != 0 && !isAnchorObjectPart( tile, *part, group, index ) ) {
+                    if ( findObjectInfoForExport( context, anchorCandidates, objectPartsByUID, tile, i, tilePart.isTopPart, part, group, index ) ) {
+                        if ( uid != 0 && !isAnchorObjectPart( tile, part, group, index ) ) {
                             continue;
                         }
 
                         Maps::ObjectGroup emittedGroup = group;
                         uint32_t emittedIndex = index;
+
+                        if ( emittedGroup == Maps::ObjectGroup::KINGDOM_TOWNS ) {
+                            if ( const Castle * castle = findCastleOnTile( context.world, i ); castle != nullptr ) {
+                                emittedIndex = getTownObjectIndexForExport( *castle );
+                            }
+                        }
+
                         if ( uid != 0 ) {
                             if ( const auto overriddenObject = getOverriddenRandomObject( context, i, uid, group, index ); overriddenObject.has_value() ) {
                                 emittedGroup = overriddenObject->group;
@@ -2949,6 +3125,7 @@ namespace Maps
                         }
                     }
                 }
+
             }
 
             for ( int colorIndex = 0; colorIndex < maxNumOfPlayers; ++colorIndex ) {

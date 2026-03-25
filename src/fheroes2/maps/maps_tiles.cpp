@@ -1367,28 +1367,59 @@ void Maps::Tile::fixMP2MapTileObjectType( Tile & tile )
     // of the monster placeholder sprite. While this engine looks at the object type when placing an actual monster on a tile, the original
     // HoMM2 apparently looks at the placeholder sprite, so we need to keep them in sync.
     if ( tile._mainObjectPart.icnType == MP2::OBJ_ICN_TYPE_MONS32 ) {
+        const auto getExpectedRandomMonsterSpriteIndex = []( const MP2::MapObjectType objectType ) -> uint8_t {
+            switch ( objectType ) {
+            case MP2::OBJ_RANDOM_MONSTER:
+                return Monster::RANDOM_MONSTER - 1;
+            case MP2::OBJ_RANDOM_MONSTER_WEAK:
+                return Monster::RANDOM_MONSTER_LEVEL_1 - 1;
+            case MP2::OBJ_RANDOM_MONSTER_MEDIUM:
+                return Monster::RANDOM_MONSTER_LEVEL_2 - 1;
+            case MP2::OBJ_RANDOM_MONSTER_STRONG:
+                return Monster::RANDOM_MONSTER_LEVEL_3 - 1;
+            case MP2::OBJ_RANDOM_MONSTER_VERY_STRONG:
+                return Monster::RANDOM_MONSTER_LEVEL_4 - 1;
+            default:
+                break;
+            }
+
+            return 0xFF;
+        };
+
         MP2::MapObjectType monsterObjectType = originalObjectType;
 
         const uint8_t originalObjectSpriteIndex = tile.getMainObjectPart().icnIndex;
+        const uint8_t expectedObjectSpriteIndex = getExpectedRandomMonsterSpriteIndex( originalObjectType );
+        if ( expectedObjectSpriteIndex != 0xFF && originalObjectSpriteIndex != expectedObjectSpriteIndex ) {
+            tile._mainObjectPart.icnIndex = expectedObjectSpriteIndex;
+
+            DEBUG_LOG( DBG_GAME, DBG_WARN,
+                       "Invalid object type index " << tile._index << ": type " << MP2::StringObject( originalObjectType ) << ", object sprite index "
+                                                    << static_cast<int>( originalObjectSpriteIndex ) << ", corrected sprite index "
+                                                    << static_cast<int>( expectedObjectSpriteIndex ) )
+
+            return;
+        }
+
         switch ( originalObjectSpriteIndex ) {
         // Random monster placeholder "MON"
-        case 66:
+        case Monster::RANDOM_MONSTER - 1:
             monsterObjectType = MP2::OBJ_RANDOM_MONSTER;
             break;
         // Random monster placeholder "MON 1"
-        case 67:
+        case Monster::RANDOM_MONSTER_LEVEL_1 - 1:
             monsterObjectType = MP2::OBJ_RANDOM_MONSTER_WEAK;
             break;
         // Random monster placeholder "MON 2"
-        case 68:
+        case Monster::RANDOM_MONSTER_LEVEL_2 - 1:
             monsterObjectType = MP2::OBJ_RANDOM_MONSTER_MEDIUM;
             break;
         // Random monster placeholder "MON 3"
-        case 69:
+        case Monster::RANDOM_MONSTER_LEVEL_3 - 1:
             monsterObjectType = MP2::OBJ_RANDOM_MONSTER_STRONG;
             break;
         // Random monster placeholder "MON 4"
-        case 70:
+        case Monster::RANDOM_MONSTER_LEVEL_4 - 1:
             monsterObjectType = MP2::OBJ_RANDOM_MONSTER_VERY_STRONG;
             break;
         default:

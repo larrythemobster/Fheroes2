@@ -108,6 +108,7 @@ namespace
 
     // Change the version when there is a need to expand map format functionality.
     constexpr uint16_t currentSupportedVersion{ 14 };
+    constexpr uint16_t currentSaveVersion{ 13 };
 
     void convertFromV2ToV3( Maps::Map_Format::MapFormat & map )
     {
@@ -437,10 +438,15 @@ namespace
 
     bool saveToStream( OStreamBase & stream, const Maps::Map_Format::BaseMapFormat & map )
     {
-        stream << currentSupportedVersion << map.isCampaign << map.difficulty << map.availablePlayerColors << map.humanPlayerColors << map.computerPlayerColors
-               << map.alliances << map.playerRace << map.startWithHeroInFirstCastle << map.victoryConditionType << map.isVictoryConditionApplicableForAI << map.allowNormalVictory
-               << map.victoryConditionMetadata << map.lossConditionType << map.lossConditionMetadata << map.width << map.mainLanguage << map.name << map.description
-               << map.creatorNotes << map.translations;
+        stream << currentSaveVersion << map.isCampaign << map.difficulty << map.availablePlayerColors << map.humanPlayerColors << map.computerPlayerColors << map.alliances
+               << map.playerRace;
+
+        if constexpr ( currentSaveVersion >= 14 ) {
+            stream << map.startWithHeroInFirstCastle;
+        }
+
+        stream << map.victoryConditionType << map.isVictoryConditionApplicableForAI << map.allowNormalVictory << map.victoryConditionMetadata << map.lossConditionType
+               << map.lossConditionMetadata << map.width << map.mainLanguage << map.name << map.description << map.creatorNotes << map.translations;
 
         return !stream.fail();
     }
