@@ -24,8 +24,12 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <fstream>
+#include <map>
+#include <optional>
 #include <utility>
 
+#include "../json.hpp"
 #include "artifact.h"
 #include "color.h"
 #include "game_video_type.h"
@@ -40,6 +44,580 @@
 namespace
 {
     const Campaign::VideoSequence emptyPlayback;
+    using Json = nlohmann::json;
+    std::map<std::pair<int32_t, int32_t>, std::vector<Campaign::CampaignAwardData>> g_campaignAwardOverrides;
+
+    struct CampaignScenarioOverride final
+    {
+        bool hasMapFileName{ false };
+        std::string mapFileName;
+
+        bool hasScenarioName{ false };
+        std::string scenarioName;
+
+        bool hasDescription{ false };
+        std::string description;
+
+        bool hasVictoryCondition{ false };
+        Campaign::ScenarioVictoryCondition victoryCondition{ Campaign::ScenarioVictoryCondition::STANDARD };
+
+        bool hasLossCondition{ false };
+        Campaign::ScenarioLossCondition lossCondition{ Campaign::ScenarioLossCondition::STANDARD };
+
+        bool hasNextScenarios{ false };
+        std::vector<Campaign::ScenarioInfoId> nextScenarios;
+
+        bool hasBonuses{ false };
+        std::vector<Campaign::ScenarioBonusData> bonuses;
+
+        bool hasAwards{ false };
+        std::vector<Campaign::CampaignAwardData> awards;
+    };
+
+    struct CampaignOverrides final
+    {
+        std::map<int32_t, std::map<int32_t, CampaignScenarioOverride>> scenarioOverrides;
+    };
+
+    Json generateCampaignOverridesTemplate();
+    Campaign::CampaignData getRolandCampaignData( bool shouldApplyOverrides = true );
+    Campaign::CampaignData getArchibaldCampaignData( bool shouldApplyOverrides = true );
+    Campaign::CampaignData getPriceOfLoyaltyCampaignData( bool shouldApplyOverrides = true );
+    Campaign::CampaignData getDescendantsCampaignData( bool shouldApplyOverrides = true );
+    Campaign::CampaignData getWizardsIsleCampaignData( bool shouldApplyOverrides = true );
+    Campaign::CampaignData getVoyageHomeCampaignData( bool shouldApplyOverrides = true );
+
+    const char * getCampaignJsonKey( const int campaignId )
+    {
+        switch ( campaignId ) {
+        case Campaign::ROLAND_CAMPAIGN:
+            return "roland";
+        case Campaign::ARCHIBALD_CAMPAIGN:
+            return "archibald";
+        case Campaign::PRICE_OF_LOYALTY_CAMPAIGN:
+            return "price_of_loyalty";
+        case Campaign::DESCENDANTS_CAMPAIGN:
+            return "descendants";
+        case Campaign::WIZARDS_ISLE_CAMPAIGN:
+            return "wizards_isle";
+        case Campaign::VOYAGE_HOME_CAMPAIGN:
+            return "voyage_home";
+        default:
+            break;
+        }
+
+        return nullptr;
+    }
+
+    std::optional<Campaign::ScenarioVictoryCondition> parseVictoryCondition( const Json & value )
+    {
+        if ( !value.is_string() ) {
+            return std::nullopt;
+        }
+
+        const std::string key = StringLower( value.get<std::string>() );
+        if ( key == "standard" ) {
+            return Campaign::ScenarioVictoryCondition::STANDARD;
+        }
+        if ( key == "capture_dragon_city" ) {
+            return Campaign::ScenarioVictoryCondition::CAPTURE_DRAGON_CITY;
+        }
+        if ( key == "obtain_ultimate_crown" ) {
+            return Campaign::ScenarioVictoryCondition::OBTAIN_ULTIMATE_CROWN;
+        }
+        if ( key == "obtain_sphere_negation" ) {
+            return Campaign::ScenarioVictoryCondition::OBTAIN_SPHERE_NEGATION;
+        }
+
+        return std::nullopt;
+    }
+
+    std::optional<Campaign::ScenarioLossCondition> parseLossCondition( const Json & value )
+    {
+        if ( !value.is_string() ) {
+            return std::nullopt;
+        }
+
+        const std::string key = StringLower( value.get<std::string>() );
+        if ( key == "standard" ) {
+            return Campaign::ScenarioLossCondition::STANDARD;
+        }
+        if ( key == "lose_all_sorceress_villages" ) {
+            return Campaign::ScenarioLossCondition::LOSE_ALL_SORCERESS_VILLAGES;
+        }
+
+        return std::nullopt;
+    }
+
+    std::optional<Campaign::ScenarioBonusData> parseScenarioBonus( const Json & value )
+    {
+        if ( !value.is_object() ) {
+            return std::nullopt;
+        }
+
+        const auto typeIter = value.find( "type" );
+        const auto subTypeIter = value.find( "sub_type" );
+        const auto amountIter = value.find( "amount" );
+        if ( typeIter == value.end() || subTypeIter == value.end() || amountIter == value.end() || !typeIter->is_string() || !subTypeIter->is_number_integer()
+             || !amountIter->is_number_integer() ) {
+            return std::nullopt;
+        }
+
+        const std::string typeKey = StringLower( typeIter->get<std::string>() );
+
+        int32_t type = -1;
+        if ( typeKey == "resources" ) {
+            type = Campaign::ScenarioBonusData::RESOURCES;
+        }
+        else if ( typeKey == "artifact" ) {
+            type = Campaign::ScenarioBonusData::ARTIFACT;
+        }
+        else if ( typeKey == "troop" ) {
+            type = Campaign::ScenarioBonusData::TROOP;
+        }
+        else if ( typeKey == "spell" ) {
+            type = Campaign::ScenarioBonusData::SPELL;
+        }
+        else if ( typeKey == "starting_race" ) {
+            type = Campaign::ScenarioBonusData::STARTING_RACE;
+        }
+        else if ( typeKey == "skill_primary" ) {
+            type = Campaign::ScenarioBonusData::SKILL_PRIMARY;
+        }
+        else if ( typeKey == "skill_secondary" ) {
+            type = Campaign::ScenarioBonusData::SKILL_SECONDARY;
+        }
+        else if ( typeKey == "starting_race_and_army" ) {
+            type = Campaign::ScenarioBonusData::STARTING_RACE_AND_ARMY;
+        }
+
+        if ( type < 0 ) {
+            return std::nullopt;
+        }
+
+        const int32_t subType = subTypeIter->get<int32_t>();
+        const int32_t amount = amountIter->get<int32_t>();
+
+        const auto spellIter = value.find( "artifact_spell_id" );
+        if ( spellIter != value.end() && spellIter->is_number_integer() ) {
+            return Campaign::ScenarioBonusData( type, subType, amount, spellIter->get<int32_t>() );
+        }
+
+        return Campaign::ScenarioBonusData( type, subType, amount );
+    }
+
+    std::optional<Campaign::CampaignAwardData> parseCampaignAward( const Json & value )
+    {
+        if ( !value.is_object() ) {
+            return std::nullopt;
+        }
+
+        const auto idIter = value.find( "id" );
+        const auto typeIter = value.find( "type" );
+        const auto subTypeIter = value.find( "sub_type" );
+        if ( idIter == value.end() || typeIter == value.end() || subTypeIter == value.end() || !idIter->is_number_integer() || !typeIter->is_string()
+             || !subTypeIter->is_number_integer() ) {
+            return std::nullopt;
+        }
+
+        const std::string typeKey = StringLower( typeIter->get<std::string>() );
+        int32_t type = -1;
+        if ( typeKey == "creature_curse" ) {
+            type = Campaign::CampaignAwardData::TYPE_CREATURE_CURSE;
+        }
+        else if ( typeKey == "creature_alliance" ) {
+            type = Campaign::CampaignAwardData::TYPE_CREATURE_ALLIANCE;
+        }
+        else if ( typeKey == "get_artifact" ) {
+            type = Campaign::CampaignAwardData::TYPE_GET_ARTIFACT;
+        }
+        else if ( typeKey == "get_spell" ) {
+            type = Campaign::CampaignAwardData::TYPE_GET_SPELL;
+        }
+        else if ( typeKey == "carry_over_forces" ) {
+            type = Campaign::CampaignAwardData::TYPE_CARRY_OVER_FORCES;
+        }
+        else if ( typeKey == "hireable_hero" ) {
+            type = Campaign::CampaignAwardData::TYPE_HIREABLE_HERO;
+        }
+        else if ( typeKey == "defeat_enemy_hero" ) {
+            type = Campaign::CampaignAwardData::TYPE_DEFEAT_ENEMY_HERO;
+        }
+        else if ( typeKey == "resource_bonus" ) {
+            type = Campaign::CampaignAwardData::TYPE_RESOURCE_BONUS;
+        }
+
+        if ( type < 0 ) {
+            return std::nullopt;
+        }
+
+        const int32_t id = idIter->get<int32_t>();
+        const int32_t subType = subTypeIter->get<int32_t>();
+        const int32_t amount = value.value( "amount", 1 );
+        const int32_t startScenarioId = value.value( "start_scenario_id", 0 );
+        const std::string customName = value.value( "custom_name", std::string() );
+
+        return Campaign::CampaignAwardData( id, type, subType, amount, startScenarioId, customName );
+    }
+
+    CampaignOverrides loadCampaignOverrides()
+    {
+        CampaignOverrides result;
+
+        std::ifstream file( "campaigns.json" );
+        Json jsonData;
+
+        if ( file.is_open() ) {
+            try {
+                file >> jsonData;
+            }
+            catch ( ... ) {
+                return result;
+            }
+        }
+        else {
+            std::ofstream outFile( "campaigns.json" );
+            if ( outFile.is_open() ) {
+                outFile << generateCampaignOverridesTemplate().dump( 4 );
+            }
+            return result;
+        }
+
+        const auto campaignsIter = jsonData.find( "campaigns" );
+        if ( campaignsIter == jsonData.end() || !campaignsIter->is_object() ) {
+            return result;
+        }
+
+        const std::array<int32_t, 6> campaignIds = { Campaign::ROLAND_CAMPAIGN, Campaign::ARCHIBALD_CAMPAIGN, Campaign::PRICE_OF_LOYALTY_CAMPAIGN,
+                                                      Campaign::DESCENDANTS_CAMPAIGN, Campaign::WIZARDS_ISLE_CAMPAIGN, Campaign::VOYAGE_HOME_CAMPAIGN };
+
+        for ( const int32_t campaignId : campaignIds ) {
+            const char * campaignKey = getCampaignJsonKey( campaignId );
+            if ( campaignKey == nullptr || !campaignsIter->contains( campaignKey ) ) {
+                continue;
+            }
+
+            const auto & campaignJson = ( *campaignsIter )[campaignKey];
+            const auto scenariosIter = campaignJson.find( "scenarios" );
+            if ( scenariosIter == campaignJson.end() || !scenariosIter->is_object() ) {
+                continue;
+            }
+
+            for ( auto scenarioIt = scenariosIter->begin(); scenarioIt != scenariosIter->end(); ++scenarioIt ) {
+                int32_t scenarioId = -1;
+                try {
+                    scenarioId = std::stoi( scenarioIt.key() );
+                }
+                catch ( ... ) {
+                    continue;
+                }
+
+                if ( !scenarioIt.value().is_object() ) {
+                    continue;
+                }
+
+                CampaignScenarioOverride overrideData;
+                const auto & scenarioJson = scenarioIt.value();
+
+                if ( const auto mapIter = scenarioJson.find( "map_file" ); mapIter != scenarioJson.end() && mapIter->is_string() ) {
+                    overrideData.hasMapFileName = true;
+                    overrideData.mapFileName = StringLower( mapIter->get<std::string>() );
+                }
+
+                if ( const auto nameIter = scenarioJson.find( "name" ); nameIter != scenarioJson.end() && nameIter->is_string() ) {
+                    overrideData.hasScenarioName = true;
+                    overrideData.scenarioName = nameIter->get<std::string>();
+                }
+
+                if ( const auto descriptionIter = scenarioJson.find( "description" ); descriptionIter != scenarioJson.end() && descriptionIter->is_string() ) {
+                    overrideData.hasDescription = true;
+                    overrideData.description = descriptionIter->get<std::string>();
+                }
+
+                if ( const auto victoryIter = scenarioJson.find( "victory_condition" ); victoryIter != scenarioJson.end() ) {
+                    if ( const auto parsedValue = parseVictoryCondition( *victoryIter ); parsedValue ) {
+                        overrideData.hasVictoryCondition = true;
+                        overrideData.victoryCondition = *parsedValue;
+                    }
+                }
+
+                if ( const auto lossIter = scenarioJson.find( "loss_condition" ); lossIter != scenarioJson.end() ) {
+                    if ( const auto parsedValue = parseLossCondition( *lossIter ); parsedValue ) {
+                        overrideData.hasLossCondition = true;
+                        overrideData.lossCondition = *parsedValue;
+                    }
+                }
+
+                if ( const auto nextIter = scenarioJson.find( "next_scenarios" ); nextIter != scenarioJson.end() && nextIter->is_array() ) {
+                    overrideData.hasNextScenarios = true;
+                    for ( const auto & nextScenario : *nextIter ) {
+                        if ( !nextScenario.is_number_integer() ) {
+                            continue;
+                        }
+
+                        overrideData.nextScenarios.emplace_back( campaignId, nextScenario.get<int32_t>() );
+                    }
+                }
+
+                if ( const auto bonusesIter = scenarioJson.find( "bonuses" ); bonusesIter != scenarioJson.end() && bonusesIter->is_array() ) {
+                    overrideData.hasBonuses = true;
+                    for ( const auto & bonusJson : *bonusesIter ) {
+                        if ( const auto parsedBonus = parseScenarioBonus( bonusJson ); parsedBonus ) {
+                            overrideData.bonuses.emplace_back( *parsedBonus );
+                        }
+                    }
+                }
+
+                if ( const auto awardsIter = scenarioJson.find( "awards" ); awardsIter != scenarioJson.end() && awardsIter->is_array() ) {
+                    overrideData.hasAwards = true;
+                    for ( const auto & awardJson : *awardsIter ) {
+                        if ( const auto parsedAward = parseCampaignAward( awardJson ); parsedAward ) {
+                            overrideData.awards.emplace_back( *parsedAward );
+                        }
+                    }
+                }
+
+                result.scenarioOverrides[campaignId][scenarioId] = std::move( overrideData );
+            }
+        }
+
+        return result;
+    }
+
+    const CampaignOverrides & getCampaignOverrides()
+    {
+        static const CampaignOverrides overrides = loadCampaignOverrides();
+        return overrides;
+    }
+
+    void applyCampaignScenarioOverrides( Campaign::CampaignData & campaignData )
+    {
+        const auto campaignOverridesIter = getCampaignOverrides().scenarioOverrides.find( campaignData.getCampaignID() );
+        if ( campaignOverridesIter == getCampaignOverrides().scenarioOverrides.end() ) {
+            return;
+        }
+
+        for ( Campaign::ScenarioData & scenario : campaignData.getAllScenariosMutable() ) {
+            const auto scenarioOverrideIter = campaignOverridesIter->second.find( scenario.getScenarioID() );
+            if ( scenarioOverrideIter == campaignOverridesIter->second.end() ) {
+                continue;
+            }
+
+            const CampaignScenarioOverride & overrideData = scenarioOverrideIter->second;
+            if ( overrideData.hasMapFileName ) {
+                scenario.setMapFileName( overrideData.mapFileName );
+            }
+            if ( overrideData.hasScenarioName ) {
+                scenario.setScenarioName( overrideData.scenarioName );
+            }
+            if ( overrideData.hasDescription ) {
+                scenario.setDescription( overrideData.description );
+            }
+            if ( overrideData.hasVictoryCondition ) {
+                scenario.setVictoryCondition( overrideData.victoryCondition );
+            }
+            if ( overrideData.hasLossCondition ) {
+                scenario.setLossCondition( overrideData.lossCondition );
+            }
+            if ( overrideData.hasNextScenarios ) {
+                scenario.setNextScenarios( std::vector<Campaign::ScenarioInfoId>( overrideData.nextScenarios ) );
+            }
+            if ( overrideData.hasBonuses ) {
+                scenario.setBonuses( std::vector<Campaign::ScenarioBonusData>( overrideData.bonuses ) );
+            }
+            if ( overrideData.hasAwards ) {
+                Campaign::CampaignAwardData::setCampaignAwardDataOverride( scenario.getScenarioInfoId(), std::vector<Campaign::CampaignAwardData>( overrideData.awards ) );
+            }
+        }
+    }
+
+    Json scenarioVictoryConditionToJson( const Campaign::ScenarioVictoryCondition value )
+    {
+        switch ( value ) {
+        case Campaign::ScenarioVictoryCondition::STANDARD:
+            return "standard";
+        case Campaign::ScenarioVictoryCondition::CAPTURE_DRAGON_CITY:
+            return "capture_dragon_city";
+        case Campaign::ScenarioVictoryCondition::OBTAIN_ULTIMATE_CROWN:
+            return "obtain_ultimate_crown";
+        case Campaign::ScenarioVictoryCondition::OBTAIN_SPHERE_NEGATION:
+            return "obtain_sphere_negation";
+        default:
+            break;
+        }
+
+        return "standard";
+    }
+
+    Json scenarioLossConditionToJson( const Campaign::ScenarioLossCondition value )
+    {
+        switch ( value ) {
+        case Campaign::ScenarioLossCondition::STANDARD:
+            return "standard";
+        case Campaign::ScenarioLossCondition::LOSE_ALL_SORCERESS_VILLAGES:
+            return "lose_all_sorceress_villages";
+        default:
+            break;
+        }
+
+        return "standard";
+    }
+
+    Json scenarioBonusToJson( const Campaign::ScenarioBonusData & bonus )
+    {
+        std::string type = "resources";
+        switch ( bonus._type ) {
+        case Campaign::ScenarioBonusData::RESOURCES:
+            type = "resources";
+            break;
+        case Campaign::ScenarioBonusData::ARTIFACT:
+            type = "artifact";
+            break;
+        case Campaign::ScenarioBonusData::TROOP:
+            type = "troop";
+            break;
+        case Campaign::ScenarioBonusData::SPELL:
+            type = "spell";
+            break;
+        case Campaign::ScenarioBonusData::STARTING_RACE:
+            type = "starting_race";
+            break;
+        case Campaign::ScenarioBonusData::SKILL_PRIMARY:
+            type = "skill_primary";
+            break;
+        case Campaign::ScenarioBonusData::SKILL_SECONDARY:
+            type = "skill_secondary";
+            break;
+        case Campaign::ScenarioBonusData::STARTING_RACE_AND_ARMY:
+            type = "starting_race_and_army";
+            break;
+        default:
+            break;
+        }
+
+        Json json = { { "type", type }, { "sub_type", bonus._subType }, { "amount", bonus._amount } };
+        if ( bonus._artifactSpellId != 0 ) {
+            json["artifact_spell_id"] = bonus._artifactSpellId;
+        }
+
+        return json;
+    }
+
+    Json campaignAwardToJson( const Campaign::CampaignAwardData & award )
+    {
+        std::string type = "get_artifact";
+        switch ( award._type ) {
+        case Campaign::CampaignAwardData::TYPE_CREATURE_CURSE:
+            type = "creature_curse";
+            break;
+        case Campaign::CampaignAwardData::TYPE_CREATURE_ALLIANCE:
+            type = "creature_alliance";
+            break;
+        case Campaign::CampaignAwardData::TYPE_GET_ARTIFACT:
+            type = "get_artifact";
+            break;
+        case Campaign::CampaignAwardData::TYPE_GET_SPELL:
+            type = "get_spell";
+            break;
+        case Campaign::CampaignAwardData::TYPE_CARRY_OVER_FORCES:
+            type = "carry_over_forces";
+            break;
+        case Campaign::CampaignAwardData::TYPE_HIREABLE_HERO:
+            type = "hireable_hero";
+            break;
+        case Campaign::CampaignAwardData::TYPE_DEFEAT_ENEMY_HERO:
+            type = "defeat_enemy_hero";
+            break;
+        case Campaign::CampaignAwardData::TYPE_RESOURCE_BONUS:
+            type = "resource_bonus";
+            break;
+        default:
+            break;
+        }
+
+        Json json = { { "id", award._id }, { "type", type }, { "sub_type", award._subType }, { "amount", award._amount },
+                      { "start_scenario_id", award._startScenarioID } };
+        if ( !award._customName.empty() ) {
+            json["custom_name"] = award._customName;
+        }
+
+        return json;
+    }
+
+    Json generateCampaignOverridesTemplate()
+    {
+        Json root;
+        Json campaignsJson = Json::object();
+
+        const std::array<int32_t, 6> campaignIds = { Campaign::ROLAND_CAMPAIGN, Campaign::ARCHIBALD_CAMPAIGN, Campaign::PRICE_OF_LOYALTY_CAMPAIGN,
+                                                      Campaign::DESCENDANTS_CAMPAIGN, Campaign::WIZARDS_ISLE_CAMPAIGN, Campaign::VOYAGE_HOME_CAMPAIGN };
+
+        for ( const int32_t campaignId : campaignIds ) {
+            const char * campaignKey = getCampaignJsonKey( campaignId );
+            if ( campaignKey == nullptr ) {
+                continue;
+            }
+
+            Json scenariosJson = Json::object();
+            Campaign::CampaignData campaignData;
+            switch ( campaignId ) {
+            case Campaign::ROLAND_CAMPAIGN:
+                campaignData = getRolandCampaignData( false );
+                break;
+            case Campaign::ARCHIBALD_CAMPAIGN:
+                campaignData = getArchibaldCampaignData( false );
+                break;
+            case Campaign::PRICE_OF_LOYALTY_CAMPAIGN:
+                campaignData = getPriceOfLoyaltyCampaignData( false );
+                break;
+            case Campaign::DESCENDANTS_CAMPAIGN:
+                campaignData = getDescendantsCampaignData( false );
+                break;
+            case Campaign::WIZARDS_ISLE_CAMPAIGN:
+                campaignData = getWizardsIsleCampaignData( false );
+                break;
+            case Campaign::VOYAGE_HOME_CAMPAIGN:
+                campaignData = getVoyageHomeCampaignData( false );
+                break;
+            default:
+                continue;
+            }
+
+            for ( const Campaign::ScenarioData & scenario : campaignData.getAllScenarios() ) {
+                Json scenarioJson;
+                scenarioJson["name"] = scenario.getScenarioName();
+                scenarioJson["description"] = scenario.getDescription();
+                scenarioJson["map_file"] = scenario.getMapFileName();
+                scenarioJson["victory_condition"] = scenarioVictoryConditionToJson( scenario.getVictoryCondition() );
+                scenarioJson["loss_condition"] = scenarioLossConditionToJson( scenario.getLossCondition() );
+
+                Json nextScenarios = Json::array();
+                for ( const Campaign::ScenarioInfoId & nextScenario : scenario.getNextScenarios() ) {
+                    nextScenarios.emplace_back( nextScenario.scenarioId );
+                }
+                scenarioJson["next_scenarios"] = std::move( nextScenarios );
+
+                Json bonuses = Json::array();
+                for ( const Campaign::ScenarioBonusData & bonus : scenario.getBonuses() ) {
+                    bonuses.emplace_back( scenarioBonusToJson( bonus ) );
+                }
+                scenarioJson["bonuses"] = std::move( bonuses );
+
+                Json awards = Json::array();
+                for ( const Campaign::CampaignAwardData & award : Campaign::CampaignAwardData::getCampaignAwardData( scenario.getScenarioInfoId() ) ) {
+                    awards.emplace_back( campaignAwardToJson( award ) );
+                }
+                scenarioJson["awards"] = std::move( awards );
+
+                scenariosJson[std::to_string( scenario.getScenarioID() )] = std::move( scenarioJson );
+            }
+
+            campaignsJson[campaignKey]["scenarios"] = std::move( scenariosJson );
+        }
+
+        root["campaigns"] = std::move( campaignsJson );
+        return root;
+    }
 
     std::vector<Campaign::CampaignAwardData> getRolandCampaignAwardData( const int scenarioID )
     {
@@ -168,7 +746,7 @@ namespace
         return obtainableAwards;
     }
 
-    Campaign::CampaignData getRolandCampaignData()
+    Campaign::CampaignData getRolandCampaignData( const bool shouldApplyOverrides )
     {
         const int scenarioCount = 11;
 
@@ -252,11 +830,14 @@ namespace
         Campaign::CampaignData campaignData;
         campaignData.setCampaignID( Campaign::ROLAND_CAMPAIGN );
         campaignData.setCampaignScenarios( std::move( scenarioDatas ) );
+        if ( shouldApplyOverrides ) {
+            applyCampaignScenarioOverrides( campaignData );
+        }
 
         return campaignData;
     }
 
-    Campaign::CampaignData getArchibaldCampaignData()
+    Campaign::CampaignData getArchibaldCampaignData( const bool shouldApplyOverrides )
     {
         const int scenarioCount = 12;
 
@@ -351,11 +932,14 @@ namespace
         Campaign::CampaignData campaignData;
         campaignData.setCampaignID( Campaign::ARCHIBALD_CAMPAIGN );
         campaignData.setCampaignScenarios( std::move( scenarioDatas ) );
+        if ( shouldApplyOverrides ) {
+            applyCampaignScenarioOverrides( campaignData );
+        }
 
         return campaignData;
     }
 
-    Campaign::CampaignData getPriceOfLoyaltyCampaignData()
+    Campaign::CampaignData getPriceOfLoyaltyCampaignData( const bool shouldApplyOverrides )
     {
         const int scenarioCount = 8;
 
@@ -415,11 +999,14 @@ namespace
         Campaign::CampaignData campaignData;
         campaignData.setCampaignID( Campaign::PRICE_OF_LOYALTY_CAMPAIGN );
         campaignData.setCampaignScenarios( std::move( scenarioDatas ) );
+        if ( shouldApplyOverrides ) {
+            applyCampaignScenarioOverrides( campaignData );
+        }
 
         return campaignData;
     }
 
-    Campaign::CampaignData getDescendantsCampaignData()
+    Campaign::CampaignData getDescendantsCampaignData( const bool shouldApplyOverrides )
     {
         const int scenarioCount = 8;
 
@@ -475,11 +1062,14 @@ namespace
         Campaign::CampaignData campaignData;
         campaignData.setCampaignID( Campaign::DESCENDANTS_CAMPAIGN );
         campaignData.setCampaignScenarios( std::move( scenarioDatas ) );
+        if ( shouldApplyOverrides ) {
+            applyCampaignScenarioOverrides( campaignData );
+        }
 
         return campaignData;
     }
 
-    Campaign::CampaignData getWizardsIsleCampaignData()
+    Campaign::CampaignData getWizardsIsleCampaignData( const bool shouldApplyOverrides )
     {
         const int scenarioCount = 4;
 
@@ -520,11 +1110,14 @@ namespace
         Campaign::CampaignData campaignData;
         campaignData.setCampaignID( Campaign::WIZARDS_ISLE_CAMPAIGN );
         campaignData.setCampaignScenarios( std::move( scenarioDatas ) );
+        if ( shouldApplyOverrides ) {
+            applyCampaignScenarioOverrides( campaignData );
+        }
 
         return campaignData;
     }
 
-    Campaign::CampaignData getVoyageHomeCampaignData()
+    Campaign::CampaignData getVoyageHomeCampaignData( const bool shouldApplyOverrides )
     {
         const int scenarioCount = 4;
 
@@ -563,6 +1156,9 @@ namespace
         Campaign::CampaignData campaignData;
         campaignData.setCampaignID( Campaign::VOYAGE_HOME_CAMPAIGN );
         campaignData.setCampaignScenarios( std::move( scenarioDatas ) );
+        if ( shouldApplyOverrides ) {
+            applyCampaignScenarioOverrides( campaignData );
+        }
 
         return campaignData;
     }
@@ -881,6 +1477,11 @@ namespace Campaign
     {
         assert( scenarioInfo.campaignId >= 0 && scenarioInfo.scenarioId >= 0 );
 
+        const auto overrideIter = g_campaignAwardOverrides.find( { scenarioInfo.campaignId, scenarioInfo.scenarioId } );
+        if ( overrideIter != g_campaignAwardOverrides.end() ) {
+            return overrideIter->second;
+        }
+
         switch ( scenarioInfo.campaignId ) {
         case ROLAND_CAMPAIGN:
             return getRolandCampaignAwardData( scenarioInfo.scenarioId );
@@ -902,6 +1503,11 @@ namespace Campaign
         }
 
         return {};
+    }
+
+    void CampaignAwardData::setCampaignAwardDataOverride( const ScenarioInfoId & scenarioInfo, std::vector<CampaignAwardData> awards )
+    {
+        g_campaignAwardOverrides[{ scenarioInfo.campaignId, scenarioInfo.scenarioId }] = std::move( awards );
     }
 
     const char * CampaignAwardData::getAllianceJoiningMessage( const int monsterId )

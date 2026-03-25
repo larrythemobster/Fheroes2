@@ -137,6 +137,41 @@ namespace Campaign
             return _bonuses;
         }
 
+        void setNextScenarios( std::vector<ScenarioInfoId> && nextScenarios )
+        {
+            _nextScenarios = std::move( nextScenarios );
+        }
+
+        void setBonuses( std::vector<ScenarioBonusData> && bonuses )
+        {
+            _bonuses = std::move( bonuses );
+        }
+
+        void setMapFileName( std::string fileName )
+        {
+            _fileName = std::move( fileName );
+        }
+
+        void setScenarioName( std::string scenarioName )
+        {
+            _scenarioName = std::move( scenarioName );
+        }
+
+        void setDescription( std::string description )
+        {
+            _description = std::move( description );
+        }
+
+        void setVictoryCondition( const ScenarioVictoryCondition victoryCondition )
+        {
+            _victoryCondition = victoryCondition;
+        }
+
+        void setLossCondition( const ScenarioLossCondition lossCondition )
+        {
+            _lossCondition = lossCondition;
+        }
+
         int getScenarioID() const
         {
             return _scenarioInfo.scenarioId;
@@ -150,6 +185,11 @@ namespace Campaign
         const ScenarioInfoId & getScenarioInfoId() const
         {
             return _scenarioInfo;
+        }
+
+        const std::string & getMapFileName() const
+        {
+            return _fileName;
         }
 
         const char * getScenarioName() const;

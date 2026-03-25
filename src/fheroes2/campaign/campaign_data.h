@@ -46,6 +46,11 @@ namespace Campaign
             return _scenarios;
         }
 
+        std::vector<ScenarioData> & getAllScenariosMutable()
+        {
+            return _scenarios;
+        }
+
         static const std::vector<ScenarioInfoId> & getScenariosAfter( const ScenarioInfoId & scenarioInfo );
         std::vector<ScenarioInfoId> getStartingScenarios() const;
 
@@ -109,6 +114,8 @@ namespace Campaign
 
         static std::vector<Campaign::CampaignAwardData> getCampaignAwardData( const ScenarioInfoId & scenarioInfo );
         static std::vector<Campaign::CampaignAwardData> getExtraCampaignAwardData( const int campaignID );
+
+        static void setCampaignAwardDataOverride( const ScenarioInfoId & scenarioInfo, std::vector<CampaignAwardData> awards );
 
         static const char * getAllianceJoiningMessage( const int monsterId );
         static const char * getAllianceFleeingMessage( const int monsterId );
