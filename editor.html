@@ -3,175 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fheroes2 Visual Mod Editor</title>
+    <title>Fheroes2 Data Editor</title>
     <style>
         :root {
-            --bg: #1e1e2e;
-            --panel: #313244;
-            --border: #45475a;
-            --text: #cdd6f4;
-            --accent: #89b4fa;
-            --success: #a6e3a1;
-            --danger: #f38ba8;
-            --warning: #f9e2af;
+            --bg: #16181c;
+            --panel: #23272f;
+            --panel-2: #1c2027;
+            --border: #39414d;
+            --text: #e6eaf0;
+            --muted: #98a2b3;
+            --accent: #d6a756;
+            --accent-2: #73c2a6;
+            --danger: #d96b6b;
+            --shadow: rgba(0, 0, 0, 0.28);
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 24px;
+            background:
+                radial-gradient(circle at top left, rgba(214, 167, 86, 0.16), transparent 28%),
+                radial-gradient(circle at top right, rgba(115, 194, 166, 0.12), transparent 24%),
+                linear-gradient(180deg, #111318 0%, var(--bg) 100%);
+            color: var(--text);
+            font: 14px/1.45 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
+
         .container {
-            max-width: 1100px;
+            max-width: 1280px;
             margin: 0 auto;
             background: var(--panel);
-            border-radius: 8px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 20px 50px var(--shadow);
         }
+
         .header {
-            background: #181825;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 2px solid var(--border);
+            padding: 24px 28px 18px;
+            background: linear-gradient(135deg, #181b21 0%, #20252d 100%);
+            border-bottom: 1px solid var(--border);
         }
-        .header h1 { margin: 0; color: var(--accent); }
+
+        .header h1 {
+            margin: 0;
+            color: var(--accent);
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: var(--muted);
+        }
+
         .toolbar {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 15px;
-            background: var(--panel);
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            padding: 18px 24px;
+            background: var(--panel-2);
             border-bottom: 1px solid var(--border);
         }
-        button {
-            background-color: var(--accent);
-            color: #111;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
+
+        button,
+        select,
+        input,
+        textarea {
+            font: inherit;
         }
-        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .btn-success { background-color: var(--success); }
-        
-        /* Tabs */
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            background: var(--accent);
+            color: #161616;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+
+        button:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--accent-2);
+        }
+
+        .pill {
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        #status {
+            display: none;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+        }
+
+        .workspace {
+            display: none;
+        }
+
         .tabs {
             display: flex;
-            background: #181825;
-            border-bottom: 1px solid var(--border);
-            overflow-x: auto;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 16px 20px 0;
+            background: var(--panel);
         }
+
         .tab-btn {
             background: transparent;
-            color: var(--text);
-            border-radius: 0;
-            padding: 12px 24px;
-            font-weight: normal;
-            white-space: nowrap;
+            color: var(--muted);
+            border-radius: 10px 10px 0 0;
+            border: 1px solid transparent;
+            padding: 12px 18px;
+            font-weight: 600;
         }
+
         .tab-btn.active {
-            background: var(--panel);
             color: var(--accent);
-            border-top: 3px solid var(--accent);
-            font-weight: bold;
+            background: var(--panel-2);
+            border-color: var(--border);
+            border-bottom-color: var(--panel-2);
         }
-        
-        /* Form Layout */
-        .editor-content { padding: 30px; min-height: 400px; display: none; }
-        .editor-content.active { display: block; }
-        .section-title { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--accent); }
-        
+
+        .editor-content {
+            display: none;
+            padding: 24px;
+            min-height: 480px;
+            background: var(--panel-2);
+            border-top: 1px solid var(--border);
+        }
+
+        .editor-content.active {
+            display: block;
+        }
+
+        .section-title {
+            margin: 0 0 18px;
+            padding-bottom: 10px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+        }
+
         .grid-form {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
+            gap: 14px;
         }
-        .form-group {
-            background: #181825;
+
+        .form-group,
+        .field-block {
+            background: #181c22;
+            border: 1px solid var(--border);
+            border-radius: 10px;
             padding: 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+        }
+
+        .form-group {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
-        .form-group label { font-weight: 500; font-size: 13px; color: #a6adc8; flex-grow: 1; padding-right: 10px;}
-        .form-group input {
-            width: 70px;
-            padding: 8px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--success);
-            border-radius: 4px;
-            font-weight: bold;
-            text-align: right;
+
+        .form-group label,
+        .field-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
         }
-        
-        /* Dropdowns */
-        select.map-dropdown {
-            max-width: 160px;
-            padding: 8px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--success);
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        
-        /* Cards */
-        .data-card {
-            background: #181825;
+
+        input[type="number"],
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            background: #242a33;
+            color: var(--text);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 9px 10px;
         }
-        .data-card h3 { margin-top: 0; color: var(--warning); border-bottom: 1px solid var(--border); padding-bottom: 10px;}
-        
-        /* Army Editor Specific */
-        .hero-stats { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;}
-        .hero-stats input { width: 60px; }
-        .list-container { background: var(--panel); padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        .row-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .row-item select { flex-grow: 1; padding: 8px; background: #181825; color: var(--text); border: 1px solid var(--border); border-radius: 4px; }
-        .btn-remove { background: var(--danger); padding: 6px 12px; font-size: 12px; }
-        
-        #status { text-align: center; padding: 10px; display: none; font-weight: bold; }
+
+        .form-group input,
+        .form-group select {
+            max-width: 180px;
+        }
+
+        textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        .data-card {
+            background: #181c22;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .data-card h3,
+        .data-card h4 {
+            margin-top: 0;
+        }
+
+        .data-card h3 {
+            color: var(--accent);
+            margin-bottom: 14px;
+        }
+
+        .hero-stats,
+        .campaign-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .list-container {
+            background: #20252d;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 14px;
+        }
+
+        .row-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stack-field,
+        .translated-field {
+            flex: 1 1 140px;
+        }
+
+        .translated-field {
+            flex: 2 1 320px;
+            min-width: 280px;
+        }
+
+        .row-item .small-input {
+            max-width: 110px;
+        }
+
+        .translated-id-row {
+            display: grid;
+            grid-template-columns: minmax(180px, 1.4fr) minmax(110px, 0.8fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .translated-id-row select,
+        .translated-id-row input {
+            width: 100%;
+            max-width: none;
+        }
+
+        .stack-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 120px;
+        }
+
+        .stack-field label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .context-help {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 12px;
+            flex: 1 1 100%;
+        }
+
+        @media (max-width: 1100px) {
+            .translated-field {
+                min-width: 100%;
+            }
+
+            .translated-id-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-remove {
+            background: var(--danger);
+            color: white;
+            padding: 8px 10px;
+            flex: 0 0 auto;
+            align-self: flex-end;
+        }
+
+        .campaign-group {
+            margin-bottom: 28px;
+        }
+
+        .campaign-group h3 {
+            margin: 0 0 14px;
+            color: var(--accent-2);
+        }
+
+        .hint {
+            margin: 0 0 14px;
+            color: var(--muted);
+        }
+
+        .empty-state {
+            padding: 28px;
+            text-align: center;
+            color: var(--muted);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="header">
-        <h1>Fheroes2 Visual Mod Editor</h1>
-        <p style="color: #a6adc8; margin-top: 5px;">Edit any stat in the game safely.</p>
+        <h1>Fheroes2 Data Editor</h1>
+        <p>Edit `stats.json` or `campaigns.json` in one place.</p>
     </div>
 
     <div class="toolbar">
-        <input type="file" id="fileInput" accept=".json" style="display: none;">
-        <button onclick="document.getElementById('fileInput').click()">📂 Load stats.json</button>
-        <button class="btn-success" id="downloadBtn" onclick="saveAndDownload()" style="display: none;">💾 Download Updated Game File</button>
+        <input type="file" id="fileInput" accept=".json" class="hidden">
+        <button onclick="document.getElementById('fileInput').click()">Load JSON File</button>
+        <button id="downloadBtn" class="btn-secondary hidden" onclick="saveAndDownload()">Download Edited JSON</button>
+        <span class="pill" id="fileTypeBadge">No file loaded</span>
+        <span class="pill" id="fileNameBadge">Waiting for file...</span>
     </div>
-    
+
     <div id="status"></div>
 
-    <div id="editorWorkspace" style="display: none;">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('mapObjects')">Map Objects</button>
-            <button class="tab-btn" onclick="switchTab('heroes')">Heroes & Armies</button>
-            <button class="tab-btn" onclick="switchTab('monsters')">Monsters</button>
-            <button class="tab-btn" onclick="switchTab('spells')">Spells</button>
-            <button class="tab-btn" onclick="switchTab('artifacts')">Artifacts</button>
-            <button class="tab-btn" onclick="switchTab('buildings')">Buildings</button>
+    <div id="statsWorkspace" class="workspace">
+        <div class="tabs" id="statsTabs">
+            <button class="tab-btn active" onclick="switchStatsTab('mapObjects')">Map Objects</button>
+            <button class="tab-btn" onclick="switchStatsTab('heroes')">Heroes & Armies</button>
+            <button class="tab-btn" onclick="switchStatsTab('monsters')">Monsters</button>
+            <button class="tab-btn" onclick="switchStatsTab('spells')">Spells</button>
+            <button class="tab-btn" onclick="switchStatsTab('artifacts')">Artifacts</button>
+            <button class="tab-btn" onclick="switchStatsTab('buildings')">Buildings</button>
         </div>
 
         <div class="editor-content active" id="mapObjectsTab">
-            <h2 class="section-title">Adventure Map Rewards (-1 means random map default)</h2>
+            <h2 class="section-title">Adventure Map Rewards</h2>
             <div class="grid-form" id="mapObjectsGrid"></div>
         </div>
 
@@ -200,147 +403,405 @@
             <div id="buildingsList"></div>
         </div>
     </div>
+
+    <div id="campaignWorkspace" class="workspace">
+        <div class="editor-content active" id="campaignTab">
+            <h2 class="section-title">Campaign Scenarios, Branches, Bonuses & Awards</h2>
+            <p class="hint">Edit map files, scenario text, branching, win/loss rules, starting bonuses, and campaign awards here.</p>
+            <div id="campaignsList"></div>
+        </div>
+    </div>
 </div>
 
 <script>
-    let gameData = null;
+    let loadedData = null;
+    let currentFileType = null;
+    let currentFileName = 'data.json';
 
-    // Load File
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
+    const statsTabs = ['mapObjects', 'heroes', 'monsters', 'spells', 'artifacts', 'buildings'];
+    const campaignKeys = {
+        roland: 'Roland',
+        archibald: 'Archibald',
+        price_of_loyalty: 'Price of Loyalty',
+        descendants: 'Descendants',
+        wizards_isle: "Wizard's Isle",
+        voyage_home: 'Voyage Home'
+    };
+
+    const campaignVictoryOptions = [
+        ['standard', 'Standard'],
+        ['capture_dragon_city', 'Capture Dragon City'],
+        ['obtain_ultimate_crown', 'Obtain Ultimate Crown'],
+        ['obtain_sphere_negation', 'Obtain Sphere of Negation']
+    ];
+
+    const campaignLossOptions = [
+        ['standard', 'Standard'],
+        ['lose_all_sorceress_villages', 'Lose All Sorceress Villages']
+    ];
+
+    const campaignBonusTypes = [
+        ['resources', 'Resources'],
+        ['artifact', 'Artifact'],
+        ['troop', 'Troop'],
+        ['spell', 'Spell'],
+        ['starting_race', 'Starting Race'],
+        ['skill_primary', 'Primary Skill'],
+        ['skill_secondary', 'Secondary Skill'],
+        ['starting_race_and_army', 'Starting Race And Army']
+    ];
+
+    const campaignAwardTypes = [
+        ['creature_curse', 'Creature Curse'],
+        ['creature_alliance', 'Creature Alliance'],
+        ['get_artifact', 'Get Artifact'],
+        ['get_spell', 'Get Spell'],
+        ['carry_over_forces', 'Carry Over Forces'],
+        ['hireable_hero', 'Hireable Hero'],
+        ['defeat_enemy_hero', 'Defeat Enemy Hero'],
+        ['resource_bonus', 'Resource Bonus']
+    ];
+
+    const resourceOptions = [
+        ['1', 'Wood'],
+        ['2', 'Mercury'],
+        ['4', 'Ore'],
+        ['8', 'Sulfur'],
+        ['16', 'Crystal'],
+        ['32', 'Gems'],
+        ['64', 'Gold']
+    ];
+
+    const raceOptions = [
+        ['1', 'Knight'],
+        ['2', 'Barbarian'],
+        ['4', 'Sorceress'],
+        ['8', 'Warlock'],
+        ['16', 'Wizard'],
+        ['32', 'Necromancer']
+    ];
+
+    const primarySkillOptions = [
+        ['1', 'Attack'],
+        ['2', 'Defense'],
+        ['3', 'Power'],
+        ['4', 'Knowledge']
+    ];
+
+    const secondarySkillOptions = [
+        ['1', 'Pathfinding'],
+        ['2', 'Archery'],
+        ['3', 'Logistics'],
+        ['4', 'Scouting'],
+        ['5', 'Diplomacy'],
+        ['6', 'Navigation'],
+        ['7', 'Leadership'],
+        ['8', 'Wisdom'],
+        ['9', 'Mysticism'],
+        ['10', 'Luck'],
+        ['11', 'Ballistics'],
+        ['12', 'Eagle Eye'],
+        ['13', 'Necromancy'],
+        ['14', 'Estates']
+    ];
+
+    const spellOptions = [
+        ['0', 'None']
+    ].concat(Object.entries({"0":"Unknown","1":"Fireball","10":"Haste","11":"Mass Haste","12":"Slow","13":"Mass Slow","14":"Blind","15":"Bless","16":"Mass Bless","17":"Stoneskin","18":"Steelskin","19":"Curse","2":"Fireblast","20":"Mass Curse","21":"Holy Word","22":"Holy Shout","23":"Anti-Magic","24":"Dispel Magic","25":"Mass Dispel","26":"Magic Arrow","27":"Berserker","28":"Armageddon","29":"Elemental Storm","3":"Lightning Bolt","30":"Meteor Shower","31":"Paralyze","32":"Hypnotize","33":"Cold Ray","34":"Cold Ring","35":"Disrupting Ray","36":"Death Ripple","37":"Death Wave","38":"Dragon Slayer","39":"Blood Lust","4":"Chain Lightning","40":"Animate Dead","41":"Mirror Image","42":"Shield","43":"Mass Shield","44":"Summon Earth Elemental","45":"Summon Air Elemental","46":"Summon Fire Elemental","47":"Summon Water Elemental","48":"Earthquake","49":"View Mines","5":"Teleport","50":"View Resources","51":"View Artifacts","52":"View Towns","53":"View Heroes","54":"View All","55":"Identify Hero","56":"Summon Boat","57":"Dimension Door","58":"Town Gate","59":"Town Portal","6":"Cure","60":"Visions","61":"Haunt","62":"Set Earth Guardian","63":"Set Air Guardian","64":"Set Fire Guardian","65":"Set Water Guardian","66":"Random Spell","67":"Random 1st Level Spell","68":"Random 2nd Level Spell","69":"Random 3rd Level Spell","7":"Mass Cure","70":"Random 4th Level Spell","71":"Random 5th Level Spell","72":"Petrification","8":"Resurrect","9":"Resurrect True"}));
+
+    const bonusTypeMeta = {
+        resources: {
+            subTypeLabel: 'Resource',
+            amountLabel: 'Amount',
+            showSpellField: false,
+            help: 'Adds or removes a starting resource.'
+        },
+        artifact: {
+            subTypeLabel: 'Artifact',
+            amountLabel: 'Count',
+            showSpellField: false,
+            help: 'Adds an artifact as a starting bonus. Spell ID is only used for spell scrolls.'
+        },
+        troop: {
+            subTypeLabel: 'Troop',
+            amountLabel: 'Count',
+            showSpellField: false,
+            help: 'Adds a starting troop stack to the main hero.'
+        },
+        spell: {
+            subTypeLabel: 'Spell',
+            amountLabel: 'Value',
+            showSpellField: false,
+            help: 'Adds a spell to the main hero at the start of the scenario.'
+        },
+        starting_race: {
+            subTypeLabel: 'Race',
+            amountLabel: 'Value',
+            showSpellField: false,
+            help: 'Set the starting alignment for the scenario.'
+        },
+        skill_primary: {
+            subTypeLabel: 'Primary Skill',
+            amountLabel: 'Bonus',
+            showSpellField: false,
+            help: 'Increase a primary skill by the chosen bonus amount.'
+        },
+        skill_secondary: {
+            subTypeLabel: 'Secondary Skill',
+            amountLabel: 'Level',
+            showSpellField: false,
+            help: 'Adds a secondary skill. Level sets the skill rank.'
+        },
+        starting_race_and_army: {
+            subTypeLabel: 'Race',
+            amountLabel: 'Value',
+            showSpellField: false,
+            help: 'Set starting alignment and use the matching starting army setup.'
+        }
+    };
+
+    const awardTypeMeta = {
+        creature_curse: {
+            subTypeLabel: 'Monster',
+            amountLabel: 'Value',
+            startLabel: 'Start Scenario',
+            help: 'Marks a monster type as hostile or specially affected later in the campaign.'
+        },
+        creature_alliance: {
+            subTypeLabel: 'Monster',
+            amountLabel: 'Value',
+            startLabel: 'Start Scenario',
+            help: 'Makes a creature type allied in later scenarios.'
+        },
+        get_artifact: {
+            subTypeLabel: 'Artifact',
+            amountLabel: 'Count',
+            startLabel: 'Start Scenario',
+            help: 'Carries this artifact reward into later scenarios.'
+        },
+        get_spell: {
+            subTypeLabel: 'Spell',
+            amountLabel: 'Value',
+            startLabel: 'Start Scenario',
+            help: 'Carries this spell into later scenarios.'
+        },
+        carry_over_forces: {
+            subTypeLabel: 'Sub Type',
+            amountLabel: 'Percent',
+            startLabel: 'Start Scenario',
+            hideSubType: true,
+            hideAmount: true,
+            help: 'Carries the saved hero army into later scenarios. Only Start Scenario is used.'
+        },
+        hireable_hero: {
+            subTypeLabel: 'Hero',
+            amountLabel: 'Value',
+            startLabel: 'Start Scenario',
+            help: 'Unlock a hireable hero later in the campaign.'
+        },
+        defeat_enemy_hero: {
+            subTypeLabel: 'Hero',
+            amountLabel: 'Value',
+            startLabel: 'Start Scenario',
+            help: 'Track an enemy hero defeat as a campaign award state.'
+        },
+        resource_bonus: {
+            subTypeLabel: 'Resource',
+            amountLabel: 'Amount',
+            startLabel: 'Start Scenario',
+            help: 'Carries a resource bonus into later scenarios.'
+        }
+    };
+
+    const builtInNameMaps = {
+        artifacts: {"0":"Invalid Artifact","1":"Ultimate Book of Knowledge","10":"Caster's Bracelet of Magic","100":"Staff of Wizardry","101":"Sword Breaker","102":"Sword of Anduran","103":"Spade of Necromancy","11":"Mage's Ring of Power","12":"Witch's Broach of Magic","13":"Medal of Valor","14":"Medal of Courage","15":"Medal of Honor","16":"Medal of Distinction","17":"Fizbin of Misfortune","18":"Thunder Mace of Dominion","19":"Armored Gauntlets of Protection","2":"Ultimate Sword of Dominion","20":"Defender Helm of Protection","21":"Giant Flail of Dominion","22":"Ballista of Quickness","23":"Stealth Shield of Protection","24":"Dragon Sword of Dominion","25":"Power Axe of Dominion","26":"Divine Breastplate of Protection","27":"Minor Scroll of Knowledge","28":"Major Scroll of Knowledge","29":"Superior Scroll of Knowledge","3":"Ultimate Cloak of Protection","30":"Foremost Scroll of Knowledge","31":"Endless Sack of Gold","32":"Endless Bag of Gold","33":"Endless Purse of Gold","34":"Nomad Boots of Mobility","35":"Traveler's Boots of Mobility","36":"Lucky Rabbit's Foot","37":"Golden Horseshoe","38":"Gambler's Lucky Coin","39":"Four-Leaf Clover","4":"Ultimate Wand of Magic","40":"True Compass of Mobility","41":"Sailor's Astrolabe of Mobility","42":"Evil Eye","43":"Enchanted Hourglass","44":"Gold Watch","45":"Skullcap","46":"Ice Cloak","47":"Fire Cloak","48":"Lightning Helm","49":"Evercold Icicle","5":"Ultimate Shield","50":"Everhot Lava Rock","51":"Lightning Rod","52":"Snake-Ring","53":"Ankh","54":"Book of Elements","55":"Elemental Ring","56":"Holy Pendant","57":"Pendant of Free Will","58":"Pendant of Life","59":"Serenity Pendant","6":"Ultimate Staff","60":"Seeing-eye Pendant","61":"Kinetic Pendant","62":"Pendant of Death","63":"Wand of Negation","64":"Golden Bow","65":"Telescope","66":"Statesman's Quill","67":"Wizard's Hat","68":"Power Ring","69":"Ammo Cart","7":"Ultimate Crown","70":"Tax Lien","71":"Hideous Mask","72":"Endless Pouch of Sulfur","73":"Endless Vial of Mercury","74":"Endless Pouch of Gems","75":"Endless Cord of Wood","76":"Endless Cart of Ore","77":"Endless Pouch of Crystal","78":"Spiked Helm","79":"Spiked Shield","8":"Golden Goose","80":"White Pearl","81":"Black Pearl","82":"Magic Book","83":"Ultimate Artifact","84":"Dummy 2","85":"Dummy 3","86":"Dummy 4","87":"Spell Scroll","88":"Arm of the Martyr","89":"Breastplate of Anduran","9":"Arcane Necklace of Magic","90":"Broach of Shielding","91":"Battle Garb of Anduran","92":"Crystal Ball","93":"Heart of Fire","94":"Heart of Ice","95":"Helmet of Anduran","96":"Holy Hammer","97":"Legendary Scepter","98":"Masthead","99":"Sphere of Negation"},
+        monsters: {"0":"Unknown Monster","1":"Peasant","10":"Paladin","11":"Crusader","12":"Goblin","13":"Orc","14":"Orc Chief","15":"Wolf","16":"Ogre","17":"Ogre Lord","18":"Troll","19":"War Troll","2":"Archer","20":"Cyclops","21":"Sprite","22":"Dwarf","23":"Battle Dwarf","24":"Elf","25":"Grand Elf","26":"Druid","27":"Greater Druid","28":"Unicorn","29":"Phoenix","3":"Ranger","30":"Centaur","31":"Gargoyle","32":"Griffin","33":"Minotaur","34":"Minotaur King","35":"Hydra","36":"Green Dragon","37":"Red Dragon","38":"Black Dragon","39":"Halfling","4":"Pikeman","40":"Boar","41":"Iron Golem","42":"Steel Golem","43":"Roc","44":"Mage","45":"Archmage","46":"Giant","47":"Titan","48":"Skeleton","49":"Zombie","5":"Veteran Pikeman","50":"Mutant Zombie","51":"Mummy","52":"Royal Mummy","53":"Vampire","54":"Vampire Lord","55":"Lich","56":"Power Lich","57":"Bone Dragon","58":"Rogue","59":"Nomad","6":"Swordsman","60":"Ghost","61":"Genie","62":"Medusa","63":"Earth Elemental","64":"Air Elemental","65":"Fire Elemental","66":"Water Elemental","67":"Random Monster","68":"Random Monster 1","69":"Random Monster 2","7":"Master Swordsman","70":"Random Monster 3","71":"Random Monster 4","8":"Cavalry","9":"Champion"},
+        spells: {"0":"Unknown","1":"Fireball","10":"Haste","11":"Mass Haste","12":"Slow","13":"Mass Slow","14":"Blind","15":"Bless","16":"Mass Bless","17":"Stoneskin","18":"Steelskin","19":"Curse","2":"Fireblast","20":"Mass Curse","21":"Holy Word","22":"Holy Shout","23":"Anti-Magic","24":"Dispel Magic","25":"Mass Dispel","26":"Magic Arrow","27":"Berserker","28":"Armageddon","29":"Elemental Storm","3":"Lightning Bolt","30":"Meteor Shower","31":"Paralyze","32":"Hypnotize","33":"Cold Ray","34":"Cold Ring","35":"Disrupting Ray","36":"Death Ripple","37":"Death Wave","38":"Dragon Slayer","39":"Blood Lust","4":"Chain Lightning","40":"Animate Dead","41":"Mirror Image","42":"Shield","43":"Mass Shield","44":"Summon Earth Elemental","45":"Summon Air Elemental","46":"Summon Fire Elemental","47":"Summon Water Elemental","48":"Earthquake","49":"View Mines","5":"Teleport","50":"View Resources","51":"View Artifacts","52":"View Towns","53":"View Heroes","54":"View All","55":"Identify Hero","56":"Summon Boat","57":"Dimension Door","58":"Town Gate","59":"Town Portal","6":"Cure","60":"Visions","61":"Haunt","62":"Set Earth Guardian","63":"Set Air Guardian","64":"Set Fire Guardian","65":"Set Water Guardian","66":"Random Spell","67":"Random 1st Level Spell","68":"Random 2nd Level Spell","69":"Random 3rd Level Spell","7":"Mass Cure","70":"Random 4th Level Spell","71":"Random 5th Level Spell","72":"Petrification","8":"Resurrect","9":"Resurrect True"},
+        heroes: {"1":"Lord Kilburn","10":"Thundax","11":"Fineous","12":"Jojosh","13":"Crag Hack","14":"Jezebel","15":"Jaclyn","16":"Ergon","17":"Tsabu","18":"Atlas","19":"Astra","2":"Sir Gallant","20":"Natasha","21":"Troyan","22":"Vatawna","23":"Rebecca","24":"Gem","25":"Ariel","26":"Carlawn","27":"Luna","28":"Arie","29":"Alamar","3":"Ector","30":"Vesper","31":"Crodo","32":"Barok","33":"Kastore","34":"Agar","35":"Falagar","36":"Wrathmont","37":"Myra","38":"Flint","39":"Dawn","4":"Gwenneth","40":"Halon","41":"Myrini","42":"Wilfrey","43":"Sarakin","44":"Kalindra","45":"Mandigal","46":"Zom","47":"Darlana","48":"Zam","49":"Ranloo","5":"Tyro","50":"Charity","51":"Rialdo","52":"Roxana","53":"Sandro","54":"Celia","55":"Roland","56":"Lord Corlagon","57":"Sister Eliza","58":"Archibald","59":"Lord Halton","6":"Ambrose","60":"Brother Brax","61":"Solmyr","62":"Dainwin","63":"Mog","64":"Uncle Ivan","65":"Joseph","66":"Gallavant","67":"Elderian","68":"Ceallach","69":"Drakonia","7":"Ruby","70":"Martine","71":"Jarkonas","72":"Debug Hero","8":"Maximus","9":"Dimitry"}
+    };
+
+    const spellScrollArtifactIds = new Set(['87']);
+
+    document.getElementById('fileInput').addEventListener('change', event => {
+        const file = event.target.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = loadEvent => {
             try {
-                gameData = JSON.parse(e.target.result);
-                document.getElementById('editorWorkspace').style.display = 'block';
-                document.getElementById('downloadBtn').style.display = 'inline-block';
-                
-                // Build all sections
-                buildMapObjectsUI();
-                buildHeroesUI();
-                buildGenericCardUI('monsters', 'monstersList');
-                buildGenericCardUI('spells', 'spellsList');
-                buildGenericCardUI('artifacts', 'artifactsList');
-                buildGenericCardUI('buildings', 'buildingsList');
-                
-                showStatus('File loaded successfully!', 'var(--success)');
-            } catch (err) {
-                showStatus('Error reading file. Is it a valid JSON?', 'var(--danger)');
+                const parsed = JSON.parse(loadEvent.target.result);
+                const type = detectFileType(parsed);
+                if (!type) {
+                    showStatus('Unsupported JSON structure. Load either stats.json or campaigns.json.', 'var(--danger)');
+                    return;
+                }
+
+                loadedData = parsed;
+                currentFileType = type;
+                currentFileName = file.name || (type === 'campaigns' ? 'campaigns.json' : 'stats.json');
+
+                document.getElementById('downloadBtn').classList.remove('hidden');
+                document.getElementById('fileTypeBadge').textContent = type === 'campaigns' ? 'Campaigns Mode' : 'Stats Mode';
+                document.getElementById('fileNameBadge').textContent = currentFileName;
+
+                renderEditor();
+                showStatus(`Loaded ${currentFileName} successfully.`, 'var(--accent-2)');
+            } catch (error) {
+                showStatus('Error reading JSON file.', 'var(--danger)');
             }
         };
+
         reader.readAsText(file);
     });
 
-    function switchTab(tabName) {
-        const tabs = ['mapObjects', 'heroes', 'monsters', 'spells', 'artifacts', 'buildings'];
-        tabs.forEach((t, index) => {
-            document.getElementById(t + 'Tab').className = (t === tabName) ? 'editor-content active' : 'editor-content';
-            document.querySelectorAll('.tab-btn')[index].className = (t === tabName) ? 'tab-btn active' : 'tab-btn';
+    function detectFileType(data) {
+        if (data && typeof data === 'object') {
+            if (data.campaigns && typeof data.campaigns === 'object') {
+                return 'campaigns';
+            }
+
+            if (data.heroes || data.monsters || data.artifacts || data.buildings || data.map_objects) {
+                return 'stats';
+            }
+        }
+
+        return null;
+    }
+
+    function renderEditor() {
+        const statsWorkspace = document.getElementById('statsWorkspace');
+        const campaignWorkspace = document.getElementById('campaignWorkspace');
+
+        if (currentFileType === 'stats') {
+            campaignWorkspace.style.display = 'none';
+            statsWorkspace.style.display = 'block';
+            buildStatsEditor();
+        } else {
+            statsWorkspace.style.display = 'none';
+            campaignWorkspace.style.display = 'block';
+            buildCampaignEditor();
+        }
+    }
+
+    function switchStatsTab(tabName) {
+        statsTabs.forEach((tab, index) => {
+            document.getElementById(tab + 'Tab').className = tab === tabName ? 'editor-content active' : 'editor-content';
+            document.querySelectorAll('#statsTabs .tab-btn')[index].className = tab === tabName ? 'tab-btn active' : 'tab-btn';
         });
     }
 
-    // Dynamic Dropdown Generator
-    // Reads directly from gameData (monsters, artifacts, spells)
+    function buildStatsEditor() {
+        buildMapObjectsUI();
+        buildHeroesUI();
+        buildGenericCardUI('monsters', 'monstersList');
+        buildGenericCardUI('spells', 'spellsList');
+        buildGenericCardUI('artifacts', 'artifactsList');
+        buildGenericCardUI('buildings', 'buildingsList');
+        switchStatsTab('mapObjects');
+    }
+
     function getOptionsForCategory(category, selectedId, allowDefault = false) {
         let options = '';
         if (allowDefault) {
-            options += `<option value="-1" ${selectedId == -1 ? 'selected' : ''}>Random / Default (-1)</option>`;
+            options += `<option value="-1" ${String(selectedId) === '-1' ? 'selected' : ''}>Random / Default (-1)</option>`;
         }
-        if (gameData && gameData[category]) {
-            const ids = Object.keys(gameData[category]).sort((a,b) => parseInt(a) - parseInt(b));
+
+        if (loadedData && loadedData[category]) {
+            const ids = Object.keys(loadedData[category]).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
             for (const id of ids) {
-                const name = gameData[category][id].name || 'Unknown';
-                options += `<option value="${id}" ${id == selectedId ? 'selected' : ''}>${name} (ID: ${id})</option>`;
+                const name = loadedData[category][id].name || 'Unknown';
+                options += `<option value="${id}" ${String(selectedId) === String(id) ? 'selected' : ''}>${escapeHtml(name)} (ID: ${id})</option>`;
             }
         }
+
         return options;
     }
 
-    // Build Map Objects UI with Dropdowns for Spells and Artifacts
     function buildMapObjectsUI() {
         const grid = document.getElementById('mapObjectsGrid');
         grid.innerHTML = '';
-        if (!gameData.map_objects) return;
+        if (!loadedData.map_objects) return;
 
-        for (const [key, value] of Object.entries(gameData.map_objects)) {
-            const cleanName = key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        for (const [key, value] of Object.entries(loadedData.map_objects)) {
+            const cleanName = beautifyKey(key);
             let inputHtml = '';
 
-            // Automatically use dropdowns if the key involves an artifact or spell
             if (key.endsWith('_artifact')) {
-                inputHtml = `<select data-type="map_objects" data-key="${key}" class="map-dropdown">${getOptionsForCategory('artifacts', value, true)}</select>`;
+                inputHtml = `<select data-type="map_objects" data-key="${key}">${getOptionsForCategory('artifacts', value, true)}</select>`;
             } else if (key.endsWith('_spell')) {
-                inputHtml = `<select data-type="map_objects" data-key="${key}" class="map-dropdown">${getOptionsForCategory('spells', value, true)}</select>`;
+                inputHtml = `<select data-type="map_objects" data-key="${key}">${getOptionsForCategory('spells', value, true)}</select>`;
             } else {
                 inputHtml = `<input type="number" step="any" data-type="map_objects" data-key="${key}" value="${value}">`;
             }
 
             grid.insertAdjacentHTML('beforeend', `
                 <div class="form-group">
-                    <label>${cleanName}</label>
+                    <label>${escapeHtml(cleanName)}</label>
                     ${inputHtml}
                 </div>
             `);
         }
     }
 
-    // Build Heroes UI (Armies and Artifacts)
     function buildHeroesUI() {
         const list = document.getElementById('heroesList');
         list.innerHTML = '';
-        if (!gameData.heroes) return;
+        if (!loadedData.heroes) return;
 
-        for (const [heroId, heroData] of Object.entries(gameData.heroes)) {
-            
-            let armyHtml = '';
-            if (heroData.army) {
-                heroData.army.forEach((troop, index) => {
-                    armyHtml += createTroopRow(heroId, index, troop.id, troop.count);
-                });
-            }
-
-            let artifactHtml = '';
-            if (heroData.artifacts) {
-                heroData.artifacts.forEach((artId, index) => {
-                    artifactHtml += createArtifactRow(heroId, index, artId);
-                });
-            }
+        for (const [heroId, heroData] of Object.entries(loadedData.heroes)) {
+            const armyHtml = (heroData.army || []).map((troop, index) => createTroopRow(heroId, index, troop.id, troop.count)).join('');
+            const artifactHtml = (heroData.artifacts || []).map((artId, index) => createArtifactRow(heroId, index, artId)).join('');
 
             list.insertAdjacentHTML('beforeend', `
                 <div class="data-card">
-                    <h3>Hero ID: ${heroId} ${heroData.name ? `(${heroData.name})` : ''}</h3>
+                    <h3>Hero ID: ${heroId}${heroData.name ? ` (${escapeHtml(heroData.name)})` : ''}</h3>
                     <div class="hero-stats">
-                        <div class="form-group"><label>Attack</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="attack" value="${heroData.attack !== undefined ? heroData.attack : -1}"></div>
-                        <div class="form-group"><label>Defense</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="defense" value="${heroData.defense !== undefined ? heroData.defense : -1}"></div>
-                        <div class="form-group"><label>Power</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="power" value="${heroData.power !== undefined ? heroData.power : -1}"></div>
-                        <div class="form-group"><label>Knowledge</label> <input type="number" data-type="hero" data-id="${heroId}" data-stat="knowledge" value="${heroData.knowledge !== undefined ? heroData.knowledge : -1}"></div>
-                    </div>
-                    
-                    <div class="list-container" id="army-${heroId}">
-                        <h4 style="margin-top: 0; margin-bottom: 10px; color: var(--accent);">Starting Army</h4>
-                        <div id="troop-container-${heroId}">${armyHtml}</div>
-                        <button onclick="addTroopRow('${heroId}')" style="background: #45475a; padding: 6px 12px; font-size: 13px; margin-top: 10px;">+ Add Troop</button>
+                        ${createStatField(heroId, 'attack', heroData.attack)}
+                        ${createStatField(heroId, 'defense', heroData.defense)}
+                        ${createStatField(heroId, 'power', heroData.power)}
+                        ${createStatField(heroId, 'knowledge', heroData.knowledge)}
                     </div>
 
-                    <div class="list-container" id="artifacts-list-${heroId}">
-                        <h4 style="margin-top: 0; margin-bottom: 10px; color: var(--accent);">Starting Artifacts</h4>
+                    <div class="list-container">
+                        <h4>Starting Army</h4>
+                        <div id="troop-container-${heroId}">${armyHtml}</div>
+                        <button type="button" onclick="addTroopRow('${heroId}')">Add Troop</button>
+                    </div>
+
+                    <div class="list-container">
+                        <h4>Starting Artifacts</h4>
                         <div id="artifact-container-${heroId}">${artifactHtml}</div>
-                        <button onclick="addArtifactRow('${heroId}')" style="background: #45475a; padding: 6px 12px; font-size: 13px; margin-top: 10px;">+ Add Artifact</button>
+                        <button type="button" onclick="addArtifactRow('${heroId}')">Add Artifact</button>
                     </div>
                 </div>
             `);
         }
     }
 
+    function createStatField(heroId, stat, value) {
+        return `
+            <div class="form-group">
+                <label>${escapeHtml(beautifyKey(stat))}</label>
+                <input type="number" data-type="hero" data-id="${heroId}" data-stat="${stat}" value="${value !== undefined ? value : -1}">
+            </div>
+        `;
+    }
+
     function createTroopRow(heroId, troopIndex, selectedId = 1, count = 10) {
         return `
             <div class="row-item" id="troop-${heroId}-${troopIndex}">
                 <select class="troop-select-id">${getOptionsForCategory('monsters', selectedId, false)}</select>
-                <label>Count:</label>
-                <input type="number" class="troop-input-count" value="${count}" min="1" style="width: 70px;">
-                <button class="btn-remove" onclick="document.getElementById('troop-${heroId}-${troopIndex}').remove()">X</button>
+                <input type="number" class="troop-input-count small-input" value="${count}" min="1">
+                <button type="button" class="btn-remove" onclick="document.getElementById('troop-${heroId}-${troopIndex}').remove()">Remove</button>
+            </div>
+        `;
+    }
+
+    function createArtifactRow(heroId, artifactIndex, selectedId = 1) {
+        return `
+            <div class="row-item" id="artifact-${heroId}-${artifactIndex}">
+                <select class="artifact-select-id">${getOptionsForCategory('artifacts', selectedId, false)}</select>
+                <button type="button" class="btn-remove" onclick="document.getElementById('artifact-${heroId}-${artifactIndex}').remove()">Remove</button>
             </div>
         `;
     }
@@ -350,124 +811,618 @@
         container.insertAdjacentHTML('beforeend', createTroopRow(heroId, container.children.length));
     }
 
-    function createArtifactRow(heroId, artifactIndex, selectedId = 1) {
-        return `
-            <div class="row-item" id="artifact-${heroId}-${artifactIndex}">
-                <select class="artifact-select-id">${getOptionsForCategory('artifacts', selectedId, false)}</select>
-                <button class="btn-remove" onclick="document.getElementById('artifact-${heroId}-${artifactIndex}').remove()">X</button>
-            </div>
-        `;
-    }
-
     function addArtifactRow(heroId) {
         const container = document.getElementById(`artifact-container-${heroId}`);
         container.insertAdjacentHTML('beforeend', createArtifactRow(heroId, container.children.length, 1));
     }
 
-    // Dynamic Card Generator for Monsters, Spells, Artifacts, and Buildings
     function buildGenericCardUI(category, containerId) {
         const list = document.getElementById(containerId);
         list.innerHTML = '';
-        if (!gameData[category]) return;
+        if (!loadedData[category]) return;
 
-        const ids = Object.keys(gameData[category]).sort((a,b) => parseInt(a) - parseInt(b));
-
+        const ids = Object.keys(loadedData[category]).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
         for (const id of ids) {
-            const item = gameData[category][id];
-            const div = document.createElement('div');
-            div.className = 'data-card';
-            
-            let title = item.name ? `${item.name} (ID: ${id})` : `ID: ${id}`;
+            const item = loadedData[category][id];
             let inputsHtml = '<div class="grid-form">';
-            
+
             for (const [key, value] of Object.entries(item)) {
                 if (typeof value === 'number' && key !== 'type_id') {
-                    let labelText = item[key + '_label'] ? item[key + '_label'] : key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    const labelText = item[key + '_label'] ? item[key + '_label'] : beautifyKey(key);
                     inputsHtml += `
                         <div class="form-group">
-                            <label>${labelText}</label>
+                            <label>${escapeHtml(labelText)}</label>
                             <input type="number" step="any" data-category="${category}" data-id="${id}" data-key="${key}" value="${value}">
                         </div>
                     `;
                 }
             }
+
             inputsHtml += '</div>';
-            div.innerHTML = `<h3>${title}</h3>${inputsHtml}`;
-            list.appendChild(div);
+            list.insertAdjacentHTML('beforeend', `
+                <div class="data-card">
+                    <h3>${escapeHtml(item.name || `ID: ${id}`)}${item.name ? ` (ID: ${id})` : ''}</h3>
+                    ${inputsHtml}
+                </div>
+            `);
         }
     }
 
-    // Save and Download everything back to JSON
+    function buildCampaignEditor() {
+        const container = document.getElementById('campaignsList');
+        container.innerHTML = '';
+
+        if (!loadedData.campaigns) {
+            container.innerHTML = '<div class="empty-state">No campaign data found.</div>';
+            return;
+        }
+
+        for (const [campaignKey, campaignValue] of Object.entries(loadedData.campaigns)) {
+            const scenarios = campaignValue.scenarios || {};
+            const scenarioIds = Object.keys(scenarios).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+
+            let scenariosHtml = '';
+            for (const scenarioId of scenarioIds) {
+                scenariosHtml += createScenarioCard(campaignKey, scenarioId, scenarios[scenarioId]);
+            }
+
+            container.insertAdjacentHTML('beforeend', `
+                <div class="campaign-group">
+                    <h3>${escapeHtml(campaignKeys[campaignKey] || beautifyKey(campaignKey))}</h3>
+                    ${scenariosHtml || '<div class="empty-state">No scenarios found.</div>'}
+                </div>
+            `);
+        }
+
+        bindTranslatedInputs();
+        bindCampaignTypeWatchers();
+    }
+
+    function createScenarioCard(campaignKey, scenarioId, scenario) {
+        const nextRows = (scenario.next_scenarios || []).map((nextId, index) => createNextScenarioRow(campaignKey, scenarioId, index, nextId)).join('');
+        const bonusRows = (scenario.bonuses || []).map((bonus, index) => createBonusRow(campaignKey, scenarioId, index, bonus)).join('');
+        const awardRows = (scenario.awards || []).map((award, index) => createAwardRow(campaignKey, scenarioId, index, award)).join('');
+
+        return `
+            <div class="data-card" data-campaign="${campaignKey}" data-scenario="${scenarioId}">
+                <h3>Scenario ${scenarioId}: ${escapeHtml(scenario.name || 'Unnamed Scenario')}</h3>
+
+                <div class="campaign-meta-grid">
+                    <div class="field-block">
+                        <div class="field-label">Scenario Name</div>
+                        <input type="text" data-campaign-field="name" value="${escapeAttribute(scenario.name || '')}">
+                    </div>
+                    <div class="field-block">
+                        <div class="field-label">Map File</div>
+                        <input type="text" data-campaign-field="map_file" value="${escapeAttribute(scenario.map_file || '')}">
+                    </div>
+                    <div class="field-block">
+                        <div class="field-label">Victory Condition</div>
+                        <select data-campaign-field="victory_condition">${buildSelectOptions(campaignVictoryOptions, scenario.victory_condition || 'standard')}</select>
+                    </div>
+                    <div class="field-block">
+                        <div class="field-label">Loss Condition</div>
+                        <select data-campaign-field="loss_condition">${buildSelectOptions(campaignLossOptions, scenario.loss_condition || 'standard')}</select>
+                    </div>
+                </div>
+
+                <div class="field-block" style="margin-bottom: 14px;">
+                    <div class="field-label">Description</div>
+                    <textarea data-campaign-field="description">${escapeHtml(scenario.description || '')}</textarea>
+                </div>
+
+                <div class="list-container">
+                    <h4>Next Scenarios / Branching</h4>
+                    <div id="next-container-${campaignKey}-${scenarioId}">${nextRows}</div>
+                    <button type="button" onclick="addNextScenarioRow('${campaignKey}', '${scenarioId}')">Add Next Scenario</button>
+                </div>
+
+                <div class="list-container">
+                    <h4>Scenario Bonus Choices</h4>
+                    <div id="bonus-container-${campaignKey}-${scenarioId}">${bonusRows}</div>
+                    <button type="button" onclick="addBonusRow('${campaignKey}', '${scenarioId}')">Add Bonus</button>
+                </div>
+
+                <div class="list-container">
+                    <h4>Campaign Awards</h4>
+                    <div id="award-container-${campaignKey}-${scenarioId}">${awardRows}</div>
+                    <button type="button" onclick="addAwardRow('${campaignKey}', '${scenarioId}')">Add Award</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function createNextScenarioRow(campaignKey, scenarioId, rowIndex, nextId = 0) {
+        return `
+            <div class="row-item" id="next-${campaignKey}-${scenarioId}-${rowIndex}">
+                <input type="number" class="next-scenario-id small-input" value="${nextId}" min="0">
+                <button type="button" class="btn-remove" onclick="document.getElementById('next-${campaignKey}-${scenarioId}-${rowIndex}').remove()">Remove</button>
+            </div>
+        `;
+    }
+
+    function createBonusRow(campaignKey, scenarioId, rowIndex, bonus = {}) {
+        const type = bonus.type || 'resources';
+        const meta = getBonusMeta(type);
+        return `
+            <div class="row-item" id="bonus-${campaignKey}-${scenarioId}-${rowIndex}">
+                <div class="stack-field">
+                    <label>Bonus Type</label>
+                    <select class="campaign-bonus-type">${buildSelectOptions(campaignBonusTypes, type)}</select>
+                </div>
+                ${createTranslatedIdControl('campaign-bonus-subtype', getTranslatedOptionsForBonusType(type), bonus.sub_type ?? 0, meta.subTypeLabel)}
+                <div class="stack-field amount-field">
+                    <label class="campaign-bonus-amount-label">${escapeHtml(meta.amountLabel)}</label>
+                    <input type="number" class="campaign-bonus-amount small-input" value="${bonus.amount ?? 1}" placeholder="${escapeAttribute(meta.amountLabel)}">
+                </div>
+                ${createTranslatedIdControl('campaign-bonus-spell', spellOptions, bonus.artifact_spell_id ?? '', 'Spell ID', !meta.showSpellField)}
+                <button type="button" class="btn-remove" onclick="document.getElementById('bonus-${campaignKey}-${scenarioId}-${rowIndex}').remove()">Remove</button>
+                <div class="context-help campaign-bonus-help">${escapeHtml(meta.help)}</div>
+            </div>
+        `;
+    }
+
+    function createAwardRow(campaignKey, scenarioId, rowIndex, award = {}) {
+        const type = award.type || 'get_artifact';
+        const meta = getAwardMeta(type);
+        return `
+            <div class="row-item" id="award-${campaignKey}-${scenarioId}-${rowIndex}">
+                <div class="stack-field">
+                    <label>Award ID</label>
+                    <input type="number" class="campaign-award-id small-input" value="${award.id ?? 0}" placeholder="ID">
+                </div>
+                <div class="stack-field">
+                    <label>Award Type</label>
+                    <select class="campaign-award-type">${buildSelectOptions(campaignAwardTypes, type)}</select>
+                </div>
+                ${createTranslatedIdControl('campaign-award-subtype', getTranslatedOptionsForAwardType(type), award.sub_type ?? 0, meta.subTypeLabel)}
+                <div class="stack-field amount-field">
+                    <label class="campaign-award-amount-label">${escapeHtml(meta.amountLabel)}</label>
+                    <input type="number" class="campaign-award-amount small-input" value="${award.amount ?? 1}" placeholder="${escapeAttribute(meta.amountLabel)}">
+                </div>
+                <div class="stack-field start-field">
+                    <label class="campaign-award-start-label">${escapeHtml(meta.startLabel)}</label>
+                    <input type="number" class="campaign-award-start small-input" value="${award.start_scenario_id ?? 0}" placeholder="${escapeAttribute(meta.startLabel)}">
+                </div>
+                <div class="stack-field">
+                    <label>Custom Name</label>
+                    <input type="text" class="campaign-award-name" value="${escapeAttribute(award.custom_name || '')}" placeholder="Custom Name">
+                </div>
+                <button type="button" class="btn-remove" onclick="document.getElementById('award-${campaignKey}-${scenarioId}-${rowIndex}').remove()">Remove</button>
+                <div class="context-help campaign-award-help">${escapeHtml(meta.help)}</div>
+            </div>
+        `;
+    }
+
+    function addNextScenarioRow(campaignKey, scenarioId) {
+        const container = document.getElementById(`next-container-${campaignKey}-${scenarioId}`);
+        container.insertAdjacentHTML('beforeend', createNextScenarioRow(campaignKey, scenarioId, container.children.length, 0));
+    }
+
+    function addBonusRow(campaignKey, scenarioId) {
+        const container = document.getElementById(`bonus-container-${campaignKey}-${scenarioId}`);
+        container.insertAdjacentHTML('beforeend', createBonusRow(campaignKey, scenarioId, container.children.length, {}));
+        bindTranslatedInputs();
+        bindCampaignTypeWatchers();
+    }
+
+    function addAwardRow(campaignKey, scenarioId) {
+        const container = document.getElementById(`award-container-${campaignKey}-${scenarioId}`);
+        container.insertAdjacentHTML('beforeend', createAwardRow(campaignKey, scenarioId, container.children.length, {}));
+        bindTranslatedInputs();
+        bindCampaignTypeWatchers();
+    }
+
+    function createTranslatedIdControl(className, options, selectedValue, placeholder, hidden = false) {
+        return `
+            <div class="stack-field translated-field ${hidden ? 'hidden' : ''}">
+                <label class="${className}-label">${escapeHtml(placeholder)}</label>
+                <div class="translated-id-row">
+                    <select class="${className}-select">${buildSelectOptionsWithCustom(options, selectedValue)}</select>
+                    <input type="number" class="${className} small-input" value="${selectedValue === '' ? '' : selectedValue}" placeholder="${placeholder}">
+                </div>
+            </div>
+        `;
+    }
+
+    function buildSelectOptionsWithCustom(entries, selectedValue) {
+        const normalizedSelected = String(selectedValue);
+        let hasSelected = false;
+        const options = entries.map(([value, label]) => {
+            const selected = normalizedSelected === String(value);
+            if (selected) hasSelected = true;
+            return `<option value="${value}" ${selected ? 'selected' : ''}>${escapeHtml(label)} (ID: ${value})</option>`;
+        });
+
+        if (!hasSelected && normalizedSelected !== '' && normalizedSelected !== 'undefined' && normalizedSelected !== 'null') {
+            options.unshift(`<option value="${escapeAttribute(normalizedSelected)}" selected>Custom (ID: ${escapeHtml(normalizedSelected)})</option>`);
+        }
+
+        return options.join('');
+    }
+
+    function getTranslatedOptionsForBonusType(type) {
+        switch (type) {
+            case 'resources':
+                return resourceOptions;
+            case 'artifact':
+                return getCategoryOptions('artifacts');
+            case 'troop':
+                return getCategoryOptions('monsters');
+            case 'spell':
+                return getCategoryOptions('spells');
+            case 'starting_race':
+            case 'starting_race_and_army':
+                return raceOptions;
+            case 'skill_primary':
+                return primarySkillOptions;
+            case 'skill_secondary':
+                return secondarySkillOptions;
+            default:
+                return [];
+        }
+    }
+
+    function getTranslatedOptionsForAwardType(type) {
+        switch (type) {
+            case 'creature_curse':
+            case 'creature_alliance':
+                return getCategoryOptions('monsters');
+            case 'get_artifact':
+                return getCategoryOptions('artifacts');
+            case 'get_spell':
+                return getCategoryOptions('spells');
+            case 'hireable_hero':
+            case 'defeat_enemy_hero':
+                return getCategoryOptions('heroes');
+            case 'resource_bonus':
+                return resourceOptions;
+            case 'carry_over_forces':
+            default:
+                return [];
+        }
+    }
+
+    function getCategoryOptions(category) {
+        if (loadedData && loadedData[category]) {
+            return Object.keys(loadedData[category])
+                .sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
+                .map(id => [id, loadedData[category][id].name || `ID ${id}`]);
+        }
+
+        if (builtInNameMaps[category]) {
+            return Object.entries(builtInNameMaps[category])
+                .sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10))
+                .map(([id, name]) => [id, name]);
+        }
+
+        return [];
+    }
+
+    function getBonusMeta(type) {
+        return bonusTypeMeta[type] || bonusTypeMeta.resources;
+    }
+
+    function getAwardMeta(type) {
+        return awardTypeMeta[type] || awardTypeMeta.get_artifact;
+    }
+
+    function bindTranslatedInputs() {
+        document.querySelectorAll('.translated-id-row').forEach(row => {
+            const select = row.querySelector('select');
+            const input = row.querySelector('input');
+            if (!select || !input || row.dataset.bound === '1') {
+                return;
+            }
+
+            select.addEventListener('change', () => {
+                input.value = select.value;
+            });
+
+            input.addEventListener('input', () => {
+                const matching = Array.from(select.options).find(option => option.value === input.value);
+                if (matching) {
+                    select.value = input.value;
+                    return;
+                }
+
+                let customOption = Array.from(select.options).find(option => option.dataset.custom === '1');
+                if (!customOption) {
+                    customOption = document.createElement('option');
+                    customOption.dataset.custom = '1';
+                    select.prepend(customOption);
+                }
+
+                customOption.value = input.value;
+                customOption.textContent = input.value === '' ? 'Custom ID' : `Custom (ID: ${input.value})`;
+                select.value = input.value;
+            });
+
+            row.dataset.bound = '1';
+        });
+    }
+
+    function bindCampaignTypeWatchers() {
+        document.querySelectorAll('.campaign-bonus-type').forEach(select => {
+            if (select.dataset.bound === '1') {
+                return;
+            }
+
+            select.addEventListener('change', () => {
+                const row = select.closest('.row-item');
+                refreshTranslatedControl(row, '.campaign-bonus-subtype-select', '.campaign-bonus-subtype', getTranslatedOptionsForBonusType(select.value));
+                updateBonusRowContext(row, select.value);
+            });
+
+            select.dataset.bound = '1';
+        });
+
+        document.querySelectorAll('.campaign-award-type').forEach(select => {
+            if (select.dataset.bound === '1') {
+                return;
+            }
+
+            select.addEventListener('change', () => {
+                const row = select.closest('.row-item');
+                refreshTranslatedControl(row, '.campaign-award-subtype-select', '.campaign-award-subtype', getTranslatedOptionsForAwardType(select.value));
+                updateAwardRowContext(row, select.value);
+            });
+
+            select.dataset.bound = '1';
+        });
+
+        document.querySelectorAll('.campaign-bonus-type').forEach(select => {
+            updateBonusRowContext(select.closest('.row-item'), select.value);
+        });
+
+        document.querySelectorAll('.campaign-bonus-subtype').forEach(input => {
+            if (input.dataset.contextBound === '1') {
+                return;
+            }
+
+            input.addEventListener('input', () => {
+                const row = input.closest('.row-item');
+                const type = row?.querySelector('.campaign-bonus-type')?.value || 'resources';
+                updateBonusRowContext(row, type);
+            });
+
+            input.dataset.contextBound = '1';
+        });
+
+        document.querySelectorAll('.campaign-bonus-subtype-select').forEach(select => {
+            if (select.dataset.contextBound === '1') {
+                return;
+            }
+
+            select.addEventListener('change', () => {
+                const row = select.closest('.row-item');
+                const type = row?.querySelector('.campaign-bonus-type')?.value || 'resources';
+                updateBonusRowContext(row, type);
+            });
+
+            select.dataset.contextBound = '1';
+        });
+
+        document.querySelectorAll('.campaign-award-type').forEach(select => {
+            updateAwardRowContext(select.closest('.row-item'), select.value);
+        });
+    }
+
+    function refreshTranslatedControl(row, selectSelector, inputSelector, options) {
+        if (!row) return;
+
+        const select = row.querySelector(selectSelector);
+        const input = row.querySelector(inputSelector);
+        if (!select || !input) return;
+
+        const currentValue = input.value;
+        select.innerHTML = buildSelectOptionsWithCustom(options, currentValue);
+        const matching = Array.from(select.options).find(option => option.value === currentValue);
+        if (matching) {
+            select.value = currentValue;
+        } else if (select.options.length > 0) {
+            select.selectedIndex = 0;
+            input.value = select.value;
+        }
+    }
+
+    function updateBonusRowContext(row, type) {
+        if (!row) return;
+
+        const meta = getBonusMeta(type);
+        const subtypeLabel = row.querySelector('.campaign-bonus-subtype-label');
+        const amountLabel = row.querySelector('.campaign-bonus-amount-label');
+        const amountInput = row.querySelector('.campaign-bonus-amount');
+        const spellField = row.querySelector('.campaign-bonus-spell')?.closest('.translated-field');
+        const help = row.querySelector('.campaign-bonus-help');
+
+        if (subtypeLabel) subtypeLabel.textContent = meta.subTypeLabel;
+        if (amountLabel) amountLabel.textContent = meta.amountLabel;
+        if (amountInput) amountInput.placeholder = meta.amountLabel;
+        if (help) help.textContent = meta.help;
+        if (spellField) {
+            let shouldShowSpellField = meta.showSpellField;
+
+            if (type === 'artifact') {
+                const artifactId = row.querySelector('.campaign-bonus-subtype')?.value || '';
+                shouldShowSpellField = spellScrollArtifactIds.has(String(artifactId));
+
+                if (shouldShowSpellField) {
+                    refreshTranslatedControl(row, '.campaign-bonus-spell-select', '.campaign-bonus-spell', spellOptions);
+                }
+            }
+
+            spellField.classList.toggle('hidden', !shouldShowSpellField);
+        }
+    }
+
+    function updateAwardRowContext(row, type) {
+        if (!row) return;
+
+        const meta = getAwardMeta(type);
+        const subtypeLabel = row.querySelector('.campaign-award-subtype-label');
+        const amountLabel = row.querySelector('.campaign-award-amount-label');
+        const startLabel = row.querySelector('.campaign-award-start-label');
+        const amountInput = row.querySelector('.campaign-award-amount');
+        const startInput = row.querySelector('.campaign-award-start');
+        const help = row.querySelector('.campaign-award-help');
+        const subtypeField = row.querySelector('.campaign-award-subtype')?.closest('.translated-field');
+        const amountField = row.querySelector('.campaign-award-amount')?.closest('.stack-field');
+
+        if (subtypeLabel) subtypeLabel.textContent = meta.subTypeLabel;
+        if (amountLabel) amountLabel.textContent = meta.amountLabel;
+        if (startLabel) startLabel.textContent = meta.startLabel;
+        if (amountInput) amountInput.placeholder = meta.amountLabel;
+        if (startInput) startInput.placeholder = meta.startLabel;
+        if (help) help.textContent = meta.help;
+        if (subtypeField) subtypeField.classList.toggle('hidden', !!meta.hideSubType);
+        if (amountField) amountField.classList.toggle('hidden', !!meta.hideAmount);
+    }
+
     function saveAndDownload() {
-        if (!gameData) return;
+        if (!loadedData || !currentFileType) return;
 
-        // 1. Gather dynamic categories
+        if (currentFileType === 'stats') {
+            gatherStatsData();
+        } else {
+            gatherCampaignData();
+        }
+
+        const outputName = currentFileType === 'campaigns' ? 'campaigns.json' : 'stats.json';
+        const blob = new Blob([JSON.stringify(loadedData, null, 4)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = outputName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showStatus(`Saved ${outputName}.`, 'var(--accent-2)');
+    }
+
+    function gatherStatsData() {
         document.querySelectorAll('input[data-category]').forEach(input => {
-            const category = input.getAttribute('data-category');
-            const id = input.getAttribute('data-id');
-            const key = input.getAttribute('data-key');
-            gameData[category][id][key] = input.value.includes('.') ? parseFloat(input.value) : parseInt(input.value);
+            const category = input.dataset.category;
+            const id = input.dataset.id;
+            const key = input.dataset.key;
+            loadedData[category][id][key] = toNumeric(input.value);
         });
 
-        // 2. Gather Map Objects (Inputs AND Selects)
         document.querySelectorAll('input[data-type="map_objects"], select[data-type="map_objects"]').forEach(input => {
-            const key = input.getAttribute('data-key');
-            gameData.map_objects[key] = key.includes('multiplier') ? parseFloat(input.value) : parseInt(input.value);
+            const key = input.dataset.key;
+            loadedData.map_objects[key] = key.includes('multiplier') ? parseFloat(input.value) : parseInt(input.value, 10);
         });
 
-        // 3. Gather Hero Stats
         document.querySelectorAll('input[data-type="hero"]').forEach(input => {
-            const id = input.getAttribute('data-id');
-            const stat = input.getAttribute('data-stat');
-            if(gameData.heroes[id]) gameData.heroes[id][stat] = parseInt(input.value);
+            const id = input.dataset.id;
+            const stat = input.dataset.stat;
+            loadedData.heroes[id][stat] = parseInt(input.value, 10);
         });
 
-        // 4. Gather Hero Armies & Artifacts
-        for (const heroId of Object.keys(gameData.heroes)) {
+        for (const heroId of Object.keys(loadedData.heroes)) {
             const troopContainer = document.getElementById(`troop-container-${heroId}`);
             if (troopContainer) {
-                const newArmy = [];
-                troopContainer.querySelectorAll('.row-item').forEach(row => {
-                    newArmy.push({
-                        id: parseInt(row.querySelector('.troop-select-id').value),
-                        count: parseInt(row.querySelector('.troop-input-count').value)
-                    });
-                });
-                gameData.heroes[heroId].army = newArmy;
+                loadedData.heroes[heroId].army = Array.from(troopContainer.querySelectorAll('.row-item')).map(row => ({
+                    id: parseInt(row.querySelector('.troop-select-id').value, 10),
+                    count: parseInt(row.querySelector('.troop-input-count').value, 10)
+                }));
             }
 
-            const artContainer = document.getElementById(`artifact-container-${heroId}`);
-            if (artContainer) {
-                const newArtifacts = [];
-                artContainer.querySelectorAll('.artifact-select-id').forEach(select => {
-                    newArtifacts.push(parseInt(select.value));
-                });
-                gameData.heroes[heroId].artifacts = newArtifacts;
+            const artifactContainer = document.getElementById(`artifact-container-${heroId}`);
+            if (artifactContainer) {
+                loadedData.heroes[heroId].artifacts = Array.from(artifactContainer.querySelectorAll('.artifact-select-id')).map(select => parseInt(select.value, 10));
             }
         }
-
-        // Trigger Download
-        const blob = new Blob([JSON.stringify(gameData, null, 4)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "stats.json";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        showStatus('File Saved & Downloaded perfectly!', 'var(--success)');
     }
 
-    function showStatus(msg, color) {
+    function gatherCampaignData() {
+        const scenarioCards = document.querySelectorAll('#campaignsList .data-card[data-campaign][data-scenario]');
+        scenarioCards.forEach(card => {
+            const campaignKey = card.dataset.campaign;
+            const scenarioId = card.dataset.scenario;
+            const scenario = loadedData.campaigns[campaignKey].scenarios[scenarioId];
+
+            scenario.name = card.querySelector('[data-campaign-field="name"]').value;
+            scenario.map_file = card.querySelector('[data-campaign-field="map_file"]').value;
+            scenario.victory_condition = card.querySelector('[data-campaign-field="victory_condition"]').value;
+            scenario.loss_condition = card.querySelector('[data-campaign-field="loss_condition"]').value;
+            scenario.description = card.querySelector('[data-campaign-field="description"]').value;
+
+            scenario.next_scenarios = Array.from(card.querySelectorAll('.next-scenario-id'))
+                .map(input => parseInt(input.value, 10))
+                .filter(value => !Number.isNaN(value));
+
+            scenario.bonuses = Array.from(card.querySelectorAll('[id^="bonus-' + campaignKey + '-' + scenarioId + '-"]')).map(row => {
+                const result = {
+                    type: row.querySelector('.campaign-bonus-type').value,
+                    sub_type: parseInt(row.querySelector('.campaign-bonus-subtype').value || '0', 10),
+                    amount: parseInt(row.querySelector('.campaign-bonus-amount').value || '0', 10)
+                };
+
+                const spellField = row.querySelector('.campaign-bonus-spell').value.trim();
+                if (spellField !== '') {
+                    result.artifact_spell_id = parseInt(spellField, 10);
+                }
+
+                return result;
+            });
+
+            scenario.awards = Array.from(card.querySelectorAll('[id^="award-' + campaignKey + '-' + scenarioId + '-"]')).map(row => {
+                const result = {
+                    id: parseInt(row.querySelector('.campaign-award-id').value || '0', 10),
+                    type: row.querySelector('.campaign-award-type').value,
+                    sub_type: parseInt(row.querySelector('.campaign-award-subtype').value || '0', 10),
+                    amount: parseInt(row.querySelector('.campaign-award-amount').value || '1', 10),
+                    start_scenario_id: parseInt(row.querySelector('.campaign-award-start').value || '0', 10)
+                };
+
+                const customName = row.querySelector('.campaign-award-name').value.trim();
+                if (customName) {
+                    result.custom_name = customName;
+                }
+
+                return result;
+            });
+        });
+    }
+
+    function buildSelectOptions(entries, selectedValue) {
+        return entries.map(([value, label]) => `<option value="${value}" ${String(selectedValue) === String(value) ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('');
+    }
+
+    function beautifyKey(key) {
+        return key.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+    }
+
+    function toNumeric(value) {
+        return String(value).includes('.') ? parseFloat(value) : parseInt(value, 10);
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttribute(value) {
+        return escapeHtml(value).replace(/`/g, '&#96;');
+    }
+
+    function showStatus(message, color) {
         const status = document.getElementById('status');
-        status.textContent = msg;
+        status.textContent = message;
         status.style.color = color;
         status.style.display = 'block';
-        setTimeout(() => status.style.display = 'none', 4000);
+        clearTimeout(showStatus.timer);
+        showStatus.timer = setTimeout(() => {
+            status.style.display = 'none';
+        }, 4000);
     }
 </script>
-
 </body>
 </html>
