@@ -505,6 +505,16 @@
         ['14', 'Estates']
     ];
 
+    const startingResourceFields = [
+        ['gold', 'Gold'],
+        ['wood', 'Wood'],
+        ['ore', 'Ore'],
+        ['mercury', 'Mercury'],
+        ['sulfur', 'Sulfur'],
+        ['crystal', 'Crystal'],
+        ['gems', 'Gems']
+    ];
+
     const spellOptions = [
         ['0', 'None']
     ].concat(Object.entries({"0":"Unknown","1":"Fireball","10":"Haste","11":"Mass Haste","12":"Slow","13":"Mass Slow","14":"Blind","15":"Bless","16":"Mass Bless","17":"Stoneskin","18":"Steelskin","19":"Curse","2":"Fireblast","20":"Mass Curse","21":"Holy Word","22":"Holy Shout","23":"Anti-Magic","24":"Dispel Magic","25":"Mass Dispel","26":"Magic Arrow","27":"Berserker","28":"Armageddon","29":"Elemental Storm","3":"Lightning Bolt","30":"Meteor Shower","31":"Paralyze","32":"Hypnotize","33":"Cold Ray","34":"Cold Ring","35":"Disrupting Ray","36":"Death Ripple","37":"Death Wave","38":"Dragon Slayer","39":"Blood Lust","4":"Chain Lightning","40":"Animate Dead","41":"Mirror Image","42":"Shield","43":"Mass Shield","44":"Summon Earth Elemental","45":"Summon Air Elemental","46":"Summon Fire Elemental","47":"Summon Water Elemental","48":"Earthquake","49":"View Mines","5":"Teleport","50":"View Resources","51":"View Artifacts","52":"View Towns","53":"View Heroes","54":"View All","55":"Identify Hero","56":"Summon Boat","57":"Dimension Door","58":"Town Gate","59":"Town Portal","6":"Cure","60":"Visions","61":"Haunt","62":"Set Earth Guardian","63":"Set Air Guardian","64":"Set Fire Guardian","65":"Set Water Guardian","66":"Random Spell","67":"Random 1st Level Spell","68":"Random 2nd Level Spell","69":"Random 3rd Level Spell","7":"Mass Cure","70":"Random 4th Level Spell","71":"Random 5th Level Spell","72":"Petrification","8":"Resurrect","9":"Resurrect True"}));
@@ -912,6 +922,15 @@
                 </div>
 
                 <div class="list-container">
+                    <h4>Starting Resources</h4>
+                    <p class="hint">These values replace the campaign scenario starting funds for human and AI players. They are generated from normal difficulty defaults.</p>
+                    <div class="campaign-meta-grid">
+                        ${createStartingResourcesEditor(campaignKey, scenarioId, 'human', scenario.starting_resources?.human || getDefaultStartingResources())}
+                        ${createStartingResourcesEditor(campaignKey, scenarioId, 'ai', scenario.starting_resources?.ai || getDefaultStartingResources())}
+                    </div>
+                </div>
+
+                <div class="list-container">
                     <h4>Next Scenarios / Branching</h4>
                     <div id="next-container-${campaignKey}-${scenarioId}">${nextRows}</div>
                     <button type="button" onclick="addNextScenarioRow('${campaignKey}', '${scenarioId}')">Add Next Scenario</button>
@@ -937,6 +956,35 @@
             <div class="row-item" id="next-${campaignKey}-${scenarioId}-${rowIndex}">
                 <input type="number" class="next-scenario-id small-input" value="${nextId}" min="0">
                 <button type="button" class="btn-remove" onclick="document.getElementById('next-${campaignKey}-${scenarioId}-${rowIndex}').remove()">Remove</button>
+            </div>
+        `;
+    }
+
+    function getDefaultStartingResources() {
+        return {
+            gold: 7500,
+            wood: 20,
+            ore: 20,
+            mercury: 5,
+            sulfur: 5,
+            crystal: 5,
+            gems: 5
+        };
+    }
+
+    function createStartingResourcesEditor(campaignKey, scenarioId, side, resources) {
+        const normalized = { ...getDefaultStartingResources(), ...resources };
+        const fields = startingResourceFields.map(([key, label]) => `
+            <div class="form-group">
+                <label>${escapeHtml(label)}</label>
+                <input type="number" data-starting-resources="${side}" data-resource-key="${key}" value="${normalized[key] ?? 0}">
+            </div>
+        `).join('');
+
+        return `
+            <div class="data-card" data-starting-resources-card="${side}" data-campaign="${campaignKey}" data-scenario="${scenarioId}">
+                <h4>${side === 'human' ? 'Human Players' : 'AI Players'}</h4>
+                <div class="grid-form">${fields}</div>
             </div>
         `;
     }
@@ -1349,6 +1397,10 @@
             scenario.victory_condition = card.querySelector('[data-campaign-field="victory_condition"]').value;
             scenario.loss_condition = card.querySelector('[data-campaign-field="loss_condition"]').value;
             scenario.description = card.querySelector('[data-campaign-field="description"]').value;
+            scenario.starting_resources = {
+                human: gatherStartingResources(card, 'human'),
+                ai: gatherStartingResources(card, 'ai')
+            };
 
             scenario.next_scenarios = Array.from(card.querySelectorAll('.next-scenario-id'))
                 .map(input => parseInt(input.value, 10))
@@ -1386,6 +1438,14 @@
                 return result;
             });
         });
+    }
+
+    function gatherStartingResources(card, side) {
+        const result = {};
+        card.querySelectorAll(`[data-starting-resources-card="${side}"] [data-resource-key]`).forEach(input => {
+            result[input.dataset.resourceKey] = parseInt(input.value || '0', 10);
+        });
+        return result;
     }
 
     function buildSelectOptions(entries, selectedValue) {

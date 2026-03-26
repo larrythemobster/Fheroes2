@@ -72,12 +72,62 @@ namespace
 
         bool hasAwards{ false };
         std::vector<Campaign::CampaignAwardData> awards;
+
+        bool hasHumanStartingResources{ false };
+        Funds humanStartingResources;
+
+        bool hasAIStartingResources{ false };
+        Funds aiStartingResources;
     };
 
     struct CampaignOverrides final
     {
         std::map<int32_t, std::map<int32_t, CampaignScenarioOverride>> scenarioOverrides;
     };
+
+    Funds getNormalDifficultyStartingResources( const bool isAI )
+    {
+        if ( isAI ) {
+            return Funds( 20, 20, 5, 20, 5, 5, 7500 );
+        }
+
+        return Funds( 20, 20, 5, 20, 5, 5, 7500 );
+    }
+
+    Json fundsToJson( const Funds & funds )
+    {
+        return Json{ { "gold", funds.gold },     { "wood", funds.wood },   { "ore", funds.ore },       { "mercury", funds.mercury },
+                     { "sulfur", funds.sulfur }, { "crystal", funds.crystal }, { "gems", funds.gems } };
+    }
+
+    Funds jsonToFunds( const Json & json, const Funds & fallback )
+    {
+        Funds funds = fallback;
+
+        if ( const auto iter = json.find( "gold" ); iter != json.end() && iter->is_number_integer() ) {
+            funds.gold = iter->get<int32_t>();
+        }
+        if ( const auto iter = json.find( "wood" ); iter != json.end() && iter->is_number_integer() ) {
+            funds.wood = iter->get<int32_t>();
+        }
+        if ( const auto iter = json.find( "ore" ); iter != json.end() && iter->is_number_integer() ) {
+            funds.ore = iter->get<int32_t>();
+        }
+        if ( const auto iter = json.find( "mercury" ); iter != json.end() && iter->is_number_integer() ) {
+            funds.mercury = iter->get<int32_t>();
+        }
+        if ( const auto iter = json.find( "sulfur" ); iter != json.end() && iter->is_number_integer() ) {
+            funds.sulfur = iter->get<int32_t>();
+        }
+        if ( const auto iter = json.find( "crystal" ); iter != json.end() && iter->is_number_integer() ) {
+            funds.crystal = iter->get<int32_t>();
+        }
+        if ( const auto iter = json.find( "gems" ); iter != json.end() && iter->is_number_integer() ) {
+            funds.gems = iter->get<int32_t>();
+        }
+
+        return funds;
+    }
 
     Json generateCampaignOverridesTemplate();
     Campaign::CampaignData getRolandCampaignData( bool shouldApplyOverrides = true );
@@ -368,6 +418,19 @@ namespace
                     }
                 }
 
+                if ( const auto startingResourcesIter = scenarioJson.find( "starting_resources" ); startingResourcesIter != scenarioJson.end()
+                     && startingResourcesIter->is_object() ) {
+                    if ( const auto humanIter = startingResourcesIter->find( "human" ); humanIter != startingResourcesIter->end() && humanIter->is_object() ) {
+                        overrideData.hasHumanStartingResources = true;
+                        overrideData.humanStartingResources = jsonToFunds( *humanIter, getNormalDifficultyStartingResources( false ) );
+                    }
+
+                    if ( const auto aiIter = startingResourcesIter->find( "ai" ); aiIter != startingResourcesIter->end() && aiIter->is_object() ) {
+                        overrideData.hasAIStartingResources = true;
+                        overrideData.aiStartingResources = jsonToFunds( *aiIter, getNormalDifficultyStartingResources( true ) );
+                    }
+                }
+
                 if ( const auto awardsIter = scenarioJson.find( "awards" ); awardsIter != scenarioJson.end() && awardsIter->is_array() ) {
                     overrideData.hasAwards = true;
                     for ( const auto & awardJson : *awardsIter ) {
@@ -602,6 +665,9 @@ namespace
                     bonuses.emplace_back( scenarioBonusToJson( bonus ) );
                 }
                 scenarioJson["bonuses"] = std::move( bonuses );
+
+                scenarioJson["starting_resources"] = Json{ { "human", fundsToJson( getNormalDifficultyStartingResources( false ) ) },
+                                                           { "ai", fundsToJson( getNormalDifficultyStartingResources( true ) ) } };
 
                 Json awards = Json::array();
                 for ( const Campaign::CampaignAwardData & award : Campaign::CampaignAwardData::getCampaignAwardData( scenario.getScenarioInfoId() ) ) {
@@ -1199,6 +1265,41 @@ namespace Campaign
         assert( scenarioInfo.scenarioId >= 0 && static_cast<size_t>( scenarioInfo.scenarioId ) < scenarios.size() );
 
         return scenarios[scenarioInfo.scenarioId].getNextScenarios();
+    }
+
+    bool CampaignData::getScenarioStartingResources( const ScenarioInfoId & scenarioInfo, Funds * humanResources, bool * hasHumanResources, Funds * aiResources,
+                                                     bool * hasAIResources )
+    {
+        const auto campaignOverridesIter = getCampaignOverrides().scenarioOverrides.find( scenarioInfo.campaignId );
+        if ( campaignOverridesIter == getCampaignOverrides().scenarioOverrides.end() ) {
+            return false;
+        }
+
+        const auto scenarioOverrideIter = campaignOverridesIter->second.find( scenarioInfo.scenarioId );
+        if ( scenarioOverrideIter == campaignOverridesIter->second.end() ) {
+            return false;
+        }
+
+        const CampaignScenarioOverride & overrideData = scenarioOverrideIter->second;
+        bool hasAnyData = false;
+
+        if ( hasHumanResources != nullptr ) {
+            *hasHumanResources = overrideData.hasHumanStartingResources;
+        }
+        if ( humanResources != nullptr && overrideData.hasHumanStartingResources ) {
+            *humanResources = overrideData.humanStartingResources;
+            hasAnyData = true;
+        }
+
+        if ( hasAIResources != nullptr ) {
+            *hasAIResources = overrideData.hasAIStartingResources;
+        }
+        if ( aiResources != nullptr && overrideData.hasAIStartingResources ) {
+            *aiResources = overrideData.aiStartingResources;
+            hasAnyData = true;
+        }
+
+        return hasAnyData;
     }
 
     std::vector<ScenarioInfoId> CampaignData::getStartingScenarios() const

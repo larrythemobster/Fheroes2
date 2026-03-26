@@ -1,0 +1,2477 @@
+{
+    "campaigns": {
+        "archibald": {
+            "scenarios": {
+                "0": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 11,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 27,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "King Archibald requires you to defeat the three enemies in this region. They are not allied with one another, so they will spend most of their energy fighting amongst themselves. You will win when you own all of the enemy castles and there are no more heroes left to fight.",
+                    "loss_condition": "standard",
+                    "map_file": "campe01.h2c",
+                    "name": "First Blood",
+                    "next_scenarios": [
+                        1
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "1": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 32,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "You must unify the barbarian tribes of the north by conquering them. As in the previous mission, the enemy is not allied against you, but they have more resources at their disposal. You will win when you own all of the enemy castles and there are no more heroes left to fight.",
+                    "loss_condition": "standard",
+                    "map_file": "campe02.h2c",
+                    "name": "Barbarian Wars",
+                    "next_scenarios": [
+                        2,
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "10": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 70,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 71,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 17,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "This is the final battle. Both you and your enemy are armed to the teeth, and all are allied against you. Capture Roland to win the war, and be sure not to lose Archibald in the fight!",
+                    "loss_condition": "standard",
+                    "map_file": "campe11.h2c",
+                    "name": "Apocalypse",
+                    "next_scenarios": [],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "11": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 16,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "Switching sides leaves you with three castles against the enemy's one. This battle will be the easiest one you will face for the rest of the war...traitor.",
+                    "loss_condition": "standard",
+                    "map_file": "campe05b.h2c",
+                    "name": "Betrayal",
+                    "next_scenarios": [
+                        5
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "2": {
+                    "awards": [
+                        {
+                            "amount": 0,
+                            "custom_name": "Necromancer Guild",
+                            "id": 1,
+                            "start_scenario_id": 0,
+                            "sub_type": 60,
+                            "type": "hireable_hero"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 20,
+                            "type": "spell"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 20,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Do-gooder wizards have taken the Necromancers' castle. You must retake it to achieve victory. Remember that while you start with a powerful army, you have no castle and must take one within 7 days, or lose this battle. (Hint: The nearest castle is to the southeast.)",
+                    "loss_condition": "standard",
+                    "map_file": "campe03.h2c",
+                    "name": "Necromancers",
+                    "next_scenarios": [
+                        4,
+                        11
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "3": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "custom_name": "Ogre Alliance",
+                            "id": 2,
+                            "start_scenario_id": 0,
+                            "sub_type": 16,
+                            "type": "creature_alliance"
+                        },
+                        {
+                            "amount": 1,
+                            "custom_name": "Dwarfbane",
+                            "id": 3,
+                            "start_scenario_id": 0,
+                            "sub_type": 22,
+                            "type": "creature_curse"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 32,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "The dwarves need conquering before they can interfere in King Archibald's plans. Roland's forces have more than one hero and many towns to start with, so be ready for attack from multiple directions. You must capture all of the enemy towns and castles to claim victory.",
+                    "loss_condition": "standard",
+                    "map_file": "campe04.h2c",
+                    "name": "Slay the Dwarves",
+                    "next_scenarios": [
+                        4,
+                        11
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "4": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 32,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "Your enemies are allied against you and start close by, so be ready to come out fighting. You will need to own all four castles in this small valley to win.",
+                    "loss_condition": "standard",
+                    "map_file": "campe05.h2c",
+                    "name": "Turning Point",
+                    "next_scenarios": [
+                        5
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "5": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 32,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "You must put down a peasant revolt led by Roland's forces. All are allied against you, but you have Lord Corlagon, an experienced hero, to help you. Capture all enemy castles to win.",
+                    "loss_condition": "standard",
+                    "map_file": "campe06.h2c",
+                    "name": "Rebellion",
+                    "next_scenarios": [
+                        6,
+                        7
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "6": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "custom_name": "Dragon Alliance",
+                            "id": 4,
+                            "start_scenario_id": 0,
+                            "sub_type": 36,
+                            "type": "creature_alliance"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 32,
+                            "type": "starting_race_and_army"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "starting_race_and_army"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "starting_race_and_army"
+                        }
+                    ],
+                    "description": "There are two enemies allied against you in this mission. Both are well armed and seek to evict you from their island. Avoid them and capture Dragon City to win.",
+                    "loss_condition": "standard",
+                    "map_file": "campe07.h2c",
+                    "name": "Dragon Master",
+                    "next_scenarios": [
+                        7
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "capture_dragon_city"
+                },
+                "7": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 3,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 25,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 80,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Your orders are to conquer the country lords that have sworn to serve Roland. All of the enemy castles are unified against you. Since you start without a castle, you must hurry to capture one before the end of the week. Capture all enemy castles for victory.",
+                    "loss_condition": "standard",
+                    "map_file": "campe08.h2c",
+                    "name": "Country Lords",
+                    "next_scenarios": [
+                        8,
+                        9
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "8": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 5,
+                            "start_scenario_id": 0,
+                            "sub_type": 7,
+                            "type": "get_artifact"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 32,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "Find the Crown before Roland's heroes find it. Archibald will need the Crown for the final battle against Roland.",
+                    "loss_condition": "standard",
+                    "map_file": "campe09.h2c",
+                    "name": "The Crown",
+                    "next_scenarios": [
+                        10
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "obtain_ultimate_crown"
+                },
+                "9": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 6,
+                            "start_scenario_id": 0,
+                            "sub_type": 0,
+                            "type": "carry_over_forces"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 81,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 24,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 26,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Gather as large an army as possible and capture the enemy castle within 8 weeks. You are opposed by only one enemy, but must travel a long way to get to the enemy castle. Any troops you have in your army at the end of this scenario will be with you in the final battle.",
+                    "loss_condition": "standard",
+                    "map_file": "campe10.h2c",
+                    "name": "Greater Glory",
+                    "next_scenarios": [
+                        10
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                }
+            }
+        },
+        "descendants": {
+            "scenarios": {
+                "0": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 50,
+                            "sub_type": 1,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 10,
+                            "sub_type": 16,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Conquer and unite all the enemy tribes. Don't lose the hero Jarkonas, the forefather of all descendants.",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_01.hxc",
+                    "name": "Conquer and Unify",
+                    "next_scenarios": [
+                        1
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "1": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "skill_primary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "skill_primary"
+                        },
+                        {
+                            "amount": 1000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Your rival, the Kingdom of Harondale, is attacking weak towns on your border! Recover from their first strike and crush them completely!",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_02.hxc",
+                    "name": "Border Towns",
+                    "next_scenarios": [
+                        2,
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "2": {
+                    "awards": [
+                        {
+                            "amount": 0,
+                            "custom_name": "Wayward Son",
+                            "id": 0,
+                            "start_scenario_id": 0,
+                            "sub_type": 65,
+                            "type": "hireable_hero"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 3,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 18,
+                            "type": "spell"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 11,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Find your wayward son Joseph who is rumored to be living in the desolate lands. Do it before the first day of the third month or it will be of no help to your family.",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_03.hxc",
+                    "name": "The Wayward Son",
+                    "next_scenarios": [
+                        4
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "3": {
+                    "awards": [
+                        {
+                            "amount": 0,
+                            "custom_name": "Uncle Ivan",
+                            "id": 1,
+                            "start_scenario_id": 0,
+                            "sub_type": 64,
+                            "type": "hireable_hero"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 3,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 25,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Rescue your crazy uncle Ivan. Find him before the first day of the fourth month or it will be of no help to your kingdom.",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_04.hxc",
+                    "name": "Crazy Uncle Ivan",
+                    "next_scenarios": [
+                        4
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "4": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 10,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 7,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 79,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Destroy the barbarians who are attacking the southern border of your kingdom! Recover your fallen towns, and then invade the jungle kingdom. Leave no enemy standing.",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_05.hxc",
+                    "name": "The Southern War",
+                    "next_scenarios": [
+                        5,
+                        6
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "5": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 2,
+                            "start_scenario_id": 0,
+                            "sub_type": 97,
+                            "type": "get_artifact"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": -1000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": -10,
+                            "sub_type": 1,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": -2,
+                            "sub_type": 2,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Retake the castle of Ivory Gates, which has fallen due to treachery.",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_06.hxc",
+                    "name": "Ivory Gates",
+                    "next_scenarios": [
+                        7
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "6": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "custom_name": "Elven Alliance",
+                            "id": 3,
+                            "start_scenario_id": 0,
+                            "sub_type": 24,
+                            "type": "creature_alliance"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 20,
+                            "sub_type": 1,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Gain the favor of the elves. They will not allow trees to be chopped down, so we will send you wood every 2 weeks. You must complete your mission before the first day of the seventh month, or the kingdom will surely fall.",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_07.hxc",
+                    "name": "The Elven Lands",
+                    "next_scenarios": [
+                        7
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "7": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 7,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 3,
+                            "type": "skill_primary"
+                        }
+                    ],
+                    "description": "This is the final battle against your rival kingdom of Harondale. Eliminate everyone, and don't lose the hero Jarkonas VI.",
+                    "loss_condition": "standard",
+                    "map_file": "camp2_08.hxc",
+                    "name": "The Epic Battle",
+                    "next_scenarios": [],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                }
+            }
+        },
+        "price_of_loyalty": {
+            "scenarios": {
+                "0": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 13,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 23,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 27,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Subdue the unruly local lords in order to provide the Empire with facilities to operate in this region.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_01.hxc",
+                    "name": "Uprising",
+                    "next_scenarios": [
+                        1
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "1": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 0,
+                            "start_scenario_id": 0,
+                            "sub_type": 89,
+                            "type": "get_artifact"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 80,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 22,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Eliminate all opposition in this area. Then the first piece of the artifact will be yours.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_02.hxc",
+                    "name": "Island of Chaos",
+                    "next_scenarios": [
+                        2,
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "2": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "custom_name": "Elven Alliance",
+                            "id": 1,
+                            "start_scenario_id": 0,
+                            "sub_type": 24,
+                            "type": "creature_alliance"
+                        },
+                        {
+                            "amount": 2,
+                            "id": 2,
+                            "start_scenario_id": 0,
+                            "sub_type": 1,
+                            "type": "resource_bonus"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 11,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 28,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 2,
+                            "sub_type": 3,
+                            "type": "skill_secondary"
+                        }
+                    ],
+                    "description": "The sorceresses to the northeast are rebelling! For the good of the empire you must quash their feeble uprising on your way to the mountains.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_03.hxc",
+                    "name": "Arrow's Flight",
+                    "next_scenarios": [
+                        4
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "3": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 15,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 10,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 20,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Having prepared for your arrival, Kraeger has arranged for a force of necromancers to thwart your quest. You must capture the castle of Scabsdale before the first day of the third week, or the Necromancers will be too strong for you.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_04.hxc",
+                    "name": "The Abyss",
+                    "next_scenarios": [
+                        5
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "4": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 25,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 2,
+                            "sub_type": 2,
+                            "type": "skill_primary"
+                        }
+                    ],
+                    "description": "The barbarian despot in this area is, as yet, ignorant of your presence. Quickly, build up your forces before you are discovered and attacked! Secure the region by subduing all enemy forces.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_05.hxc",
+                    "name": "The Giant's Pass",
+                    "next_scenarios": [
+                        5
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "5": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 3,
+                            "start_scenario_id": 0,
+                            "sub_type": 95,
+                            "type": "get_artifact"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 3,
+                            "sub_type": 11,
+                            "type": "troop"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 35,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "The Empire is weak in this region. You will be unable to completely subdue all forces in this area, so take what you can before reprisal strikes. Remember, your true goal is to claim the Helmet of Anduran.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_06.hxc",
+                    "name": "Aurora Borealis",
+                    "next_scenarios": [
+                        6,
+                        7
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "6": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 4,
+                            "start_scenario_id": 0,
+                            "sub_type": 102,
+                            "type": "get_artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "custom_name": "Kraeger defeated",
+                            "id": 5,
+                            "start_scenario_id": 0,
+                            "sub_type": 62,
+                            "type": "defeat_enemy_hero"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 10,
+                            "sub_type": 8,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 25,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "artifact_spell_id": 40,
+                            "sub_type": 87,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "For the good of the Empire, eliminate Kraeger.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_07.hxc",
+                    "name": "Betrayal's End",
+                    "next_scenarios": [
+                        7
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "7": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 53,
+                            "type": "spell"
+                        },
+                        {
+                            "amount": 5,
+                            "sub_type": 44,
+                            "type": "troop"
+                        },
+                        {
+                            "amount": 2,
+                            "sub_type": 14,
+                            "type": "skill_secondary"
+                        }
+                    ],
+                    "description": "At last, you have the opportunity and the facilities to rid the Empire of the necromancer's evil. Eradicate them completely, and you will be sung as a hero for all time.",
+                    "loss_condition": "standard",
+                    "map_file": "camp1_08.hxc",
+                    "name": "Corruption's Heart",
+                    "next_scenarios": [],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                }
+            }
+        },
+        "roland": {
+            "scenarios": {
+                "0": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 18,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 19,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Roland needs you to defeat the lords near his castle to begin his war of rebellion against his brother. They are not allied with each other, so they will spend most of their time fighting with one another. Victory is yours when you have defeated all of their castles and heroes.",
+                    "loss_condition": "standard",
+                    "map_file": "campg01.h2c",
+                    "name": "Force of Arms",
+                    "next_scenarios": [
+                        1
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "1": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 16,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "The local lords refuse to swear allegiance to Roland, and must be subdued. They are wealthy and powerful, so be prepared for a tough fight. Capture all enemy castles to win.",
+                    "loss_condition": "standard",
+                    "map_file": "campg02.h2c",
+                    "name": "Annexation",
+                    "next_scenarios": [
+                        2,
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "10": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 32,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "Switching sides leaves you with three castles against the enemy's one. This battle will be the easiest one you will face for the rest of the war...traitor.",
+                    "loss_condition": "standard",
+                    "map_file": "campg05b.h2c",
+                    "name": "Betrayal",
+                    "next_scenarios": [
+                        5
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "2": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "custom_name": "Dwarven Alliance",
+                            "id": 0,
+                            "start_scenario_id": 0,
+                            "sub_type": 22,
+                            "type": "creature_alliance"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 16,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "Your task is to defend the Dwarves against Archibald's forces. Capture all of the enemy towns and castles to win, and be sure not to lose all of the dwarf towns at once, or the enemy will have won.",
+                    "loss_condition": "lose_all_sorceress_villages",
+                    "map_file": "campg03.h2c",
+                    "name": "Save the Dwarves",
+                    "next_scenarios": [
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "3": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 16,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "You will face four allied enemies in a straightforward fight for resources and treasure. Capture all of the enemy castles for victory.",
+                    "loss_condition": "standard",
+                    "map_file": "campg04.h2c",
+                    "name": "Carator Mines",
+                    "next_scenarios": [
+                        4,
+                        10
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "4": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 16,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "Your enemies are allied against you and start close by, so be ready to come out fighting. You will need to own all four castles in this small valley to win.",
+                    "loss_condition": "standard",
+                    "map_file": "campg05.h2c",
+                    "name": "Turning Point",
+                    "next_scenarios": [
+                        5
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "5": {
+                    "awards": [
+                        {
+                            "amount": 0,
+                            "custom_name": "Sorceress Guild",
+                            "id": 1,
+                            "start_scenario_id": 0,
+                            "sub_type": 57,
+                            "type": "hireable_hero"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 41,
+                            "type": "spell"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 44,
+                            "type": "spell"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 8,
+                            "type": "spell"
+                        }
+                    ],
+                    "description": "The Sorceress' guild of Noraston has requested Roland's aid against an attack from Archibald's allies. Capture all of the enemy castles to win, and don't lose Noraston, or you'll lose the scenario. (Hint: There is an enemy castle on an island in the ocean.)",
+                    "loss_condition": "standard",
+                    "map_file": "campg06.h2c",
+                    "name": "Defender",
+                    "next_scenarios": [
+                        6,
+                        7
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "6": {
+                    "awards": [
+                        {
+                            "amount": 0,
+                            "id": 2,
+                            "start_scenario_id": 9,
+                            "sub_type": 0,
+                            "type": "carry_over_forces"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 81,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 24,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 26,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Gather as large an army as possible and capture the enemy castle within 8 weeks. You are opposed by only one enemy, but must travel a long way to get to the enemy castle. Any troops you have in your army at the end of this scenario will be with you in the final battle.",
+                    "loss_condition": "standard",
+                    "map_file": "campg07.h2c",
+                    "name": "The Gauntlet",
+                    "next_scenarios": [
+                        8
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "7": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 3,
+                            "start_scenario_id": 9,
+                            "sub_type": 7,
+                            "type": "get_artifact"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 16,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "starting_race"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "starting_race"
+                        }
+                    ],
+                    "description": "Find the Crown before Archibald's heroes find it. Roland will need the Crown for the final battle against Archibald.",
+                    "loss_condition": "standard",
+                    "map_file": "campg08.h2c",
+                    "name": "The Crown",
+                    "next_scenarios": [
+                        8
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "obtain_ultimate_crown"
+                },
+                "8": {
+                    "awards": [
+                        {
+                            "amount": 0,
+                            "id": 4,
+                            "start_scenario_id": 9,
+                            "sub_type": 56,
+                            "type": "defeat_enemy_hero"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 20,
+                            "sub_type": 16,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 20,
+                            "sub_type": 32,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 20,
+                            "sub_type": 2,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Three allied enemies stand before you and victory, including Lord Corlagon. Roland is in a castle to the northwest, and you will lose if he falls to the enemy. Remember that capturing Lord Corlagon will ensure that he will not fight against you in the final scenario.",
+                    "loss_condition": "standard",
+                    "map_file": "campg09.h2c",
+                    "name": "Corlagon's Defense",
+                    "next_scenarios": [
+                        9
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "9": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 70,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 71,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 17,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "This is the final battle. Both you and your enemy are armed to the teeth, and all are allied against you. Capture Archibald to end the war!",
+                    "loss_condition": "standard",
+                    "map_file": "campg10.h2c",
+                    "name": "Final Justice",
+                    "next_scenarios": [],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                }
+            }
+        },
+        "voyage_home": {
+            "scenarios": {
+                "0": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 34,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 500,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "skill_secondary"
+                        }
+                    ],
+                    "description": "Capture the town on the island off the southeast shore in order to construct a boat and travel back towards the mainland. Do not lose the hero Gallavant.",
+                    "loss_condition": "standard",
+                    "map_file": "camp4_01.hxc",
+                    "name": "Stranded",
+                    "next_scenarios": [
+                        1
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "1": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 6,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 15,
+                            "sub_type": 8,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Find and defeat Martine, the pirate leader, who resides in Pirates Cove. Do not lose Gallavant or your quest will be over.",
+                    "loss_condition": "standard",
+                    "map_file": "camp4_02.hxc",
+                    "name": "Pirate Isles",
+                    "next_scenarios": [
+                        2,
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "2": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 3000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 1,
+                            "type": "skill_primary"
+                        }
+                    ],
+                    "description": "Eliminate all the other forces who oppose the rule of Lord Alberon. Gallavant must not die.",
+                    "loss_condition": "standard",
+                    "map_file": "camp4_03.hxc",
+                    "name": "King and Country",
+                    "next_scenarios": [],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "3": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 13,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 3,
+                            "type": "skill_secondary"
+                        },
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "Overthrow the entrenched monarchy of Lord Alberon, and claim all the land in your name. Gallavant must not die.",
+                    "loss_condition": "standard",
+                    "map_file": "camp4_04.hxc",
+                    "name": "Blood is Thicker",
+                    "next_scenarios": [],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                }
+            }
+        },
+        "wizards_isle": {
+            "scenarios": {
+                "0": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 2000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 25,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 23,
+                            "type": "artifact"
+                        }
+                    ],
+                    "description": "Your mission is to vanquish the warring mages in the magical Shrouded Isles. The completion of this task will give you a fighting chance against your rivals.",
+                    "loss_condition": "standard",
+                    "map_file": "camp3_01.hxc",
+                    "name": "The Shrouded Isles",
+                    "next_scenarios": [
+                        1
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "1": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 0,
+                            "start_scenario_id": 0,
+                            "sub_type": 62,
+                            "type": "get_spell"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 11,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 30,
+                            "type": "artifact"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 2,
+                            "type": "spell"
+                        }
+                    ],
+                    "description": "The location of the great library has been discovered! You must make your way to it, and reclaim the city of Chronos in which it lies.",
+                    "loss_condition": "standard",
+                    "map_file": "camp3_02.hxc",
+                    "name": "The Eternal Scrolls",
+                    "next_scenarios": [
+                        2,
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                },
+                "2": {
+                    "awards": [
+                        {
+                            "amount": 1,
+                            "id": 1,
+                            "start_scenario_id": 0,
+                            "sub_type": 99,
+                            "type": "get_artifact"
+                        }
+                    ],
+                    "bonuses": [
+                        {
+                            "amount": 1,
+                            "sub_type": 11,
+                            "type": "spell"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 44,
+                            "type": "spell"
+                        },
+                        {
+                            "amount": 1,
+                            "sub_type": 4,
+                            "type": "spell"
+                        }
+                    ],
+                    "description": "Find the Orb of negation, which is said to be buried in this land. There are clues inscribed on stone obelisks which will help lead you to your prize. Find the Orb before the first day of the sixth month, or your rivals will surely have gotten to the fount before you.",
+                    "loss_condition": "standard",
+                    "map_file": "camp3_03.hxc",
+                    "name": "Power's End",
+                    "next_scenarios": [
+                        3
+                    ],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "obtain_sphere_negation"
+                },
+                "3": {
+                    "awards": [],
+                    "bonuses": [
+                        {
+                            "amount": 5,
+                            "sub_type": 1,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 5,
+                            "sub_type": 4,
+                            "type": "resources"
+                        },
+                        {
+                            "amount": 1000,
+                            "sub_type": 64,
+                            "type": "resources"
+                        }
+                    ],
+                    "description": "You must take control of the castle of Magic, where the fount of wizardry lies. Do this and your victory will be supreme.",
+                    "loss_condition": "standard",
+                    "map_file": "camp3_04.hxc",
+                    "name": "Fount of Wizardry",
+                    "next_scenarios": [],
+                    "starting_resources": {
+                        "ai": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        },
+                        "human": {
+                            "crystal": 5,
+                            "gems": 5,
+                            "gold": 7500,
+                            "mercury": 5,
+                            "ore": 20,
+                            "sulfur": 20,
+                            "wood": 20
+                        }
+                    },
+                    "victory_condition": "standard"
+                }
+            }
+        }
+    }
+}

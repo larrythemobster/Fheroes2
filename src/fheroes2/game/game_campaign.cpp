@@ -779,6 +779,42 @@ namespace
         }
     }
 
+    void applyCampaignStartingResources( const Campaign::ScenarioInfoId & currentScenarioInfoId )
+    {
+        Funds humanResources;
+        Funds aiResources;
+        bool hasHumanResources = false;
+        bool hasAIResources = false;
+        if ( !Campaign::CampaignData::getScenarioStartingResources( currentScenarioInfoId, &humanResources, &hasHumanResources, &aiResources, &hasAIResources ) ) {
+            return;
+        }
+
+        const Players & sortedPlayers = Settings::Get().GetPlayers();
+        for ( const Player * player : sortedPlayers ) {
+            if ( player == nullptr ) {
+                continue;
+            }
+
+            Kingdom & kingdom = world.GetKingdom( player->GetColor() );
+            if ( !kingdom.isPlay() ) {
+                continue;
+            }
+
+            if ( player->isControlHuman() ) {
+                if ( hasHumanResources ) {
+                    const Funds delta = humanResources - kingdom.GetFunds();
+                    kingdom.AddFundsResource( delta );
+                }
+            }
+            else if ( player->isControlAI() ) {
+                if ( hasAIResources ) {
+                    const Funds delta = aiResources - kingdom.GetFunds();
+                    kingdom.AddFundsResource( delta );
+                }
+            }
+        }
+    }
+
     void playPreviousScenarioVideo()
     {
         const Campaign::CampaignSaveData & saveData = Campaign::CampaignSaveData::Get();
@@ -1656,6 +1692,8 @@ fheroes2::GameMode Game::SelectCampaignScenario( const fheroes2::GameMode prevMo
 
             // Fade-out screen before loading a scenario.
             fheroes2::fadeOutDisplay();
+
+            applyCampaignStartingResources( currentScenarioInfoId );
 
             // The rest of the scenario bonuses should be set after calling players.SetStartGame().
             if ( scenarioBonus._type != Campaign::ScenarioBonusData::STARTING_RACE ) {

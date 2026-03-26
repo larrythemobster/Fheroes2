@@ -31,6 +31,8 @@ namespace Maps
     struct FileInfo;
 }
 
+struct Funds;
+
 namespace Campaign
 {
     class CampaignData
@@ -65,6 +67,8 @@ namespace Campaign
         void setCampaignScenarios( std::vector<ScenarioData> && scenarios );
 
         static const CampaignData & getCampaignData( const int campaignID );
+        static bool getScenarioStartingResources( const ScenarioInfoId & scenarioInfo, Funds * humanResources, bool * hasHumanResources, Funds * aiResources,
+                                                  bool * hasAIResources );
 
         // Some scenarios have different gameplay conditions like unions which are not specified within the map file itself.
         static void updateScenarioGameplayConditions( const Campaign::ScenarioInfoId & scenarioInfoId, Maps::FileInfo & mapInfo );
