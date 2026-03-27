@@ -1392,11 +1392,13 @@
             const scenarioId = card.dataset.scenario;
             const scenario = loadedData.campaigns[campaignKey].scenarios[scenarioId];
 
-            scenario.name = card.querySelector('[data-campaign-field="name"]').value;
-            scenario.map_file = card.querySelector('[data-campaign-field="map_file"]').value;
-            scenario.victory_condition = card.querySelector('[data-campaign-field="victory_condition"]').value;
-            scenario.loss_condition = card.querySelector('[data-campaign-field="loss_condition"]').value;
-            scenario.description = card.querySelector('[data-campaign-field="description"]').value;
+            // Safely gather standard fields using optional chaining
+            scenario.name = card.querySelector('[data-campaign-field="name"]')?.value || "";
+            scenario.map_file = card.querySelector('[data-campaign-field="map_file"]')?.value || "";
+            scenario.victory_condition = card.querySelector('[data-campaign-field="victory_condition"]')?.value || "";
+            scenario.loss_condition = card.querySelector('[data-campaign-field="loss_condition"]')?.value || "";
+            scenario.description = card.querySelector('[data-campaign-field="description"]')?.value || "";
+            
             scenario.starting_resources = {
                 human: gatherStartingResources(card, 'human'),
                 ai: gatherStartingResources(card, 'ai')
@@ -1408,12 +1410,12 @@
 
             scenario.bonuses = Array.from(card.querySelectorAll('[id^="bonus-' + campaignKey + '-' + scenarioId + '-"]')).map(row => {
                 const result = {
-                    type: row.querySelector('.campaign-bonus-type').value,
-                    sub_type: parseInt(row.querySelector('.campaign-bonus-subtype').value || '0', 10),
-                    amount: parseInt(row.querySelector('.campaign-bonus-amount').value || '0', 10)
+                    type: row.querySelector('.campaign-bonus-type')?.value || "",
+                    sub_type: parseInt(row.querySelector('.campaign-bonus-subtype')?.value || '0', 10),
+                    amount: parseInt(row.querySelector('.campaign-bonus-amount')?.value || '0', 10)
                 };
 
-                const spellField = row.querySelector('.campaign-bonus-spell').value.trim();
+                const spellField = row.querySelector('.campaign-bonus-spell')?.value?.trim() || "";
                 if (spellField !== '') {
                     result.artifact_spell_id = parseInt(spellField, 10);
                 }
@@ -1423,14 +1425,14 @@
 
             scenario.awards = Array.from(card.querySelectorAll('[id^="award-' + campaignKey + '-' + scenarioId + '-"]')).map(row => {
                 const result = {
-                    id: parseInt(row.querySelector('.campaign-award-id').value || '0', 10),
-                    type: row.querySelector('.campaign-award-type').value,
-                    sub_type: parseInt(row.querySelector('.campaign-award-subtype').value || '0', 10),
-                    amount: parseInt(row.querySelector('.campaign-award-amount').value || '1', 10),
-                    start_scenario_id: parseInt(row.querySelector('.campaign-award-start').value || '0', 10)
+                    id: parseInt(row.querySelector('.campaign-award-id')?.value || '0', 10),
+                    type: row.querySelector('.campaign-award-type')?.value || "",
+                    sub_type: parseInt(row.querySelector('.campaign-award-subtype')?.value || '0', 10),
+                    amount: parseInt(row.querySelector('.campaign-award-amount')?.value || '1', 10),
+                    start_scenario_id: parseInt(row.querySelector('.campaign-award-start')?.value || '0', 10)
                 };
 
-                const customName = row.querySelector('.campaign-award-name').value.trim();
+                const customName = row.querySelector('.campaign-award-name')?.value?.trim() || "";
                 if (customName) {
                     result.custom_name = customName;
                 }

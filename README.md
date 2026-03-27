@@ -1,22 +1,38 @@
-# fheroes2: Stat Editor
+# fheroes2: Stat Editor & Modding Fork
 
-This is a customized fork of the [fheroes2](https://github.com/ihub/fheroes2) engine, originally developed as a private client project and now released open-source. 
+This is a customized fork of the [fheroes2](https://github.com/ihhub/fheroes2) engine, originally developed as a private client project and now released open-source. 
 
-While it retains the incredible engine upgrades of the base fheroes2 project (modernizing the classic Heroes of Might and Magic II experience), this repository introduces a **Visual Modding System** that allows anyone to completely rebalance the game without compiling code.
+While it retains the incredible engine upgrades of the base fheroes2 project (modernizing the classic Heroes of Might and Magic II experience), this repository introduces a **Visual Modding System** and **Data Externalization** that allows anyone to completely rebalance the game and campaigns without compiling code.
 
-## 🌟 Custom Features
+## 🛠 Custom Features
 
 * **Externalized Game Stats (`stats.json`):** Core game mechanics—including Artifact bonuses, Spell mana costs/damage, and Hero starting armies—have been extracted from the hardcoded C++ source and moved into an easily readable JSON file. 
+* **Externalized Campaigns (`campaigns.json`):** Entire campaign structures are no longer hardcoded! Scenario links, carry-over awards, starting resources, and starting bonuses are now fully customizable via `campaigns.json`.
 * **Visual Mod Editor (`editor.html`):** Included in the root of this project is a lightweight, browser-based GUI editor. Simply open `editor.html` in any web browser to visually edit the game's balance, adjust troop counts, or rewrite artifact bonuses. When you're done, click save, and drop the new `stats.json` into your game folder.
 * **Instant Rebalancing:** Want *The Ultimate Book of Knowledge* to grant +12 Knowledge? Done. Want *Mass Cure* to cost 15 mana? Done. The game reads your custom stats on launch.
 
-## 📦 Downloads & Releases
+## 🗺 Native Map Converter
+
+This fork includes a powerful built-in map converter that translates legacy map and campaign formats (`.mp2`, `.mpx`, `.h2c`, `.mx2`, and `.hxc`) into the engine's modern, robust `.fh2m` format. 
+
+Because it uses the engine's native loading logic, it preserves object metadata, rumors, daily events, and campaign overlays accurately.
+
+**How to use the converter:**
+1. Open your command line or terminal.
+2. Run the executable with the `--convert` flag, pointing to the directory containing your legacy maps:
+   ```bash
+   fheroes2 --convert /path/to/your/maps/directory
+   ```
+3. The engine will batch process the files, load their states, and export them as modern `.fh2m` files into the same directory.
+
+## 📥 Downloads & Releases
 
 1. Download the latest `.zip` release from our [Releases page](../../releases). 
-2. Extract the files and ensure your `stats.json` is in the same directory as the executable.
-3. Use the included `editor.html` to create your own custom balance patch!
+2. Extract the files and ensure your `stats.json` and `campaigns.json` are in the same directory as the executable.
+3. Use the included `editor.html` to create your own custom balance mod.
+4. Run the game!
 
-*(Note: You will still need the original Heroes of Might and Magic II data files to play, just like the base fheroes2 project. See the [Installation Guide](docs/INSTALL.md) for details.)*
+*(Note: To play the game using this engine, you will still need the original game's data files. Place your `DATA` and `MAPS` folders from your original installation into the fheroes2 directory.)*
 
 ---
 *The section below contains the original fheroes2 documentation.*
