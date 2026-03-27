@@ -2490,7 +2490,7 @@ namespace Maps
 
     void addObjectPartForExport( ExportObjectPartsByUID & objectPartsByUID, const fheroes2::Point & tilePosition, const Maps::ObjectPart & part, const bool isTopPart )
     {
-        if ( part._uid == 0 || part.icnType == MP2::OBJ_ICN_TYPE_UNKNOWN ) {
+        if ( part.icnType == MP2::OBJ_ICN_TYPE_UNKNOWN ) {
             return;
         }
 
@@ -2723,16 +2723,6 @@ namespace Maps
             return false;
         }
 
-        if ( part._uid == 0 ) {
-            if ( hasDirectMapping ) {
-                group = directGroup;
-                index = directIndex;
-                return true;
-            }
-
-            return Maps::getObjectGroupAndIndex( part.icnType, part.icnIndex, group, index );
-        }
-
         if ( hasDirectMapping && isSharedTownObjectGroup( directGroup ) ) {
             group = directGroup;
             index = directIndex;
@@ -2959,11 +2949,6 @@ namespace Maps
                     artifactMeta.selected = { artifact.getSpellId() + 1 };
                 }
             }
-
-            if ( artifactMeta.selected.empty() ) {
-                // Keep an entry for editor/runtime metadata lookups.
-                artifactMeta = artifactMeta;
-            }
             break;
         }
         default:
@@ -3044,6 +3029,20 @@ namespace Maps
             const ExportObjectAnchorCandidates anchorCandidates = collectObjectAnchorCandidates();
             const ExportObjectPartsByUID objectPartsByUID = collectObjectPartsByUID( w );
 
+            // In the original MP2 format, the first object placed on the map gets UID 0. However, the FH2M loader
+            // treats UID 0 as invalid (no object). We allocate a replacement UID for any uid==0 parts so they are
+            // properly exported with anchor detection, deduplication, and metadata.
+            uint32_t zeroUidReplacement = 0;
+            const auto getExportUid = [&zeroUidReplacement]( const uint32_t originalUid ) -> uint32_t {
+                if ( originalUid != 0 ) {
+                    return originalUid;
+                }
+                if ( zeroUidReplacement == 0 ) {
+                    zeroUidReplacement = Maps::getNewObjectUID();
+                }
+                return zeroUidReplacement;
+            };
+
             for ( int32_t i = 0; i < static_cast<int32_t>( w.getSize() ); ++i ) {
                 const Maps::Tile & tile = w.getTile( i );
                 Maps::Map_Format::TileInfo & mapTile = map.tiles[i];
@@ -3071,12 +3070,12 @@ namespace Maps
 
                 for ( const ExportTilePartInfo & tilePart : parts ) {
                     const Maps::ObjectPart & part = *tilePart.part;
-                    const uint32_t uid = part._uid;
+                    const uint32_t uid = getExportUid( part._uid );
 
                     Maps::ObjectGroup group = Maps::ObjectGroup::NONE;
                     uint32_t index = 0;
                     if ( findObjectInfoForExport( context, anchorCandidates, objectPartsByUID, tile, i, tilePart.isTopPart, part, group, index ) ) {
-                        if ( uid != 0 && !isAnchorObjectPart( tile, part, group, index ) ) {
+                        if ( !isAnchorObjectPart( tile, part, group, index ) ) {
                             continue;
                         }
 
@@ -3089,14 +3088,48 @@ namespace Maps
                             }
                         }
 
-                        if ( uid != 0 ) {
-                            if ( const auto overriddenObject = getOverriddenRandomObject( context, i, uid, group, index ); overriddenObject.has_value() ) {
-                                emittedGroup = overriddenObject->group;
-                                emittedIndex = overriddenObject->index;
+                        if ( const auto overriddenObject = getOverriddenRandomObject( context, i, uid, group, index ); overriddenObject.has_value() ) {
+                            emittedGroup = overriddenObject->group;
+                            emittedIndex = overriddenObject->index;
+                        }
+
+                        // Verify that the full object template fits within the map bounds when placed at this anchor tile.
+                        // The MP2 loader places each tile's parts individually (naturally clipping to map bounds), but the FH2M
+                        // loader places the full template from the anchor, so we must skip objects whose parts would go OOB.
+                        {
+                            const Maps::ObjectInfo & emittedObjectInfo = Maps::getObjectInfo( emittedGroup, static_cast<int32_t>( emittedIndex ) );
+                            const fheroes2::Point anchorPos = Maps::GetPoint( i );
+                            bool allPartsInBounds = true;
+
+                            for ( const auto & partInfo : emittedObjectInfo.groundLevelParts ) {
+                                if ( partInfo.layerType == Maps::SHADOW_LAYER || partInfo.layerType == Maps::TERRAIN_LAYER ) {
+                                    // Shadows and terrain objects are allowed to go OOB (skipped during load).
+                                    continue;
+                                }
+
+                                const fheroes2::Point pos = anchorPos + partInfo.tileOffset;
+                                if ( !Maps::isValidAbsPoint( pos.x, pos.y ) ) {
+                                    allPartsInBounds = false;
+                                    break;
+                                }
+                            }
+
+                            if ( allPartsInBounds ) {
+                                for ( const auto & partInfo : emittedObjectInfo.topLevelParts ) {
+                                    const fheroes2::Point pos = anchorPos + partInfo.tileOffset;
+                                    if ( !Maps::isValidAbsPoint( pos.x, pos.y ) ) {
+                                        allPartsInBounds = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if ( !allPartsInBounds ) {
+                                continue;
                             }
                         }
 
-                        if ( uid != 0 && savedObjects.count( { uid, emittedGroup, emittedIndex, i } ) > 0 ) {
+                        if ( savedObjects.count( { uid, emittedGroup, emittedIndex, i } ) > 0 ) {
                             continue;
                         }
 
@@ -3105,10 +3138,8 @@ namespace Maps
                             ++exportedHeroObjects;
                         }
 
-                        if ( uid != 0 ) {
-                            savedObjects.insert( { uid, emittedGroup, emittedIndex, i } );
-                            saveObjectMetadata( map, context, tile, i, uid, emittedGroup, emittedIndex );
-                        }
+                        savedObjects.insert( { uid, emittedGroup, emittedIndex, i } );
+                        saveObjectMetadata( map, context, tile, i, uid, emittedGroup, emittedIndex );
                     }
                 }
 

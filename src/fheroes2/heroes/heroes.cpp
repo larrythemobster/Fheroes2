@@ -425,23 +425,6 @@ Heroes::Heroes( const int heroId, const int race )
     }
     _movePoints = GetMaxMovePoints();
 
-
-    {
-        auto it = heroModLoader.overrides.find(_id);
-        if (it != heroModLoader.overrides.end()) {
-            if (it->second.attack != -1)     attack      = it->second.attack;
-            if (it->second.defense != -1)    defense     = it->second.defense;
-            if (it->second.power != -1)      power       = it->second.power;
-            if (it->second.knowledge != -1)  knowledge   = it->second.knowledge;
-            if (it->second.experience != -1) _experience = it->second.experience;
-
-            if (!_spellPoints || it->second.knowledge != -1) {
-                SetSpellPoints(GetMaxSpellPoints());
-            }
-            _movePoints = GetMaxMovePoints();
-        }
-    }
-
     APPLY_JSON_HERO_OVERRIDES();
 
 }
