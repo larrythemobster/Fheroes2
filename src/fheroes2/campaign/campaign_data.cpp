@@ -69,6 +69,8 @@ namespace
 
         bool hasBonuses{ false };
         std::vector<Campaign::ScenarioBonusData> bonuses;
+        // When populated, overrides bonuses with multi-group selection.
+        std::vector<std::vector<Campaign::ScenarioBonusData>> bonusGroups;
 
         bool hasAwards{ false };
         std::vector<Campaign::CampaignAwardData> awards;
@@ -78,6 +80,9 @@ namespace
 
         bool hasAIStartingResources{ false };
         Funds aiStartingResources;
+
+        bool hasBonusPickCount{ false };
+        int32_t bonusPickCount{ 1 };
     };
 
     struct CampaignOverrides final
@@ -248,12 +253,14 @@ namespace
         const int32_t subType = subTypeIter->get<int32_t>();
         const int32_t amount = amountIter->get<int32_t>();
 
+        Campaign::ScenarioBonusData result( type, subType, amount );
+
         const auto spellIter = value.find( "artifact_spell_id" );
         if ( spellIter != value.end() && spellIter->is_number_integer() ) {
-            return Campaign::ScenarioBonusData( type, subType, amount, spellIter->get<int32_t>() );
+            result._artifactSpellId = spellIter->get<int32_t>();
         }
 
-        return Campaign::ScenarioBonusData( type, subType, amount );
+        return result;
     }
 
     std::optional<Campaign::CampaignAwardData> parseCampaignAward( const Json & value )
@@ -409,7 +416,24 @@ namespace
                     }
                 }
 
-                if ( const auto bonusesIter = scenarioJson.find( "bonuses" ); bonusesIter != scenarioJson.end() && bonusesIter->is_array() ) {
+                if ( const auto bonusGroupsIter = scenarioJson.find( "bonus_groups" ); bonusGroupsIter != scenarioJson.end() && bonusGroupsIter->is_array() ) {
+                    // bonus_groups: array of arrays — each sub-array is a mutually-exclusive set of choices.
+                    overrideData.hasBonuses = true;
+                    overrideData.bonusGroups.clear();
+                    for ( const auto & groupJson : *bonusGroupsIter ) {
+                        if ( !groupJson.is_array() ) {
+                            continue;
+                        }
+                        std::vector<Campaign::ScenarioBonusData> group;
+                        for ( const auto & bonusJson : groupJson ) {
+                            if ( const auto parsedBonus = parseScenarioBonus( bonusJson ); parsedBonus ) {
+                                group.emplace_back( *parsedBonus );
+                            }
+                        }
+                        overrideData.bonusGroups.emplace_back( std::move( group ) );
+                    }
+                }
+                else if ( const auto bonusesIter = scenarioJson.find( "bonuses" ); bonusesIter != scenarioJson.end() && bonusesIter->is_array() ) {
                     overrideData.hasBonuses = true;
                     for ( const auto & bonusJson : *bonusesIter ) {
                         if ( const auto parsedBonus = parseScenarioBonus( bonusJson ); parsedBonus ) {
@@ -429,6 +453,11 @@ namespace
                         overrideData.hasAIStartingResources = true;
                         overrideData.aiStartingResources = jsonToFunds( *aiIter, getNormalDifficultyStartingResources( true ) );
                     }
+                }
+
+                if ( const auto bonusPickIter = scenarioJson.find( "bonus_pick_count" ); bonusPickIter != scenarioJson.end() && bonusPickIter->is_number_integer() ) {
+                    overrideData.hasBonusPickCount = true;
+                    overrideData.bonusPickCount = bonusPickIter->get<int32_t>();
                 }
 
                 if ( const auto awardsIter = scenarioJson.find( "awards" ); awardsIter != scenarioJson.end() && awardsIter->is_array() ) {
@@ -486,10 +515,18 @@ namespace
                 scenario.setNextScenarios( std::vector<Campaign::ScenarioInfoId>( overrideData.nextScenarios ) );
             }
             if ( overrideData.hasBonuses ) {
-                scenario.setBonuses( std::vector<Campaign::ScenarioBonusData>( overrideData.bonuses ) );
+                if ( !overrideData.bonusGroups.empty() ) {
+                    scenario.setBonusGroups( std::vector<std::vector<Campaign::ScenarioBonusData>>( overrideData.bonusGroups ) );
+                }
+                else {
+                    scenario.setBonuses( std::vector<Campaign::ScenarioBonusData>( overrideData.bonuses ) );
+                }
             }
             if ( overrideData.hasAwards ) {
                 Campaign::CampaignAwardData::setCampaignAwardDataOverride( scenario.getScenarioInfoId(), std::vector<Campaign::CampaignAwardData>( overrideData.awards ) );
+            }
+            if ( overrideData.hasBonusPickCount ) {
+                scenario.setBonusPickCount( overrideData.bonusPickCount );
             }
         }
     }

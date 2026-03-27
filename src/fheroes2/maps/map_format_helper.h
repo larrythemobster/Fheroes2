@@ -151,9 +151,13 @@ namespace Maps
             std::string sourcePath;
             std::vector<MP2::MapObjectType> originalObjectTypes;
             bool isCampaign{ false };
+            // True when this campaign scenario allows the player to choose their starting faction.
+            // When set, the human player's starting castle is exported as a random castle/town so that
+            // World::loadResurrectionMap can apply the STARTING_RACE campaign bonus at game start.
+            bool hasFactionChoice{ false };
         };
 
-        bool convertMapFile( const std::string & inputFile, const std::string & outputFile, const FileInfo & mapInfo, bool isCampaign );
+        bool convertMapFile( const std::string & inputFile, const std::string & outputFile, const FileInfo & mapInfo, bool isCampaign, bool hasFactionChoice );
         bool saveMap( const ConversionContext & context, const std::string & path );
     }
 }

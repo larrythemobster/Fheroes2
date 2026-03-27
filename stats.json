@@ -1513,6 +1513,56 @@
             "type_id": 2048
         }
     },
+    "hero_recruitment_chances": {
+        "barbarian": {
+            "barbarian": 10,
+            "knight": 10,
+            "necromancer": 10,
+            "sorceress": 10,
+            "warlock": 10,
+            "wizard": 10
+        },
+        "knight": {
+            "barbarian": 10,
+            "knight": 10,
+            "necromancer": 10,
+            "sorceress": 10,
+            "warlock": 10,
+            "wizard": 10
+        },
+        "necromancer": {
+            "barbarian": 10,
+            "knight": 10,
+            "necromancer": 10,
+            "sorceress": 10,
+            "warlock": 10,
+            "wizard": 10
+        },
+        "sorceress": {
+            "barbarian": 10,
+            "knight": 10,
+            "necromancer": 10,
+            "sorceress": 10,
+            "warlock": 10,
+            "wizard": 10
+        },
+        "warlock": {
+            "barbarian": 10,
+            "knight": 10,
+            "necromancer": 10,
+            "sorceress": 10,
+            "warlock": 10,
+            "wizard": 10
+        },
+        "wizard": {
+            "barbarian": 10,
+            "knight": 10,
+            "necromancer": 10,
+            "sorceress": 10,
+            "warlock": 10,
+            "wizard": 10
+        }
+    },
     "hero_starting_skills": {
         "barbarian": {
             "level1": 1,

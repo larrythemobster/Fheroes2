@@ -61,6 +61,7 @@
 #include <filesystem>
 
 #include "../campaign/campaign_data.h"
+#include "../campaign/campaign_scenariodata.h"
 #include "../maps/map_format_helper.h"
 #include "../maps/maps_fileinfo.h"
 #include "../world/world.h"
@@ -437,6 +438,7 @@ int main( int argc, char ** argv )
                             continue;
                         }
 
+                        bool hasFactionChoice = false;
                         if ( isCampaignMap ) {
                             if ( const std::optional<Campaign::ScenarioInfoId> scenarioInfo = findCampaignScenarioInfo( inputFile ); scenarioInfo.has_value() ) {
                                 Campaign::CampaignData::updateScenarioGameplayConditions( *scenarioInfo, mapInfo );
@@ -473,6 +475,17 @@ int main( int argc, char ** argv )
                                             mapInfo.lossConditionType = Maps::FileInfo::LOSS_TOWN;
                                         }
                                     }
+
+                                    // Detect if this scenario offers a faction choice (STARTING_RACE bonus).
+                                    // When true, the converter will export the human player's castle as random
+                                    // so the campaign's chosen race is applied correctly at game start.
+                                    for ( const Campaign::ScenarioBonusData & bonus : scenarioData->getBonuses() ) {
+                                        if ( bonus._type == Campaign::ScenarioBonusData::STARTING_RACE
+                                             || bonus._type == Campaign::ScenarioBonusData::STARTING_RACE_AND_ARMY ) {
+                                            hasFactionChoice = true;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -481,7 +494,7 @@ int main( int argc, char ** argv )
                         conf.GetPlayers().Init( mapInfo );
                         conf.GetPlayers().SetStartGame();
 
-                        if ( !Maps::MapFormatHelper::convertMapFile( inputFile, outputFile, mapInfo, isCampaignMap ) ) {
+                        if ( !Maps::MapFormatHelper::convertMapFile( inputFile, outputFile, mapInfo, isCampaignMap, hasFactionChoice ) ) {
                             std::cout << " -> Engine failed to convert map.\n";
                             continue;
                         }

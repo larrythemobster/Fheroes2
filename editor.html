@@ -371,6 +371,7 @@
             <button class="tab-btn" onclick="switchStatsTab('spells')">Spells</button>
             <button class="tab-btn" onclick="switchStatsTab('artifacts')">Artifacts</button>
             <button class="tab-btn" onclick="switchStatsTab('buildings')">Buildings</button>
+            <button class="tab-btn" onclick="switchStatsTab('heroRecruitment')">Hero Recruitment</button>
         </div>
 
         <div class="editor-content active" id="mapObjectsTab">
@@ -402,6 +403,12 @@
             <h2 class="section-title">Building Costs</h2>
             <div id="buildingsList"></div>
         </div>
+
+        <div class="editor-content" id="heroRecruitmentTab">
+            <h2 class="section-title">Hero Recruitment Chances by Castle Race</h2>
+            <p class="hint">Each row is the castle's native race. Each column is the chance (weight) that a hero of that race will appear in the recruitment pool. Higher values = more likely. Equal weights = original game behavior.</p>
+            <div id="heroRecruitmentGrid"></div>
+        </div>
     </div>
 
     <div id="campaignWorkspace" class="workspace">
@@ -418,7 +425,7 @@
     let currentFileType = null;
     let currentFileName = 'data.json';
 
-    const statsTabs = ['mapObjects', 'heroes', 'monsters', 'spells', 'artifacts', 'buildings'];
+    const statsTabs = ['mapObjects', 'heroes', 'monsters', 'spells', 'artifacts', 'buildings', 'heroRecruitment'];
     const campaignKeys = {
         roland: 'Roland',
         archibald: 'Archibald',
@@ -707,7 +714,42 @@
         buildGenericCardUI('spells', 'spellsList');
         buildGenericCardUI('artifacts', 'artifactsList');
         buildGenericCardUI('buildings', 'buildingsList');
+        buildHeroRecruitmentUI();
         switchStatsTab('mapObjects');
+    }
+
+    const heroRecruitmentRaces = ['knight', 'barbarian', 'sorceress', 'warlock', 'wizard', 'necromancer'];
+
+    function buildHeroRecruitmentUI() {
+        const container = document.getElementById('heroRecruitmentGrid');
+        container.innerHTML = '';
+
+        const section = loadedData?.hero_recruitment_chances;
+        if (!section) {
+            container.innerHTML = '<p class="hint">No <code>hero_recruitment_chances</code> section found in this stats.json. Save and reload the file from the game once to auto-generate it, then reload it here.</p>';
+            return;
+        }
+
+        // Build a 6×6 table: rows = castle race, columns = hire race
+        let html = '<table style="border-collapse:collapse;">';
+        // Header row
+        html += '<tr><th style="padding:6px 10px;text-align:left;color:var(--muted);">Castle Race \\ Hero Race</th>';
+        for (const hireRace of heroRecruitmentRaces) {
+            html += `<th style="padding:6px 10px;color:var(--accent);text-transform:capitalize;">${escapeHtml(hireRace)}</th>`;
+        }
+        html += '</tr>';
+
+        for (const castleRace of heroRecruitmentRaces) {
+            const row = section[castleRace] || {};
+            html += `<tr><td style="padding:6px 10px;color:var(--text);font-weight:bold;text-transform:capitalize;">${escapeHtml(castleRace)}</td>`;
+            for (const hireRace of heroRecruitmentRaces) {
+                const weight = row[hireRace] ?? 10;
+                html += `<td style="padding:4px 6px;"><input type="number" min="0" max="9999" style="width:60px;" data-hero-recruitment-castle="${castleRace}" data-hero-recruitment-hire="${hireRace}" value="${weight}"></td>`;
+            }
+            html += '</tr>';
+        }
+        html += '</table>';
+        container.innerHTML = html;
     }
 
     function getOptionsForCategory(category, selectedId, allowDefault = false) {
@@ -890,11 +932,11 @@
 
     function createScenarioCard(campaignKey, scenarioId, scenario) {
         const nextRows = (scenario.next_scenarios || []).map((nextId, index) => createNextScenarioRow(campaignKey, scenarioId, index, nextId)).join('');
-        const bonusRows = (scenario.bonuses || []).map((bonus, index) => createBonusRow(campaignKey, scenarioId, index, bonus)).join('');
         const awardRows = (scenario.awards || []).map((award, index) => createAwardRow(campaignKey, scenarioId, index, award)).join('');
+        const bonusRows = (scenario.bonuses || []).map((bonus, index) => createBonusRow(campaignKey, scenarioId, index, bonus)).join('');
 
         return `
-            <div class="data-card" data-campaign="${campaignKey}" data-scenario="${scenarioId}">
+            <div class="data-card" data-campaign="${campaignKey}" data-scenario="${scenarioId}" data-scenario-card="1">
                 <h3>Scenario ${scenarioId}: ${escapeHtml(scenario.name || 'Unnamed Scenario')}</h3>
 
                 <div class="campaign-meta-grid">
@@ -938,6 +980,10 @@
 
                 <div class="list-container">
                     <h4>Scenario Bonus Choices</h4>
+                    <div class="form-group" style="margin-bottom:8px;max-width:280px;">
+                        <label>Bonus picks allowed</label>
+                        <input type="number" min="1" max="10" data-campaign-field="bonus_pick_count" value="${scenario.bonus_pick_count ?? 1}" style="max-width:80px;">
+                    </div>
                     <div id="bonus-container-${campaignKey}-${scenarioId}">${bonusRows}</div>
                     <button type="button" onclick="addBonusRow('${campaignKey}', '${scenarioId}')">Add Bonus</button>
                 </div>
@@ -982,7 +1028,7 @@
         `).join('');
 
         return `
-            <div class="data-card" data-starting-resources-card="${side}" data-campaign="${campaignKey}" data-scenario="${scenarioId}">
+            <div class="data-card" data-starting-resources-card="${side}">
                 <h4>${side === 'human' ? 'Human Players' : 'AI Players'}</h4>
                 <div class="grid-form">${fields}</div>
             </div>
@@ -992,8 +1038,9 @@
     function createBonusRow(campaignKey, scenarioId, rowIndex, bonus = {}) {
         const type = bonus.type || 'resources';
         const meta = getBonusMeta(type);
+        const bonusRowId = `bonus-${campaignKey}-${scenarioId}-${rowIndex}`;
         return `
-            <div class="row-item" id="bonus-${campaignKey}-${scenarioId}-${rowIndex}">
+            <div class="row-item" id="${bonusRowId}">
                 <div class="stack-field">
                     <label>Bonus Type</label>
                     <select class="campaign-bonus-type">${buildSelectOptions(campaignBonusTypes, type)}</select>
@@ -1004,7 +1051,7 @@
                     <input type="number" class="campaign-bonus-amount small-input" value="${bonus.amount ?? 1}" placeholder="${escapeAttribute(meta.amountLabel)}">
                 </div>
                 ${createTranslatedIdControl('campaign-bonus-spell', spellOptions, bonus.artifact_spell_id ?? '', 'Spell ID', !meta.showSpellField)}
-                <button type="button" class="btn-remove" onclick="document.getElementById('bonus-${campaignKey}-${scenarioId}-${rowIndex}').remove()">Remove</button>
+                <button type="button" class="btn-remove" onclick="document.getElementById('${bonusRowId}').remove()">Remove</button>
                 <div class="context-help campaign-bonus-help">${escapeHtml(meta.help)}</div>
             </div>
         `;
@@ -1383,10 +1430,23 @@
                 loadedData.heroes[heroId].artifacts = Array.from(artifactContainer.querySelectorAll('.artifact-select-id')).map(select => parseInt(select.value, 10));
             }
         }
+
+        // Gather hero_recruitment_chances grid
+        document.querySelectorAll('input[data-hero-recruitment-castle]').forEach(input => {
+            const castleRace = input.dataset.heroRecruitmentCastle;
+            const hireRace = input.dataset.heroRecruitmentHire;
+            if (!loadedData.hero_recruitment_chances) {
+                loadedData.hero_recruitment_chances = {};
+            }
+            if (!loadedData.hero_recruitment_chances[castleRace]) {
+                loadedData.hero_recruitment_chances[castleRace] = {};
+            }
+            loadedData.hero_recruitment_chances[castleRace][hireRace] = parseInt(input.value, 10) || 0;
+        });
     }
 
     function gatherCampaignData() {
-        const scenarioCards = document.querySelectorAll('#campaignsList .data-card[data-campaign][data-scenario]');
+        const scenarioCards = document.querySelectorAll('#campaignsList .data-card[data-scenario-card="1"]');
         scenarioCards.forEach(card => {
             const campaignKey = card.dataset.campaign;
             const scenarioId = card.dataset.scenario;
@@ -1408,7 +1468,8 @@
                 .map(input => parseInt(input.value, 10))
                 .filter(value => !Number.isNaN(value));
 
-            scenario.bonuses = Array.from(card.querySelectorAll('[id^="bonus-' + campaignKey + '-' + scenarioId + '-"]')).map(row => {
+            const bonusContainer = document.getElementById('bonus-container-' + campaignKey + '-' + scenarioId);
+            scenario.bonuses = Array.from(bonusContainer ? bonusContainer.querySelectorAll('.row-item') : []).map(row => {
                 const result = {
                     type: row.querySelector('.campaign-bonus-type')?.value || "",
                     sub_type: parseInt(row.querySelector('.campaign-bonus-subtype')?.value || '0', 10),
@@ -1423,7 +1484,19 @@
                 return result;
             });
 
-            scenario.awards = Array.from(card.querySelectorAll('[id^="award-' + campaignKey + '-' + scenarioId + '-"]')).map(row => {
+            // Collect bonus_pick_count (only write if > 1 to keep JSON clean)
+            const bonusPickCount = parseInt(card.querySelector('[data-campaign-field="bonus_pick_count"]')?.value || '1', 10);
+            if (bonusPickCount > 1) {
+                scenario.bonus_pick_count = bonusPickCount;
+            } else {
+                delete scenario.bonus_pick_count;
+            }
+
+            // Always clear bonus_groups if present — we only use flat bonuses now.
+            delete scenario.bonus_groups;
+
+            const awardContainer = document.getElementById('award-container-' + campaignKey + '-' + scenarioId);
+            scenario.awards = Array.from(awardContainer ? awardContainer.querySelectorAll('.row-item') : []).map(row => {
                 const result = {
                     id: parseInt(row.querySelector('.campaign-award-id')?.value || '0', 10),
                     type: row.querySelector('.campaign-award-type')?.value || "",

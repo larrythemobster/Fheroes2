@@ -134,7 +134,27 @@ namespace Campaign
 
         const std::vector<ScenarioBonusData> & getBonuses() const
         {
+            // Return the first group if bonus_groups is populated, otherwise the legacy flat list.
+            if ( !_bonusGroups.empty() ) {
+                return _bonusGroups[0];
+            }
             return _bonuses;
+        }
+
+        // Returns all bonus groups.  Empty if bonus_groups was not set.
+        const std::vector<std::vector<ScenarioBonusData>> & getBonusGroups() const
+        {
+            return _bonusGroups;
+        }
+
+        void setBonusPickCount( const int32_t count )
+        {
+            _bonusPickCount = ( count > 0 ? count : 1 );
+        }
+
+        int32_t getBonusPickCount() const
+        {
+            return _bonusPickCount;
         }
 
         void setNextScenarios( std::vector<ScenarioInfoId> && nextScenarios )
@@ -145,6 +165,13 @@ namespace Campaign
         void setBonuses( std::vector<ScenarioBonusData> && bonuses )
         {
             _bonuses = std::move( bonuses );
+            // Clear bonus_groups so the legacy flat list takes effect.
+            _bonusGroups.clear();
+        }
+
+        void setBonusGroups( std::vector<std::vector<ScenarioBonusData>> && bonusGroups )
+        {
+            _bonusGroups = std::move( bonusGroups );
         }
 
         void setMapFileName( std::string fileName )
@@ -223,6 +250,10 @@ namespace Campaign
         ScenarioInfoId _scenarioInfo;
         std::vector<ScenarioInfoId> _nextScenarios;
         std::vector<ScenarioBonusData> _bonuses;
+        // When non-empty, overrides _bonuses: each entry is a group of mutually-exclusive choices.
+        std::vector<std::vector<ScenarioBonusData>> _bonusGroups;
+        // How many bonuses the player may select (default 1).
+        int32_t _bonusPickCount{ 1 };
         std::string _fileName;
         // Note: There are inconsistencies with the content of the map file in regards to the map name and description, so we'll be getting them from somewhere else
         std::string _scenarioName;

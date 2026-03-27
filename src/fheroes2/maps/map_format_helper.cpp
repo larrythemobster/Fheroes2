@@ -2982,7 +2982,7 @@ namespace Maps
 
     namespace MapFormatHelper
     {
-        bool convertMapFile( const std::string & inputFile, const std::string & outputFile, const FileInfo & mapInfo, const bool isCampaign )
+        bool convertMapFile( const std::string & inputFile, const std::string & outputFile, const FileInfo & mapInfo, const bool isCampaign, const bool hasFactionChoice )
         {
             World & conversionWorld = World::Get();
             if ( !conversionWorld.LoadMapMP2( inputFile, mapInfo.version == GameVersion::SUCCESSION_WARS ) ) {
@@ -2994,7 +2994,7 @@ namespace Maps
                 return false;
             }
 
-            ConversionContext context{ conversionWorld, mapInfo, inputFile, std::move( originalObjectTypes ), isCampaign };
+            ConversionContext context{ conversionWorld, mapInfo, inputFile, std::move( originalObjectTypes ), isCampaign, hasFactionChoice };
             return saveMap( context, outputFile );
         }
 
@@ -3084,13 +3084,59 @@ namespace Maps
 
                         if ( emittedGroup == Maps::ObjectGroup::KINGDOM_TOWNS ) {
                             if ( const Castle * castle = findCastleOnTile( context.world, i ); castle != nullptr ) {
-                                emittedIndex = getTownObjectIndexForExport( *castle );
+                                // Bug fix: if this campaign scenario offers faction choice (STARTING_RACE bonus),
+                                // export the human player's castle as random so loadResurrectionMap applies the
+                                // chosen faction at game start instead of baking in the original MP2 race.
+                                if ( context.hasFactionChoice && ( Players::HumanColors() & castle->GetColor() ) ) {
+                                    emittedIndex = castle->isCastle() ? 12U : 13U;
+                                    std::cout << "  [CONVERTER] Castle at tile " << i << ": exported as index " << emittedIndex
+                                              << " (RANDOM - faction choice will apply at game start)\n";
+                                }
+                                else {
+                                    emittedIndex = getTownObjectIndexForExport( *castle );
+                                    std::cout << "  [CONVERTER] Castle at tile " << i << ": exported as index " << emittedIndex
+                                              << " (race=" << Race::String( castle->GetRace() ) << ")\n";
+                                }
                             }
                         }
 
                         if ( const auto overriddenObject = getOverriddenRandomObject( context, i, uid, group, index ); overriddenObject.has_value() ) {
                             emittedGroup = overriddenObject->group;
                             emittedIndex = overriddenObject->index;
+                        }
+
+                        // Bug fix: the ADVENTURE_MINES sprite matching resolves all resource variants to the same
+                        // terrain-type candidate (the EXTRAOVR overlay that differentiates resources is secondary).
+                        // Correct the index here using tile.metadata()[0] which LoadMapMP2 sets from the MP2 mine table.
+                        // Mine ObjectInfo in map_object_info.cpp is laid out as 8 terrain blocks × 5 resources each:
+                        //   block = emittedIndex / 5, resourceSlot = 0(Ore) 1(Sulfur) 2(Crystal) 3(Gems) 4(Gold)
+                        if ( emittedGroup == Maps::ObjectGroup::ADVENTURE_MINES
+                             && Maps::getObjectInfo( emittedGroup, static_cast<int32_t>( emittedIndex ) ).objectType == MP2::OBJ_MINE ) {
+                            const uint32_t resourceType = tile.metadata()[0];
+                            uint32_t resourceSlot = 0; // default: Ore
+                            switch ( resourceType ) {
+                            case Resource::ORE:
+                                resourceSlot = 0;
+                                break;
+                            case Resource::SULFUR:
+                                resourceSlot = 1;
+                                break;
+                            case Resource::CRYSTAL:
+                                resourceSlot = 2;
+                                break;
+                            case Resource::GEMS:
+                                resourceSlot = 3;
+                                break;
+                            case Resource::GOLD:
+                                resourceSlot = 4;
+                                break;
+                            default:
+                                break;
+                            }
+                            const uint32_t correctedIndex = ( emittedIndex / 5U ) * 5U + resourceSlot;
+                            std::cout << "  [CONVERTER] Mine at tile " << i << ": index " << emittedIndex << " -> " << correctedIndex
+                                      << " (" << Resource::String( static_cast<int>( resourceType ) ) << ")\n";
+                            emittedIndex = correctedIndex;
                         }
 
                         // Verify that the full object template fits within the map bounds when placed at this anchor tile.

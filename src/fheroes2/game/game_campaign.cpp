@@ -384,7 +384,6 @@ namespace
     {
         fheroes2::Display & display = fheroes2::Display::instance();
 
-        const std::vector<Campaign::ScenarioBonusData> & bonuses = scenario.getBonuses();
         fheroes2::Text mapName( scenario.getScenarioName(), fheroes2::FontType::normalWhite() );
         mapName.fitToOneRow( 200 );
         mapName.draw( top.x + 197 + ( 200 - mapName.width() ) / 2, top.y + 99 - mapName.height() / 2, display );
@@ -405,23 +404,23 @@ namespace
         const int textChoiceWidth = 160;
         const fheroes2::Point initialOffset{ top.x + 425, top.y + 211 };
 
+        const std::vector<Campaign::ScenarioBonusData> & bonuses = scenario.getBonuses();
         for ( size_t i = 0; i < bonuses.size(); ++i ) {
             fheroes2::Text choice( bonuses[i].getName(), fheroes2::FontType::normalWhite() );
             choice.fitToOneRow( textChoiceWidth );
-
             choice.draw( initialOffset.x, initialOffset.y + 22 * static_cast<int>( i ) - choice.height() / 2, display );
         }
     }
 
     bool displayScenarioBonusPopupWindow( const Campaign::ScenarioData & scenario, const fheroes2::Point & top )
     {
+        const LocalEvent & le = LocalEvent::Get();
+
         const std::vector<Campaign::ScenarioBonusData> & bonuses = scenario.getBonuses();
         if ( bonuses.empty() ) {
             // Nothing to process.
             return false;
         }
-
-        const LocalEvent & le = LocalEvent::Get();
 
         for ( size_t i = 0; i < bonuses.size(); ++i ) {
             if ( le.isMouseRightButtonPressedInArea( { top.x + 414, top.y + 198 + 22 * static_cast<int>( i ), 200, 22 } ) ) {
@@ -1396,12 +1395,12 @@ fheroes2::GameMode Game::SelectCampaignScenario( const fheroes2::GameMode prevMo
     fheroes2::addGradientShadow( fheroes2::AGG::GetICN( buttonIconID, 6 ), display, { cancelPlacement, buttonOffsetY }, { -5, 5 } );
     fheroes2::addGradientShadow( fheroes2::AGG::GetICN( buttonIconID, 8 ), display, { difficultyPlacement, buttonOffsetY }, { -5, 5 } );
 
-    // create scenario bonus choice buttons
-    fheroes2::ButtonGroup buttonChoices;
-    fheroes2::OptionButtonGroup optionButtonGroup;
-
-    std::optional<int32_t> scenarioBonusId;
+    // Create scenario bonus choice buttons.
     const std::vector<Campaign::ScenarioBonusData> & bonusChoices = scenario.getBonuses();
+    const uint32_t bonusChoiceCount = static_cast<uint32_t>( bonusChoices.size() );
+    const int32_t maxBonusPicks = scenario.getBonusPickCount();
+
+    fheroes2::ButtonGroup buttonChoices;
 
     const fheroes2::Point optionButtonOffset( 590, 199 );
     const int32_t optionButtonStep = 22;
@@ -1411,35 +1410,24 @@ fheroes2::GameMode Game::SelectCampaignScenario( const fheroes2::GameMode prevMo
     fheroes2::Copy( backgroundImage, optionButtonOffset.x + pressedButton.x(), optionButtonOffset.y + pressedButton.y(), releaseButton, 0, 0, releaseButton.width(),
                     releaseButton.height() );
 
-    const uint32_t bonusChoiceCount = static_cast<uint32_t>( bonusChoices.size() );
-
-    {
-        const int32_t saveDataBonusId = campaignSaveData.getCurrentScenarioBonusId();
-
-        for ( uint32_t i = 0; i < bonusChoiceCount; ++i ) {
-            buttonChoices.createButton( optionButtonOffset.x + top.x, optionButtonOffset.y + optionButtonStep * i + top.y, releaseButton, pressedButton, i );
-            optionButtonGroup.addButton( &buttonChoices.button( i ) );
-
-            if ( allowToRestart && saveDataBonusId >= 0 && static_cast<uint32_t>( saveDataBonusId ) == i ) {
-                scenarioBonusId = saveDataBonusId;
-                buttonChoices.button( i ).press();
-            }
-        }
+    // Create all buttons first (before any pointer is taken), then set pressed state.
+    for ( uint32_t i = 0; i < bonusChoiceCount; ++i ) {
+        buttonChoices.createButton( optionButtonOffset.x + top.x, optionButtonOffset.y + optionButtonStep * static_cast<int32_t>( i ) + top.y, releaseButton,
+                                    pressedButton, i );
     }
 
-    if ( bonusChoiceCount > 0 ) {
-        if ( allowToRestart ) {
-            // If the campaign scenario is already in progress, then one of the bonuses should be selected
-            assert( scenarioBonusId.has_value() );
-        }
-        else {
-            // If this is the beginning of a new campaign scenario, then just select the first bonus
-            scenarioBonusId = 0;
-            buttonChoices.button( 0 ).press();
-        }
+    // Restore selection from save data on restart, otherwise pre-select the first choice.
+    const int32_t saveDataBonusId = campaignSaveData.getCurrentScenarioBonusId();
+    if ( allowToRestart && saveDataBonusId >= 0 && static_cast<uint32_t>( saveDataBonusId ) < bonusChoiceCount ) {
+        buttonChoices.button( saveDataBonusId ).press();
+    }
+    else if ( bonusChoiceCount > 0 ) {
+        buttonChoices.button( 0 ).press();
     }
 
-    optionButtonGroup.draw( display );
+    for ( uint32_t i = 0; i < bonusChoiceCount; ++i ) {
+        buttonChoices.button( i ).draw();
+    }
 
     buttonViewIntro.draw();
     buttonDifficulty.draw();
@@ -1527,6 +1515,7 @@ fheroes2::GameMode Game::SelectCampaignScenario( const fheroes2::GameMode prevMo
         fheroes2::fadeInDisplay( { top.x, top.y, backgroundImage.width(), backgroundImage.height() }, false );
     }
 
+    // Build click areas (extend left to include the text label).
     std::vector<fheroes2::Rect> choiceArea( bonusChoiceCount );
     for ( uint32_t i = 0; i < bonusChoiceCount; ++i ) {
         choiceArea[i] = buttonChoices.button( i ).area();
@@ -1551,12 +1540,34 @@ fheroes2::GameMode Game::SelectCampaignScenario( const fheroes2::GameMode prevMo
         buttonRestart.drawOnState( le.isMouseLeftButtonPressedAndHeldInArea( buttonRestart.area() ) );
 
         for ( uint32_t i = 0; i < bonusChoiceCount; ++i ) {
-            if ( le.isMouseLeftButtonPressedInArea( choiceArea[i] ) || ( i < hotKeyBonusChoice.size() && HotKeyPressEvent( hotKeyBonusChoice[i] ) ) ) {
-                scenarioBonusId = fheroes2::checkedCast<int32_t>( i );
-                buttonChoices.button( i ).press();
-                optionButtonGroup.draw( display );
+            if ( le.MouseClickLeft( choiceArea[i] ) || ( i < hotKeyBonusChoice.size() && HotKeyPressEvent( hotKeyBonusChoice[i] ) ) ) {
+                if ( buttonChoices.button( i ).isPressed() ) {
+                    // Deselect this button.
+                    buttonChoices.button( i ).release();
+                }
+                else {
+                    // Count currently pressed buttons.
+                    int32_t pressedCount = 0;
+                    for ( uint32_t j = 0; j < bonusChoiceCount; ++j ) {
+                        if ( buttonChoices.button( j ).isPressed() ) {
+                            ++pressedCount;
+                        }
+                    }
+                    if ( pressedCount >= maxBonusPicks ) {
+                        // Deselect the first pressed button to make room.
+                        for ( uint32_t j = 0; j < bonusChoiceCount; ++j ) {
+                            if ( buttonChoices.button( j ).isPressed() ) {
+                                buttonChoices.button( j ).release();
+                                break;
+                            }
+                        }
+                    }
+                    buttonChoices.button( i ).press();
+                }
+                for ( uint32_t j = 0; j < bonusChoiceCount; ++j ) {
+                    buttonChoices.button( j ).draw();
+                }
                 display.render();
-
                 break;
             }
         }
@@ -1643,24 +1654,23 @@ fheroes2::GameMode Game::SelectCampaignScenario( const fheroes2::GameMode prevMo
 
             conf.setCurrentMapInfo( mapInfo );
 
-            assert( !scenarioBonusId || ( scenarioBonusId >= 0 && static_cast<size_t>( *scenarioBonusId ) < bonusChoices.size() ) );
-
-            const Campaign::ScenarioBonusData scenarioBonus = [scenarioBonusId, &bonusChoices = std::as_const( bonusChoices )]() -> Campaign::ScenarioBonusData {
-                if ( !scenarioBonusId ) {
-                    return {};
+            // Collect all selected bonuses (all pressed buttons).
+            std::vector<Campaign::ScenarioBonusData> selectedBonuses;
+            int32_t primaryBonusId = -1;
+            for ( uint32_t i = 0; i < bonusChoiceCount; ++i ) {
+                if ( buttonChoices.button( i ).isPressed() ) {
+                    selectedBonuses.push_back( bonusChoices[i] );
+                    if ( primaryBonusId < 0 ) {
+                        primaryBonusId = static_cast<int32_t>( i );
+                    }
                 }
+            }
 
-                if ( scenarioBonusId < 0 || static_cast<size_t>( *scenarioBonusId ) >= bonusChoices.size() ) {
-                    return {};
+            // Apply STARTING_RACE / STARTING_RACE_AND_ARMY bonuses first (before SetStartGame).
+            for ( const Campaign::ScenarioBonusData & bonus : selectedBonuses ) {
+                if ( bonus._type == Campaign::ScenarioBonusData::STARTING_RACE || bonus._type == Campaign::ScenarioBonusData::STARTING_RACE_AND_ARMY ) {
+                    SetScenarioBonus( currentScenarioInfoId, { Campaign::ScenarioBonusData::STARTING_RACE, bonus._subType, bonus._amount } );
                 }
-
-                return bonusChoices[*scenarioBonusId];
-            }();
-
-            // Scenario bonus related to the starting faction has to be set before calling players.SetStartGame(). If the scenario bonus includes the starting army, then
-            // only the starting faction should still be set.
-            if ( scenarioBonus._type == Campaign::ScenarioBonusData::STARTING_RACE || scenarioBonus._type == Campaign::ScenarioBonusData::STARTING_RACE_AND_ARMY ) {
-                SetScenarioBonus( currentScenarioInfoId, { Campaign::ScenarioBonusData::STARTING_RACE, scenarioBonus._subType, scenarioBonus._amount } );
             }
 
             // Betrayal scenario eliminates all obtained awards.
@@ -1696,13 +1706,15 @@ fheroes2::GameMode Game::SelectCampaignScenario( const fheroes2::GameMode prevMo
             applyCampaignStartingResources( currentScenarioInfoId );
 
             // The rest of the scenario bonuses should be set after calling players.SetStartGame().
-            if ( scenarioBonus._type != Campaign::ScenarioBonusData::STARTING_RACE ) {
-                SetScenarioBonus( currentScenarioInfoId, scenarioBonus );
+            for ( const Campaign::ScenarioBonusData & bonus : selectedBonuses ) {
+                if ( bonus._type != Campaign::ScenarioBonusData::STARTING_RACE ) {
+                    SetScenarioBonus( currentScenarioInfoId, bonus );
+                }
             }
 
             applyObtainedCampaignAwards( currentScenarioInfoId, campaignSaveData.getObtainedCampaignAwards() );
 
-            campaignSaveData.setCurrentScenarioInfo( currentScenarioInfoId, scenarioBonusId.value_or( -1 ) );
+            campaignSaveData.setCurrentScenarioInfo( currentScenarioInfoId, primaryBonusId );
 
             return fheroes2::GameMode::START_GAME;
         }

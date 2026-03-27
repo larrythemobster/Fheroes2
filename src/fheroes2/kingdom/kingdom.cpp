@@ -25,9 +25,15 @@
 
 #include <algorithm>
 #include <cassert>
+#include <fstream>
+#include <map>
+#include <numeric>
 #include <ostream>
+#include <random>
 #include <string>
 #include <vector>
+
+#include "../json.hpp"
 
 #include "army.h"
 #include "artifact.h"
@@ -99,6 +105,156 @@ namespace
     bool HeroesStrongestArmy( const Heroes * h1, const Heroes * h2 )
     {
         return h1 && h2 && h2->GetArmy().isStrongerThan( h1->GetArmy() );
+    }
+
+    // Maps a race integer (Race::KNGT etc.) to a JSON key string.
+    const char * raceToJsonKey( int race )
+    {
+        switch ( race ) {
+        case Race::KNGT:
+            return "knight";
+        case Race::BARB:
+            return "barbarian";
+        case Race::SORC:
+            return "sorceress";
+        case Race::WRLK:
+            return "warlock";
+        case Race::WZRD:
+            return "wizard";
+        case Race::NECR:
+            return "necromancer";
+        default:
+            return nullptr;
+        }
+    }
+
+    // All playable races in a fixed order for iteration.
+    constexpr int allRaces[] = { Race::KNGT, Race::BARB, Race::SORC, Race::WRLK, Race::WZRD, Race::NECR };
+
+    // Loaded from stats.json "hero_recruitment_chances" section.
+    // For each kingdom race, stores a weight per hire race.
+    // If missing from stats.json the section is auto-generated with equal weights.
+    struct HeroRecruitmentChancesLoader
+    {
+        // weights[kingdomRace][hireRace] = weight (int >= 0)
+        std::map<int, std::map<int, int>> weights;
+
+        HeroRecruitmentChancesLoader()
+        {
+            nlohmann::json jsonData;
+            bool saveRequired = false;
+
+            {
+                std::ifstream file( "stats.json" );
+                if ( file.is_open() ) {
+                    try {
+                        file >> jsonData;
+                    }
+                    catch ( ... ) {
+                    }
+                    file.close();
+                }
+            }
+
+            const char * sectionKey = "hero_recruitment_chances";
+
+            if ( jsonData.contains( sectionKey ) ) {
+                auto & section = jsonData[sectionKey];
+                for ( int kr : allRaces ) {
+                    const char * krKey = raceToJsonKey( kr );
+                    if ( !krKey )
+                        continue;
+                    if ( section.contains( krKey ) ) {
+                        auto & row = section[krKey];
+                        for ( int hr : allRaces ) {
+                            const char * hrKey = raceToJsonKey( hr );
+                            if ( !hrKey )
+                                continue;
+                            int w = row.contains( hrKey ) ? static_cast<int>( row[hrKey] ) : 10;
+                            weights[kr][hr] = w;
+                        }
+                    }
+                    else {
+                        // Row missing — fill with equal weights and mark save needed
+                        for ( int hr : allRaces ) {
+                            weights[kr][hr] = 10;
+                        }
+                        saveRequired = true;
+                    }
+                }
+            }
+            else {
+                // Section missing entirely — generate equal weights
+                for ( int kr : allRaces ) {
+                    for ( int hr : allRaces ) {
+                        weights[kr][hr] = 10;
+                    }
+                }
+                saveRequired = true;
+            }
+
+            if ( saveRequired ) {
+                // Write the section back (preserving everything else in stats.json)
+                for ( int kr : allRaces ) {
+                    const char * krKey = raceToJsonKey( kr );
+                    if ( !krKey )
+                        continue;
+                    for ( int hr : allRaces ) {
+                        const char * hrKey = raceToJsonKey( hr );
+                        if ( !hrKey )
+                            continue;
+                        jsonData[sectionKey][krKey][hrKey] = weights[kr][hr];
+                    }
+                }
+                std::ofstream outFile( "stats.json" );
+                outFile << jsonData.dump( 4 );
+            }
+        }
+    };
+
+    static HeroRecruitmentChancesLoader heroRecruitmentChancesLoader;
+
+    // Picks a random race to use when hiring a hero, weighted by the kingdom's native race.
+    // Returns Race::NONE if weights are all zero (falls back to fully random in GetHeroForHire).
+    int getWeightedHireRace( int kingdomRace )
+    {
+        const char * krKey = raceToJsonKey( kingdomRace );
+        if ( !krKey )
+            return Race::NONE;
+
+        auto it = heroRecruitmentChancesLoader.weights.find( kingdomRace );
+        if ( it == heroRecruitmentChancesLoader.weights.end() )
+            return Race::NONE;
+
+        const auto & row = it->second;
+
+        // Build cumulative weight list
+        std::vector<int> raceOrder;
+        std::vector<int> cumulative;
+        int total = 0;
+        for ( int hr : allRaces ) {
+            auto wit = row.find( hr );
+            int w = ( wit != row.end() ) ? wit->second : 0;
+            if ( w > 0 ) {
+                raceOrder.push_back( hr );
+                total += w;
+                cumulative.push_back( total );
+            }
+        }
+
+        if ( total <= 0 )
+            return Race::NONE;
+
+        static std::mt19937 rng{ std::random_device{}() };
+        std::uniform_int_distribution<int> dist( 1, total );
+        const int roll = dist( rng );
+
+        for ( size_t i = 0; i < cumulative.size(); ++i ) {
+            if ( roll <= cumulative[i] )
+                return raceOrder[i];
+        }
+
+        return raceOrder.back();
     }
 }
 
@@ -528,7 +684,9 @@ const Recruits & Kingdom::GetRecruits()
     }
 
     if ( recruits.GetID2() == Heroes::UNKNOWN || ( recruits.GetHero2() && !recruits.GetHero2()->isAvailableForHire() ) ) {
-        recruits.SetHero2( world.GetHeroForHire( Race::NONE, recruits.GetID1() ) );
+        // Use weighted race selection for the second recruit slot based on the kingdom's native race.
+        const int hireRace = getWeightedHireRace( GetRace() );
+        recruits.SetHero2( world.GetHeroForHire( hireRace, recruits.GetID1() ) );
     }
 
     // Heroes for recruitment must be different except if there are no heroes left (both are Heroes::UNKNOWN).
